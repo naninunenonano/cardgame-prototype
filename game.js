@@ -69,9 +69,9 @@ function create({clock=()=>Date.now(),random=()=>Math.random()}={}) {
   const eligible=state[p][trash].filter(c=>land?c.type==='土地':c.type!=='土地'&&!c.resolving);
   if(!eligible.length)return false;const ids=new Set(eligible.map(c=>c.id));state[p][trash]=state[p][trash].filter(c=>!ids.has(c.id));
   eligible.forEach(c=>{c.faceUp=false;c.rest=false;c.sick=false;});state[p][deck].push(...eligible);shuffleRaw(p,deck);
-  supplyStatus[p][land?'land':'main']='';record(`${label(p)}：${land?'土地':'メイン'}デッキを${trash==='trash'?'通常のトラッシュ':'土地トラッシュ'}${eligible.length}枚でリフレッシュ。追加ペナルティなし。`);return true;
+  record(`${label(p)}：${land?'土地':'メイン'}デッキを${trash==='trash'?'通常のトラッシュ':'土地トラッシュ'}${eligible.length}枚でリフレッシュ。追加ペナルティなし。`);return true;
  }
- function mainCard(p){if(!refreshDeck(p)){supplyStatus[p].main='メインデッキ・通常トラッシュともに不足。可能な枚数で処理を終了（敗北判定保留）。';record(`${label(p)}：${supplyStatus[p].main}`);return null;}const c=state[p].main.shift();refreshDeck(p);return c;}
+ function mainCard(p){if(!refreshDeck(p)){supplyStatus[p].main='直近の処理で補充不足：メインデッキ・通常トラッシュから必要枚数を用意できず、可能な枚数で終了（敗北判定保留）。';record(`${label(p)}：${supplyStatus[p].main}`);return null;}supplyStatus[p].main='';const c=state[p].main.shift();refreshDeck(p);return c;}
  function drawRaw(p,count){let drawn=0;for(let i=0;i<count;i++){const c=mainCard(p);if(!c)break;c.faceUp=true;c.rest=false;state[p].hand.push(c);drawn++;}return drawn;}
  function putShield(p,count){let placed=0;for(let i=0;i<count;i++){const c=mainCard(p);if(!c)break;c.faceUp=false;c.rest=false;state[p].life.push(c);placed++;}return placed;}
  function addLands(p,count=1,reason='効果'){
@@ -95,9 +95,9 @@ function create({clock=()=>Date.now(),random=()=>Math.random()}={}) {
   return ok(result?'山札切れにより開始処理を終了しました。':status==='ready'?'シールドを7枚ずつ配置し、第1ターンを開始しました。':'もう一人のマリガンを選択してください。');
  }
  function locate(id) {for(const p of PLAYERS)for(const z of ZONES){const index=state[p][z.id].findIndex(c=>c.id===id);if(index>=0)return {p,z:z.id,index,card:state[p][z.id][index]};}return null;}
- function rawMove(source,p,z,bottom=true) {if(z==='trash'&&source.card.type==='土地')z='landTrash';const [c]=state[source.p][source.z].splice(source.index,1);if(isUnit(z)&&!isUnit(source.z)){c.sick=true;c.enteredTurn=p===SELF?turn.number:null;}if(z==='landDeck')c.faceUp=false;if(bottom)state[p][z].push(c);else state[p][z].unshift(c);if(source.z==='main'||z==='trash')refreshDeck(p);return c;}
+ function rawMove(source,p,z,bottom=true) {if(z==='trash'&&source.card.type==='土地')z='landTrash';const [c]=state[source.p][source.z].splice(source.index,1);if(isUnit(z)&&!isUnit(source.z)){c.sick=true;c.enteredTurn=p===SELF?turn.number:null;}if(z==='landDeck')c.faceUp=false;if(bottom)state[p][z].push(c);else state[p][z].unshift(c);if(source.z==='main')refreshDeck(source.p);if(z==='trash')refreshDeck(p);return c;}
  function interactionError() {if(result)return '山札切れで終了しています。最初からやり直してください。';if(status!=='ready')return '開始準備中は通常操作を使えません。';if(operation)return '選択中の処理を完了してください。';return '';}
- function mainError(p,allowPayment=false) {if(result)return '山札切れで終了しています。';if(status!=='ready')return '開始準備中です。';if(p!==SELF)return '相手側は手動確認のみです。';if(!['main1','main2'].includes(turn.step))return '土地配置とカードの使用はメイン1・メイン2で行ってください。';if(operation&&!(allowPayment&&operation.kind==='payment'))return '選択中の処理を完了してください。';return '';}
+ function mainError(p,allowPayment=false) {if(result)return '山札切れで終了しています。';if(status!=='ready')return '開始準備中です。';if(p!==SELF)return '相手側は手動確認のみです。';if(!['main1','main2'].includes(turn.step))return 'カードの使用はメイン1・メイン2で行ってください。';if(operation&&!(allowPayment&&operation.kind==='payment'))return '選択中の処理を完了してください。';return '';}
  function manualMove(id,p,z,bottom=false) {
   const source=locate(id),error=interactionError();if(error)return fail(error);if(!source||!state[p]?.[z])return fail('カードまたは領域が見つかりません。');
   if(['main','trash'].includes(z)&&source.card.type==='土地'&&z!=='trash')return fail('土地はメインデッキへ入れられません。');
@@ -182,7 +182,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random()}={}) {
  function beginTurn() {
   operation=null;turn.number++;turn.key={};turn.step='untap';turn.lastDraw=0;
   for(const z of ZONES)if(isField(z.id)||z.id==='energy')state[SELF][z.id].forEach(c=>{c.rest=false;if(isField(z.id))c.sick=false;});
-  turn.landsPlaced=0;record(`自分の第${turn.number}ターン：アンタップ、召喚酔い解除、土地配置回数リセット。`);
+  turn.landsPlaced=0;record(`自分の第${turn.number}ターン：アンタップ、召喚酔い解除。`);
   turn.step='draw';if(turn.number===1)record('先攻第1ターン：ドローなし');else{turn.lastDraw=drawRaw(SELF,1);if(result)return;record(`ドロー：${turn.lastDraw}枚。`);}
   turn.step='land';turn.landsPlaced=addLands(SELF,1,'ターン開始時の自動配置');
   turn.step='main1';record('メイン1を開始しました。');
@@ -199,7 +199,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random()}={}) {
  function confirmDiscard(expected=operation) {
   const o=operation;if(!o||o!==expected||o.kind!=='discard'||turn.step!=='end'||result)return fail('この手札調整は終了しています。');
   if(o.ids.length!==state[o.p].hand.length-7||new Set(o.ids).size!==o.ids.length||o.ids.some(id=>!state[o.p].hand.some(c=>c.id===id)))return fail(`手札が7枚になるように${state[o.p].hand.length-7}枚選んでください。`);
-  const chosen=new Set(o.ids),cards=state[o.p].hand.filter(c=>chosen.has(c.id));state[o.p].hand=state[o.p].hand.filter(c=>!chosen.has(c.id));state[o.p].trash.push(...cards);operation=null;turn.key={};turn.notBefore=clock()+350;
+  const cards=o.ids.map(id=>locate(id).card);for(const id of o.ids)rawMove(locate(id),o.p,'trash');operation=null;turn.key={};turn.notBefore=clock()+350;
   return ok(`エンド：${cards.length}枚をトラッシュへ送り、手札を7枚にしました。次の自分のターンへ進めます。`);
  }
  function enqueue(effects,p,sourceId){queue.unshift(...effects.map(effect=>({...JSON.parse(JSON.stringify(effect)),p,sourceId})));}
@@ -249,7 +249,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random()}={}) {
  function skipTriggers(){const o=operation;if(o?.kind!=='triggers')return fail('トリガー選択ではありません。');operation=null;record('残りのトリガーを使用せず手札に残しました。');pump();return ok('トリガーの選択を完了しました。');}
  function confirmTriggerPlacement(expected=operation){
   const o=operation;if(o!==expected||!['triggerPlace','freePlace'].includes(o?.kind)||result)return fail('この配置操作は終了しています。');const s=locate(o.id);if(!s||s.p!==o.p||s.z!=='hand')return fail('対象カードが手札にありません。');if(o.kind==='freePlace'&&(s.card.type!=='通常'||Mana.total(s.card.cost)>landCount(o.p)))return fail('土地枚数以下の軽減前合計コストを満たしません。');const checked=placementInfo(o,s.card);if(!checked.ok)return checked;
-  operation=null;enterCard(s,o.p,o.slot,checked.replacement);record(`${s.card.name}を${o.kind==='freePlace'?'母なる大地':'シールドトリガー'}で無料配置。`);pump();return ok('トリガー配置を確定しました。');
+  operation=null;enterCard(s,o.p,o.slot,checked.replacement);record(`${s.card.name}を${o.kind==='freePlace'?'母なる大地':'シールドトリガー'}で無料配置。`);pump();return ok('無料配置を確定しました。');
  }
  function skipTriggerPlacement(){if(!['triggerPlace','freePlace'].includes(operation?.kind))return fail('無料配置ではありません。');operation=null;pump();return ok('配置を取りやめ、カードを手札に残しました。');}
  function breakShields(p,count){

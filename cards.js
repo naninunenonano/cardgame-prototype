@@ -10,11 +10,11 @@
  {key:'dragon',name:'グラディアン・レッド・ドラゴン',type:'通常',cost:M.cost(4,{緑:6}),power:15000,symbols:{緑:3},breaks:3,text:'緑カード。最大5軽減、最低不特定4＋緑1。'},
  {key:'trap',name:'ナチュラル・トラップ',type:'呪文',cost:M.cost(5,{緑:1}),trigger:{},onUse:[{kind:'trap'}],provisional:true,text:'シールドトリガー。相手ユニット1枚をトラッシュへ。その持ち主が土地デッキの上から1枚を未使用でマナゾーンへ。コストは仮値。'},
  {key:'repair',name:'修復',type:'呪文',cost:M.cost(0,{緑:3}),trigger:{},onUse:[{kind:'shield',count:1,landThreshold:10,extra:1}],text:'シールドトリガー。盾1枚追加。土地10枚以上ならさらに1枚。キャラ制限なし。'},
- {key:'bahamut',deckLimit:1,name:'バハムート',type:'通常',cost:M.cost(10,{緑:1}),power:11000,symbols:{緑:3},breaks:3,onEnter:[{kind:'wipe'}],text:'登場時：本人以外の両者のユニット・設置物をすべてトラッシュへ。土地・盾・キャラ・サイドは対象外。同名1枚制限。'},
+ {key:'bahamut',deckLimit:1,reduction:null,name:'バハムート',type:'通常',cost:M.cost(10,{緑:1}),power:11000,symbols:{緑:3},breaks:3,onEnter:[{kind:'wipe'}],text:'登場時：本人以外の両者のユニット・設置物をすべてトラッシュへ。土地・盾・キャラ・サイドは対象外。'},
  {key:'bird',name:'極楽鳥',type:'通常',cost:M.cost(0,{緑:1}),power:1000,symbols:{},breaks:0,manaAbility:{colors:COLORS,amount:1},provisional:true,text:'本人を横向きにして任意の1色1点を支払いに使用。召喚酔い中は不可。ブレイク0。パワーは仮値。'},
  {key:'elf',name:'ラノワールのエルフ',type:'通常',cost:M.cost(0,{緑:1}),power:2000,symbols:{},breaks:0,manaAbility:{colors:['緑'],amount:1},provisional:true,text:'本人を横向きにして緑1点を支払いに使用。召喚酔い中は不可。ブレイク0。パワーは仮値。'},
  {key:'panzer',name:'タマタンゴ・パンツァー',type:'通常',cost:M.cost(5,{緑:3}),power:7000,symbols:{緑:2},breaks:2,enterRest:true,lure:true,trigger:{minLands:5},text:'使用済みで登場。横向きでも相手の攻撃を引き付ける。土地5枚以上ならシールドトリガー。ブロッカーではない。'},
- {key:'dolt',name:'ドルツヴァイ・アステリオ',type:'通常',cost:M.cost(5,{緑:1}),power:0,powerMode:'lands',symbols:{緑:1},breaks:1,machFighter:{duration:'entryTurn'},onDefeat:[addLand],text:'パワー＝自分の土地×1000。出たターンだけ相手ユニットへ攻撃可能。戦闘で相手を退場させたら土地デッキの上から1枚を未使用でマナゾーンへ。'}
+ {key:'dolt',reduction:null,name:'ドルツヴァイ・アステリオ',type:'通常',cost:M.cost(5,{緑:1}),power:0,powerMode:'lands',symbols:{緑:1},breaks:1,machFighter:{duration:'entryTurn'},onDefeat:[addLand],text:'パワー＝自分の土地×1000。出たターンだけ相手ユニットへ攻撃可能。戦闘で相手を退場させたら土地デッキの上から1枚を未使用でマナゾーンへ。'}
  ,{key:'mother',name:'母なる大地',type:'呪文',cost:M.cost(2,{緑:1}),onUse:[{kind:'mother'}],text:'両者いずれかのユニット1枚を持ち主のトラッシュへ。その持ち主は土地枚数以下の軽減前合計コストのユニット1枚を手札から無料で出してもよい。トリガーなし。'}
  ,{key:'zundoko',name:'Dの花道 ズンドコ晴れ舞台',type:'設置物',cost:M.cost(4,{緑:1}),power:null,symbols:{緑:1},onUnitEnter:[addLand],text:'自分のユニットが登場するたび、土地デッキの上から1枚を未使用で追加。複数枚はそれぞれ誘発。Dスイッチなし。'}
  ];
