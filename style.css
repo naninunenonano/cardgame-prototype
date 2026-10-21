@@ -22,3 +22,6 @@
 .compact .unit-field .card{height:62px;width:55px;flex-basis:55px}.compact .unit-field .card.rest{height:46px;width:72px;flex-basis:72px}
 /* Empty support zones stay compact; occupied cards remain readable. */
 .cards:has(>.empty){min-height:42px}.unit-field .cards:has(>.empty){min-height:130px}.compact .cards:has(>.empty),.compact .unit-field .cards:has(>.empty){min-height:46px}
+
+/* Ver.0.8: separate land supply and discard without widening the board. */
+.zone[data-zone=landDeck]{grid-area:landdeck}.zone[data-zone=landTrash]{grid-area:landtrash}.self .layout{grid-template-areas:'units units units units' 'extra lrig main life' 'landdeck landtrash energy energy' 'trash exile structures structures' 'check check check check' 'hand hand hand hand'}.opponent .layout{grid-template-areas:'hand hand hand hand' 'check check check check' 'structures structures exile trash' 'energy energy landtrash landdeck' 'life main lrig extra' 'units units units units'}.deck-summary{font-size:10px;line-height:1.5;color:#bdd6cb;overflow-wrap:anywhere}.deck-summary b{color:#ffd69f}.free-unit-options{display:flex;gap:12px;flex-wrap:wrap}.free-unit-options .card{width:135px;flex-basis:135px}.effect-targets>section{display:flex;flex-direction:column;gap:5px}.effect-targets p{font-size:12px}.zone[data-zone=landTrash]{border-color:#9a936e}
