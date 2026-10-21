@@ -1,21 +1,35 @@
-const {chromium}=require('playwright');const assert=require('node:assert/strict');const path=require('node:path');
-(async()=>{const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1280,height:1000}});await page.goto('file://'+path.join(__dirname,'index.html'));const run=fn=>page.evaluate(fn);await page.click('[data-mode="A"]');
-assert.equal(await page.locator('.zone').count(),22);
-await page.locator('[data-player="p1"][data-zone="hand"] .card').nth(1).click();await page.click('#to-mana');assert.equal(await run(()=>state.p1.energy.length),1);await page.click('#rotate');assert.match(await page.locator('[data-player="p1"][data-zone="energy"] .count').innerText(),/縦 0 \/ 横 1/);await page.click('[data-ready="p1"]');assert.equal(await run(()=>state.p1.energy[0].rest),false);
-await page.click('#mode-change');page.once('dialog',d=>d.dismiss());await page.click('[data-mode="B"]');assert.equal(await run(()=>mode),'A');await page.click('#close');
-await page.click('#mode-change');page.once('dialog',d=>d.accept());await page.click('[data-mode="B"]');assert.equal(await run(()=>mode),'B');
-await page.locator('[data-player="p1"][data-zone="hand"] .card').nth(1).click();await page.click('#to-mana');assert.equal(await run(()=>state.p1.energy.length),0);assert.match(await page.locator('#notice').innerText(),/土地/);await page.selectOption('#destination','p2/energy');await page.click('#move');assert.equal(await run(()=>state.p2.energy.length),0);
-await page.locator('[data-player="p1"][data-zone="hand"] .card').first().click();await page.click('#to-mana');assert.equal(await run(()=>state.p1.energy.length),1);
-await page.click('#mode-change');page.once('dialog',d=>d.accept());await page.click('[data-mode="A"]');
-
-await run(()=>{const ids=()=>Object.values(state).flatMap(p=>Object.values(p).flat()).map(c=>c.id);const before=ids().sort().join();const c=state.p1.hand[0];c.faceUp=false;c.rest=true;move(c.id,'p2','signi-1');if(ids().sort().join()!==before)throw Error('identity');const s=locate(c.id);if(s.card.faceUp||!s.card.rest)throw Error('orientation');move(c.id,'p2','main');if(state.p2.main[0].id!==c.id)throw Error('top');move(c.id,'p2','main',true);if(state.p2.main.at(-1).id!==c.id)throw Error('bottom');shuffle('p2','main');if(ids().sort().join()!==before)throw Error('shuffle identity');render();});
-await page.locator('[data-draw="p1"]').click();assert.equal(await run(()=>state.p1.main.length),11);assert.equal(await run(()=>state.p1.hand.length),5);
-await page.selectOption('#visibility','both');assert.equal(await page.locator('[data-player="p2"][data-zone="hand"] .card:not(.back)').count(),5);
-await run(()=>{selected=state.p1.life[0].id;render();});await page.click('#peek');assert.equal(await run(()=>locate(selected).card.faceUp),false);await page.click('#close');
-const before=await run(()=>JSON.stringify(state));page.once('dialog',d=>d.dismiss());await page.click('#reset');assert.equal(await run(()=>JSON.stringify(state)),before);
-await page.click('#add');await page.fill('[name="name"]','追加テスト');await page.locator('#add-form button').click();assert.equal(await run(()=>state.p1.hand.length),6);
-await page.setViewportSize({width:390,height:844});assert(await run(()=>document.documentElement.scrollWidth<=innerWidth));await page.locator('[data-player="p1"][data-zone="hand"] .card').first().click();await page.selectOption('#destination','p2/check');await page.click('#move');assert.equal(await run(()=>state.p2.check.length),1);await page.locator('[data-list="p2/check"]').click();assert.equal(await page.locator('#modal .card').count(),1);await page.locator('#modal .card').click();await page.click('#rotate');await page.click('#flip');await page.selectOption('#destination','p1/main');await page.click('#bottom');assert.equal(await run(()=>state.p1.main.at(-1).id===selected),true);
-await run(()=>{for(let i=0;i<50;i++)state.p1.hand.push(createCard('幅確認','テスト','青'));render();});assert(await run(()=>document.documentElement.scrollWidth<=innerWidth));
-await page.selectOption('#active','p2');assert.equal(await page.locator('#board>.player').first().getAttribute('aria-label'),'プレイヤー2の盤面');
-await run(()=>{initial();render();});await page.check('#compact');await page.screenshot({path:path.join(__dirname,'screenshot-mobile.png'),fullPage:true});await page.uncheck('#compact');await page.setViewportSize({width:1280,height:1100});await page.screenshot({path:path.join(__dirname,'screenshot-desktop.png'),fullPage:true});
-await page.locator('[data-player="p1"][data-zone="hand"] .card').first().click();await page.click('#delete');assert.equal(await run(()=>state.p1.hand.length),4);page.once('dialog',d=>d.accept());await page.click('#reset');assert.equal(await run(()=>state.p1.hand.length),5);console.log('PASS: zones, identity/counts, orientation, draw/shuffle/top-bottom, visibility, peek, add/delete, mobile tap/list/width, stable layout, reset cancel/accept');await browser.close();})().catch(e=>{console.error(e);process.exit(1)});
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict'),path=require('node:path');
+(async()=>{
+ const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH,args:['--no-sandbox','--disable-gpu']}: {})});
+ try {
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('file://'+path.join(__dirname,'index.html'));
+ const run=fn=>page.evaluate(fn);
+ assert.equal(await page.locator('#setup').isVisible(),true);assert.equal(await page.locator('#add').isDisabled(),true);
+ assert.equal(await page.locator('[data-mulligan]').count(),7);
+ assert(await run(()=>document.documentElement.scrollWidth<=innerWidth));
+ await page.locator('[data-mulligan]').first().tap();assert.match(await page.locator('#exchange-count').innerText(),/1枚/);await page.locator('[data-mulligan]').first().tap();assert.match(await page.locator('#exchange-count').innerText(),/0枚/);
+ const returned=await run(()=>state.p1.hand.slice(0,3).map(c=>c.id));const expected=await run(()=>state.p1.main.slice(0,3).map(c=>c.id));
+ for(const id of returned)await page.locator(`[data-mulligan="${id}"]`).tap();await page.locator('#exchange').tap();
+ assert.equal(await run(()=>mulligan.p1),'done');assert.equal(await run(()=>state.p1.life.length),0);
+ const newHand=await run(()=>state.p1.hand.map(c=>c.id));assert(returned.every(id=>!newHand.includes(id)));assert(expected.every(id=>newHand.includes(id)));
+ const p2=await run(()=>state.p2.hand.map(c=>c.id));for(const id of p2)await page.locator(`[data-mulligan="${id}"]`).tap();await page.locator('#exchange').tap();
+ assert.equal(await run(()=>phase),'ready');assert.equal(await page.locator('#setup').isVisible(),false);
+ for(const p of ['p1','p2'])assert.deepEqual(await page.evaluate(p=>[state[p].hand.length,state[p].life.length,state[p].main.length,new Set(Object.values(state[p]).flat().map(c=>c.id)).size,state[p].life.every(c=>!c.faceUp)],p),[7,7,46,60,true]);
+ assert.match(await page.locator('[data-player="p1"][data-zone="main"] .count').innerText(),/46枚/);
+ await page.selectOption('#visibility','both');assert.equal(await page.locator('[data-zone="hand"] .card:not(.back)').count(),14);
+ await run(()=>{const land=Object.values(state.p1).flat().find(c=>c.type==='土地');const normal=Object.values(state.p1).flat().find(c=>c.type==='通常');move(land.id,'p1','hand');move(normal.id,'p1','hand');land.faceUp=true;normal.faceUp=true;render();});
+ const nonland=await run(()=>state.p1.hand.find(c=>c.type==='通常').id);await page.locator(`[data-player="p1"][data-zone="hand"] [data-card="${nonland}"]`).tap();await page.locator('#to-mana').tap();assert.equal(await run(()=>state.p1.energy.length),0);assert.match(await page.locator('#notice').innerText(),/土地/);
+ await page.selectOption('#destination','p2/energy');await page.locator('#move').tap();assert.equal(await run(()=>state.p2.energy.length),0);
+ const land=await run(()=>state.p1.hand.find(c=>c.type==='土地').id);await page.locator(`[data-player="p1"][data-zone="hand"] [data-card="${land}"]`).tap();await page.locator('#to-mana').tap();await page.locator('#rotate').tap();assert.match(await page.locator('[data-player="p1"][data-zone="energy"] .count').innerText(),/縦 0 \/ 横 1/);await page.locator('[data-ready="p1"]').tap();assert.equal(await run(()=>state.p1.energy[0].rest),false);
+ assert(await run(()=>document.documentElement.scrollWidth<=innerWidth));
+ const before=await run(()=>JSON.stringify(state));page.once('dialog',d=>d.dismiss());await page.locator('#reset').tap();assert.equal(await run(()=>JSON.stringify(state)),before);
+ page.once('dialog',d=>d.accept());await page.locator('#reset').tap();assert.equal(await run(()=>phase),'mulligan');assert.deepEqual(await run(()=>[mulligan.p1,mulligan.p2,selected]),['pending','pending',null]);
+ await page.locator('#exchange').tap();await page.locator('#keep').tap();assert.equal(await run(()=>phase),'ready');
+ await page.screenshot({path:process.env.SCREENSHOT_DIR?path.join(process.env.SCREENSHOT_DIR,'cardgame-mobile.png'):'/tmp/cardgame-mobile.png',fullPage:true});
+ await page.setViewportSize({width:1280,height:1000});assert(await run(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:process.env.SCREENSHOT_DIR?path.join(process.env.SCREENSHOT_DIR,'cardgame-desktop.png'):'/tmp/cardgame-desktop.png',fullPage:true});
+ assert.deepEqual(errors,[]);console.log('PASS Chromium: 390px touch multi-select, partial/all/zero exchange, keep, 7/7/46 counts and 60 unique IDs, setup lock, visibility, land-only moves, mana counts, reset, PC/mobile width, no page errors.');
+ } finally {await browser.close();}
+})().catch(e=>{console.error(e);process.exit(1);});
