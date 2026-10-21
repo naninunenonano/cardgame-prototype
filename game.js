@@ -5,13 +5,13 @@
 })(globalThis,function(Mana,Catalog){
 'use strict';
 const ZONES=[...Array.from({length:7},(_,i)=>({id:`signi-${i+1}`,name:`ユニット${i+1}`,class:'unit'})),
- {id:'lrig',name:'ルリグ',class:'lrig'},{id:'extra',name:'サイドボード',pile:true},{id:'main',name:'メインデッキ',pile:true},
+ {id:'lrig',name:'プレイヤーキャラ',class:'lrig'},{id:'extra',name:'サイドボード',pile:true},{id:'main',name:'メインデッキ',pile:true},
  {id:'life',name:'シールド',pile:true},{id:'energy',name:'マナゾーン'},{id:'trash',name:'トラッシュ',pile:true},
  {id:'structures',name:'設置物'},{id:'exile',name:'除外ゾーン',pile:true},{id:'check',name:'チェックゾーン'},{id:'hand',name:'手札',class:'hand'}];
 const PLAYERS=['p1','p2'],SELF='p1';
 const STEPS={untap:'アンタップ',draw:'ドロー',main1:'メイン1',attack:'アタック',main2:'メイン2',end:'エンド'};
 const isUnit=z=>ZONES.some(zone=>zone.id===z&&zone.class==='unit');
-const isField=z=>isUnit(z)||z==='lrig';
+const isField=z=>isUnit(z)||z==='lrig'||z==='structures';
 const label=p=>p==='p1'?'プレイヤー1':'プレイヤー2';
 function create({clock=()=>Date.now(),random=()=>Math.random()}={}) {
  let state,status,turn,mulligan,operation,result,serial=0,log=[],queue=[];
@@ -90,7 +90,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random()}={}) {
  function locate(id) {for(const p of PLAYERS)for(const z of ZONES){const index=state[p][z.id].findIndex(c=>c.id===id);if(index>=0)return {p,z:z.id,index,card:state[p][z.id][index]};}return null;}
  function rawMove(source,p,z,bottom=true) {const [c]=state[source.p][source.z].splice(source.index,1);if(isUnit(z)&&!isUnit(source.z)){c.sick=true;c.enteredTurn=p===SELF?turn.number:null;}if(bottom)state[p][z].push(c);else state[p][z].unshift(c);return c;}
  function interactionError() {if(result)return '山札切れで終了しています。最初からやり直してください。';if(status!=='ready')return '開始準備中は通常操作を使えません。';if(operation)return '選択中の処理を完了してください。';return '';}
- function mainError(p,allowPayment=false) {if(result)return '山札切れで終了しています。';if(status!=='ready')return '開始準備中です。';if(p!==SELF)return '相手側は手動確認のみです。';if(!['main1','main2'].includes(turn.step))return '土地配置とユニットの使用はメイン1・メイン2で行ってください。';if(operation&&!(allowPayment&&operation.kind==='payment'))return '選択中の処理を完了してください。';return '';}
+ function mainError(p,allowPayment=false) {if(result)return '山札切れで終了しています。';if(status!=='ready')return '開始準備中です。';if(p!==SELF)return '相手側は手動確認のみです。';if(!['main1','main2'].includes(turn.step))return '土地配置とカードの使用はメイン1・メイン2で行ってください。';if(operation&&!(allowPayment&&operation.kind==='payment'))return '選択中の処理を完了してください。';return '';}
  function manualMove(id,p,z,bottom=false) {
   const source=locate(id),error=interactionError();if(error)return fail(error);if(!source||!state[p]?.[z])return fail('カードまたは領域が見つかりません。');
   if(z==='energy'&&source.card.type!=='土地')return fail('土地以外はマナゾーンに置けません。');
@@ -244,7 +244,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random()}={}) {
  function attackTargets(id){
   const s=locate(id);if(!s)return [];const c=s.card,enemy=s.p==='p1'?'p2':'p1',units=unitSlots(enemy).flatMap(z=>state[enemy][z.id]).filter(c=>c.type==='通常');
   const lures=units.filter(c=>c.lure);
-  const canUnit=!!c.machFighter&&c.enteredTurn===turn.number&&s.p===SELF;
+  const canUnit=c.machFighter?.duration==='entryTurn'&&c.enteredTurn===turn.number&&s.p===SELF;
   if(c.sick&&!canUnit)return [];
   if(lures.length)return lures.map(c=>({id:c.id,name:c.name,forced:true}));
   return [...(!c.sick?[{id:'body',name:label(enemy)+'本体'}]:[]),...(canUnit?units.map(c=>({id:c.id,name:c.name})):[])];

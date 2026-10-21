@@ -1,7 +1,7 @@
 // 色・種類・カード定義・効果列・デッキ構成を分離。今回の開始デッキはgreen。
 (function(root,factory){const c=factory(typeof module==='object'&&module.exports?require('./mana.js'):root.ManaEngine);if(typeof module==='object'&&module.exports)module.exports=c;else root.CardCatalog=c;})(globalThis,function(M){
  const COLORS=['白','青','黒','赤','緑'],TYPES={unit:'通常',spell:'呪文',structure:'設置物',land:'土地'};
- const search={kind:'search'},shuffleAfterSearch=true;
+ const search={kind:'search'};
  const defs=[
  {key:'life',name:'フェアリー・ライフ',type:'呪文',cost:M.cost(1,{緑:1}),onUse:[search],text:'基本土地を1枚まで未使用で置き、山札をシャッフル。'},
  {key:'fortune',name:'豊潤フォージュン',type:'呪文',cost:M.cost(2,{緑:1}),onUse:[search,{kind:'drawIfLandMax',max:5,count:1}],text:'基本土地を1枚まで未使用で置きシャッフル。追加後の土地が5枚以下なら1枚ドロー。'},
@@ -21,5 +21,5 @@
  const redKeys=[];for(let n=1;n<=12;n++){const key='red'+n;redKeys.push(key);cards[key]={key,name:`赤・${n}コスト`,type:'通常',color:'赤',cost:M.cost(n-1,{赤:1}),power:n*1000,symbols:{赤:1},breaks:1,abilities:[],onUse:[],onEnter:[],onDefeat:[],text:'再利用用の旧仮デッキ定義。'};}
  cards.redLand={...cards.greenLand,key:'redLand',name:'赤の基本土地',color:'赤'};
  const decks={green:[...defs.map(c=>({key:c.key,count:3})),{key:'greenLand',count:24}],red:[...redKeys.map(key=>({key,count:3})),{key:'redLand',count:24}]};
- return {COLORS,TYPES,cards,decks,startDeck:'green',shuffleAfterSearch};
+ return {COLORS,TYPES,cards,decks,startDeck:'green'};
 });
