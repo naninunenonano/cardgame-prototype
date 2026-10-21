@@ -1,38 +1,63 @@
 const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
-const elements=new Map();const element=key=>{if(!elements.has(key))elements.set(key,{innerHTML:'',textContent:'',value:'',querySelector:()=>({scrollLeft:0}),classList:{toggle(){}},addEventListener(){},showModal(){this.open=true},close(){this.open=false}});return elements.get(key);};
+const elements=new Map();
+const element=key=>{if(!elements.has(key))elements.set(key,{innerHTML:'',textContent:'',value:'',querySelector:()=>({scrollLeft:0}),classList:{toggle(){}},close(){this.open=false;},showModal(){this.open=true;}});return elements.get(key);};
 const context=vm.createContext({console,document:{querySelector:element,querySelectorAll:()=>[],addEventListener(){}},confirm:()=>false});
-vm.runInContext(fs.readFileSync(__dirname+'/app.js','utf8'),context);const run=s=>vm.runInContext(s,context);
-run(`render=()=>{};renderControl=()=>{};changeMode('A');`);
-assert.equal(run('ZONES.length'),11);assert.equal(run('state.p1.hand.length'),5);assert.equal(run('state.p2.life.length'),7);
-run(`function ids(){return Object.values(state).flatMap(p=>Object.values(p).flat()).map(c=>c.id).sort().join();} var original=ids();var c=state.p1.hand[0];c.faceUp=false;c.rest=true;`);
-for(let i=0;i<100;i++){run(`move(c.id,'${i%2?'p1':'p2'}','${['main','signi-1','trash','life'][i%4]}',${!!(i%2)});`);assert.equal(run('ids()'),run('original'));assert.equal(run('locate(c.id).card.faceUp'),false);assert.equal(run('locate(c.id).card.rest'),true);}
-run(`move(c.id,'p1','main');`);assert.equal(run('state.p1.main[0].id'),run('c.id'));run(`move(c.id,'p1','main',true);`);assert.equal(run('state.p1.main.at(-1).id'),run('c.id'));
-run(`for(let i=0;i<50;i++)shuffle('p1','main');`);assert.equal(run('ids()'),run('original'));
-run(`var n=state.p1.main.length;var h=state.p1.hand.length;move(state.p1.main[0].id,'p1','hand');`);assert.equal(run('state.p1.main.length'),run('n-1'));assert.equal(run('state.p1.hand.length'),run('h+1'));
-run(`var s=JSON.stringify(state);document.querySelector('#reset').onclick();`);assert.equal(run('JSON.stringify(state)'),run('s'));
-run(`active='p1';visibility='active';var face=createCard('確認','仮','青');`);assert.equal(run(`hidden('p2','hand',face)`),true);run(`visibility='both'`);assert.equal(run(`hidden('p2','hand',face)`),false);run(`face.faceUp=false`);assert.equal(run(`hidden('p2','hand',face)`),true);
-run(`var added=createCard('追加','仮','赤');state.p1.check.push(added);`);assert.equal(run('new Set(ids().split(",")).size'),run('ids().split(",").length'));run(`var at=locate(added.id);state[at.p][at.z].splice(at.index,1);`);assert.equal(run('locate(added.id)'),null);
-context.confirm=()=>true;run(`document.querySelector('#reset').onclick();`);assert.equal(run('state.p1.hand.length'),5);assert.equal(run('state.p1.main.length'),12);
-console.log('PASS: initial zones/counts; 100 cross-player moves preserve IDs and orientation; top/bottom; shuffle; draw; visibility; add/delete; reset cancel/accept. DOM layout and real browser interaction are not covered.');
-
-// 両方式を同じカード構成で比較し、マナの入口を検証。
-run(`mode='A';initial();var sample=JSON.stringify(state);var nonland=state.p1.hand.find(c=>c.type!=='土地');var land=state.p1.hand.find(c=>c.type==='土地');var allBefore=ids();`);
-assert.equal(run(`move(nonland.id,'p1','energy')`),true);
+vm.runInContext(fs.readFileSync(__dirname+'/app.js','utf8'),context);
+const run=s=>vm.runInContext(s,context);
+run(`render=()=>{};renderSetup=()=>{};function all(p){return Object.values(state[p]).flat();}function signature(p){return all(p).map(c=>c.id).sort().join();}`);
+// 毎回の生成構成と、0〜7枚交換を複数のシャッフル結果で検証。
+for(let repeat=0;repeat<24;repeat++)for(const count of [0,1,3,7]) {
+  run('initial();');
+  for(const p of ['p1','p2']) {
+    assert.equal(run(`all('${p}').length`),60);
+    assert.equal(run(`all('${p}').filter(c=>c.basic&&c.type==='土地').length`),24);
+    assert.equal(run(`all('${p}').filter(c=>c.type==='通常').length`),36);
+    assert.equal(run(`state.${p}.hand.length`),7);
+    assert.equal(run(`state.${p}.main.length`),53);
+    assert.equal(run(`state.${p}.life.length`),0);
+    assert.equal(run(`state.${p}.extra.length`),0);
+    for(let cost=1;cost<=12;cost++) assert.equal(run(`all('${p}').filter(c=>c.cost===${cost}&&c.color==='赤').length`),3);
+  }
+  run('var before=signature("p1");var ids=state.p1.hand.slice(0,'+count+').map(c=>c.id);var expected=state.p1.main.slice(0,'+count+').map(c=>c.id);var existing=state.p1.hand.filter(c=>!ids.includes(c.id)).map(c=>c.id);');
+  assert.equal(run('move(state.p1.hand[0].id,"p1","trash")'),false);
+  assert.equal(run('addCard("p1","hand",createCard("追加","通常","赤"))'),false);
+  // シャッフル実行時点ではドロー済みで、戻した個体は手札にない。
+  run(`var originalShuffle=shuffle;var called=0;shuffle=(p,z)=>{called++;if(state[p].hand.length!==7)throw Error('shuffle before draw');if(p==='p1'&&ids.some(id=>state.p1.hand.some(c=>c.id===id)))throw Error('redrawn returned card');originalShuffle(p,z);};`);
+  assert.equal(run('completeMulligan("p1",ids)'),true);
+  assert.equal(run('called'),1);
+  assert.equal(run('state.p1.hand.map(c=>c.id).sort().join()'),run('[...existing,...expected].sort().join()'));
+  assert.equal(run('signature("p1")'),run('before'));
+  assert.equal(run('state.p1.life.length'),0);
+  assert.equal(run('completeMulligan("p1",[])'),false);
+  run('shuffle=originalShuffle;');
+  assert.equal(run('completeMulligan("p2",[],true)'),true);
+  assert.equal(run('phase'),'ready');
+  for(const p of ['p1','p2']) {
+    assert.equal(run(`state.${p}.hand.length`),7);
+    assert.equal(run(`state.${p}.life.length`),7);
+    assert.equal(run(`state.${p}.main.length`),46);
+    assert.equal(run(`state.${p}.life.every(c=>!c.faceUp&&!c.rest)`),true);
+    assert.equal(run(`new Set(all('${p}').map(c=>c.id)).size`),60);
+    assert.equal(run(`all('${p}').every(c=>c.origin==='${p}')`),true);
+  }
+  assert.equal(run('signature("p1")'),run('before'));
+}
+run(`initial();var handBefore=JSON.stringify(state);var duplicate=state.p1.hand[0].id;`);
+assert.equal(run('completeMulligan("p1",[duplicate,duplicate])'),false);
+assert.equal(run('completeMulligan("p1",["missing"])'),false);
+assert.equal(run('JSON.stringify(state)'),run('handBefore'));
+assert.equal(run('completeMulligan("p2",[],true)'),true);
+assert.equal(run('state.p2.life.length'),0);
+run('completeMulligan("p1",[],true);');
+run(`var card=Object.values(state.p1).flat().find(c=>c.type==='通常');var beforeMove=signature('p1');`);
+assert.equal(run(`move(card.id,'p1','energy')`),false);
+run(`var land=Object.values(state.p1).flat().find(c=>c.type==='土地');land.rest=true;`);
 assert.equal(run(`move(land.id,'p1','energy')`),true);
-assert.equal(run('ids()'),run('allBefore'));
-run(`state.p1.energy[0].rest=true;`);
-assert.equal(run('manaCounts("p1").total'),2);assert.equal(run('manaCounts("p1").upright'),1);assert.equal(run('manaCounts("p1").sideways'),1);
-run(`readyMana('p1')`);assert.equal(run('manaCounts("p1").upright'),2);
-run(`mode='B';initial();`);assert.equal(run('JSON.stringify(state)'),run('sample'));
-assert.equal(run(`JSON.stringify(state.p1.main.map(({id,...c})=>c))`),run(`JSON.stringify(state.p2.main.map(({id,...c})=>c))`));
-run(`nonland=state.p1.hand.find(c=>c.type!=='土地');land=state.p1.hand.find(c=>c.type==='土地');allBefore=ids();var blockedState=JSON.stringify(state);`);
-assert.equal(run(`move(nonland.id,'p1','energy')`),false);assert.equal(run('JSON.stringify(state)'),run('blockedState'));
-assert.match(elements.get('#notice').textContent,/土地/);
-assert.equal(run(`move(land.id,'p1','energy')`),true);assert.equal(run('ids()'),run('allBefore'));
-assert.equal(run(`move(nonland.id,'p2','energy',true)`),false);
-run(`move(nonland.id,'p1','trash')`);assert.equal(run(`move(nonland.id,'p1','energy')`),false);
-assert.equal(run(`addCard('p1','energy',createCard('不可','シグニ','赤'))`),false);
-assert.equal(run(`addCard('p2','energy',createCard('土地追加','土地','緑'))`),true);
-context.confirm=()=>false;run(`var unchanged=JSON.stringify(state)`);assert.equal(run(`changeMode('A')`),false);assert.equal(run('mode'),'B');assert.equal(run('JSON.stringify(state)'),run('unchanged'));
-context.confirm=()=>true;assert.equal(run(`changeMode('A')`),true);assert.equal(run('JSON.stringify(state)'),run('sample'));
-console.log('PASS: A/B entry restrictions, generic/cross-player/add routes, stable IDs, mana orientation counts and ready-all, identical samples, confirmed mode change and cancellation.');
+assert.equal(run('manaCounts("p1").sideways'),1);run('readyMana("p1")');assert.equal(run('manaCounts("p1").upright'),1);
+assert.equal(run('signature("p1")'),run('beforeMove'));
+for(let i=0;i<10;i++)assert.equal(run(`addCard('p1','extra',createCard('同名のサイド用仮カード','仮カード','赤'))`),true);
+assert.equal(run(`addCard('p1','extra',createCard('11枚目','仮カード','赤'))`),false);
+run('var resetBefore=JSON.stringify(state);selected=card.id;document.querySelector("#reset").onclick();');assert.equal(run('JSON.stringify(state)'),run('resetBefore'));
+context.confirm=()=>true;run('document.querySelector("#reset").onclick();');assert.equal(run('selected'),null);assert.equal(run('mulligan.p1'), 'pending');assert.equal(run('mulligan.p2'),'pending');assert.equal(run('state.p1.hand.length'),7);assert.equal(run('state.p1.life.length'),0);assert.equal(run('all("p1").length'),60);
+run(`var deck=buildDeck('p1');validateDeck(deck);deck[3]={...deck[3],name:deck[0].name};`);assert.throws(()=>run('validateDeck(deck)'),/3枚/);
+console.log('PASS model: 96 opening runs; exact 60-card composition, 0/1/3/7 exchange order and identities, one-time choices, no early shields, final 7/7/46 and 60 unique IDs, setup lock, land-only, sideboard slots without name limit, reset.');
