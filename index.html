@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>盤面試作 Ver.0.1</title><link rel="stylesheet" href="style.css"></head>
+<body><header><div><small> CARD LAB / SOLO TABLE</small><h1>盤面試作 <span>Ver.0.1</span></h1></div><button id="reset">初期状態へ</button></header>
+<section class="toolbar"><label>操作対象 <select id="active"><option value="p1">プレイヤー1</option><option value="p2">プレイヤー2</option></select></label><label>手札表示 <select id="visibility"><option value="active">操作対象のみ公開</option><option value="both">両者公開</option></select></label><label><input id="compact" type="checkbox">盤面全体を見る</label><button id="add">＋ 仮カード追加</button></section>
+<p class="guide">カードをタップ → 下の操作欄で移動先を指定。各領域の「一覧」から重なったカードも選べます。</p>
+<main id="board"></main><section id="control" aria-label="選択カードの操作"></section><p id="notice" role="status" aria-live="polite">サンプルを配置しました。</p><footer>動作確認用の仮設定：各自 メインデッキ12枚・手札5枚・ライフクロス7枚。枚数・領域名はルール未確定です。自動ルール判定なし／再読み込みで初期化。</footer>
+<dialog id="modal"><div class="modal-head"><h2 id="modal-title"></h2><button id="close">閉じる</button></div><div id="modal-body"></div></dialog><script src="app.js"></script></body></html>
