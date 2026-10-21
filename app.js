@@ -1,377 +1,107 @@
 'use strict';
-// 表示名・枠の定義。既存キーを保ち、CSSの配置定義を再利用する。
-const ZONES = [
-  {id:'signi-1',name:'シグニ1',class:'signi'},
-  {id:'signi-2',name:'シグニ2',class:'signi'},
-  {id:'signi-3',name:'シグニ3',class:'signi'},
-  {id:'lrig',name:'ルリグ',class:'lrig'},
-  {id:'extra',name:'サイドボード',pile:true},
-  {id:'main',name:'メインデッキ',pile:true},
-  {id:'life',name:'シールド',pile:true},
-  {id:'energy',name:'マナゾーン'},
-  {id:'trash',name:'トラッシュ',pile:true},
-  {id:'check',name:'チェックゾーン'},
-  {id:'hand',name:'手札',class:'hand'}
-];
-const CONFIG = {deck:60, hand:7, shields:7, sideboard:10, sameName:3};
-const COLORS = {白:'#b6a461',赤:'#cf6265',青:'#599dd4',緑:'#61b18c',黒:'#796a9d',無色:'#859aa4'};
-const PLAYERS = ['p1','p2'];
-const SOLO_PLAYER='p1'; // 壁打ちはこのプレイヤーの先攻ターンだけを反復する。
-const $ = s => document.querySelector(s);
-const label = p => p==='p1'?'プレイヤー1':'プレイヤー2';
-const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let serial=0, selected=null, active='p1', visibility='active', state, pendingPlay=null;
-let phase='mulligan', setupPlayer='p1', mulligan, exchangeSelection=new Set();
-let turn={number:0,landsPlaced:0,busy:false,key:{}}, turnTimer=null;
-
-function createCard(name,type,color,faceUp=true,cost=null,basic=false,origin=null) {
-  const required=type==='土地'||cost===null?null:(typeof cost==='number'?ManaEngine.cost(cost):cost);
-  return {id:`card-${++serial}`,name,type,color,cost:required,basic,origin,faceUp,rest:false,mana:type==='土地'?{color,amount:1}:null};
+var Game=GameRules.create();
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const COLORS={白:'#b6a461',赤:'#cf6265',青:'#599dd4',緑:'#61b18c',黒:'#796a9d',無色:'#859aa4'};
+let selected=null,active='p1',visibility='active',setupPlayer='p1',exchangeIds=new Set(),advanceTimer=null,modalView=null;
+function hidden(p,z,c){return !c.faceUp||(z==='hand'&&visibility==='active'&&p!==active);}
+function cardHTML(c,{hide=false,p=null,z=null,selectMode='card',chosen=false}={}) {
+ const ability=c.abilities.length?c.abilities.join('・'):'なし';
+ const cost=c.type==='土地'?'配置コストなし':c.cost?ManaEngine.describe(c.cost):'コスト未設定';
+ const play=z==='hand'&&!hide&&Game.status==='ready'?Game.playStatus(c,p):null;
+ const stateText=`${c.rest?'使用済み':'未使用'}${c.sick?'・召喚酔い':''}`;
+ return `<button class="card ${c.type==='土地'&&!hide?'land':''} ${hide?'back':''} ${c.rest?'rest':''} ${chosen||selected===c.id?'selected':''} ${play?(play.ok?'playable':'unplayable'):''}" style="--color:${COLORS[c.color]}" data-${selectMode}="${c.id}" ${selectMode!=='card'?`aria-pressed="${chosen}"`:''} aria-label="${hide?'裏向きカード':esc(c.name)}・${stateText}">${hide?'<strong>裏向きカード</strong>':`<strong>${esc(c.name)}</strong><span>${esc(c.type)} / ${esc(c.color)}<br>コスト：${cost}${c.type==='通常'?`<br>パワー：${c.power??'未設定'}`:''}<br>能力：${esc(ability)}</span><em>${c.id}</em>`}${play?`<span class="play-status">${esc(play.text)}</span>`:''}<span class="mana-state ${c.rest?'spent':''}">${stateText}</span></button>`;
 }
-function buildDeck(p) {
-  const cards=[];
-  for(let cost=1;cost<=12;cost++) {
-    for(let copy=0;copy<3;copy++) cards.push(createCard(`赤・${cost}コスト`,'通常','赤',false,ManaEngine.cost(cost-1,{赤:1}),false,p));
-  }
-  for(let i=0;i<24;i++) cards.push(createCard('赤の基本土地','土地','赤',false,null,true,p));
-  return cards;
+function notify(result){$('#notice').textContent=result.message||'';render();if(Game.operation)renderOperation();}
+function renderSetup(){
+ $('#setup').hidden=Game.status==='ready'||!!Game.result;
+ if($('#setup').hidden){$('#setup').innerHTML='';return;}
+ if(Game.mulligan[setupPlayer]==='done')setupPlayer=Game.PLAYERS.find(p=>Game.mulligan[p]==='pending')||'p1';
+ $('#setup').innerHTML=`<h2>開始準備：マリガン</h2><p>各自1回、0〜7枚を交換できます。両者完了後にシールドを7枚配置します。</p><div class="setup-tabs">${Game.PLAYERS.map(p=>`<button data-setup-player="${p}" ${Game.mulligan[p]==='done'?'disabled':''}>${Game.label(p)}：${Game.mulligan[p]==='done'?'完了':'未選択'}</button>`).join('')}</div><h3>${Game.label(setupPlayer)}の初期手札：7枚</h3><div class="mulligan-hand">${Game.state[setupPlayer].hand.map(c=>cardHTML(c,{selectMode:'mulligan',chosen:exchangeIds.has(c.id)})).join('')}</div><p id="exchange-count">選択中：${exchangeIds.size}枚 / 7枚</p><div class="setup-actions"><button id="exchange">${exchangeIds.size}枚交換する</button><button id="keep">交換せず開始</button></div><p>下へ戻す → 同数ドロー → シャッフル。引き直す前にはシャッフルしません。</p>`;
+ const p=setupPlayer;
+ $('#exchange').onclick=()=>{const r=Game.completeMulligan(p,[...exchangeIds]);if(r.ok)exchangeIds.clear();notify(r);};
+ $('#keep').onclick=()=>{const r=Game.completeMulligan(p,[],true);if(r.ok)exchangeIds.clear();notify(r);};
 }
-function validateDeck(cards) {
-  if(cards.length!==CONFIG.deck) throw Error('メインデッキは60枚です。');
-  const names=new Map();
-  for(const card of cards) {
-    if(card.basic&&card.type==='土地') continue;
-    names.set(card.name,(names.get(card.name)||0)+1);
-    if(names.get(card.name)>CONFIG.sameName) throw Error('基本土地以外の同名カードは3枚までです。');
-  }
+function renderTurn(){
+ const ready=Game.status==='ready',turn=Game.turn,mana=Game.availableMana('p1');
+ const progression=Object.entries(Game.STEPS).map(([key,name])=>`<span class="${key===turn.step?'current-step':''}">${name}</span>`).join(' → ');
+ const names={main1:'アタックへ',attack:'メイン2へ',main2:'エンドへ',end:'次のターン'};
+ const nextId=turn.step==='end'?'next-turn':'next-phase';
+ $('#turn-panel').innerHTML=`<div><b>${Game.result?`${Game.label(Game.result.loser)}の敗北：${Game.result.reason}`:ready?`自分（プレイヤー1）の第${turn.number}ターン ／ ${Game.STEPS[turn.step]}`:'開始準備中'}</b><span class="turn-land">土地配置：${turn.landsPlaced?'配置済み（1/1）':'未配置（0/1）'}</span><small>${ready&&turn.number===1?'先攻第1ターン：ドローなし':'壁打ち：相手のターンを挟みません'}</small><small>未使用土地から出せるマナ：合計${mana.total}点 ／ ${ManaEngine.colors.map(c=>`${c}${mana[c]}`).join('・')}</small><div class="phase-track">${progression}</div></div><div class="turn-buttons">${Game.operation?'<button id="resume-operation">選択を再開</button>':''}<button id="${nextId}" ${!Game.canAdvance?'disabled':''}>${names[turn.step]||'処理中'}</button></div>`;
+ const key=turn.key;
+ $('#'+nextId).onclick=()=>{selected=null;notify(Game.advance(key));};
+ if($('#resume-operation'))$('#resume-operation').onclick=renderOperation;
+ if(advanceTimer!==null)clearTimeout(advanceTimer);
+ const delay=turn.notBefore-Date.now();if(delay>0)advanceTimer=setTimeout(()=>{advanceTimer=null;renderTurn();},delay+10);
 }
-function shuffle(p,z) {
-  const cards=state[p][z];
-  for(let i=cards.length-1;i>0;i--) {
-    const j=Math.floor(Math.random()*(i+1));
-    [cards[i],cards[j]]=[cards[j],cards[i]];
-  }
+function options(){return Game.PLAYERS.map(p=>`<optgroup label="${Game.label(p)}">${Game.ZONES.map(z=>`<option value="${p}/${z.id}">${Game.label(p)}・${z.name}</option>`).join('')}</optgroup>`).join('');}
+function renderZone(p,z){
+ const a=Game.state[p][z.id],mana=Game.availableMana(p);
+ return `<section class="zone ${z.class||''}" data-player="${p}" data-zone="${z.id}"><div class="zone-title"><b>${z.name}</b><span class="count">${a.length}${z.id==='extra'?'/10':''}枚</span></div>${z.id==='energy'?`<p class="mana-summary">未使用土地から出せるマナ：合計${mana.total}点<br>${ManaEngine.colors.map(c=>`${c}${mana[c]}`).join('・')}<br>縦 ${a.filter(c=>!c.rest).length} / 横 ${a.filter(c=>c.rest).length}</p>`:''}<div class="cards">${(z.pile?a.slice(0,1):a).map(c=>cardHTML(c,{hide:hidden(p,z.id,c),p,z:z.id})).join('')||'<span class="empty">カードなし</span>'}</div><div class="zone-tools"><button data-list="${p}/${z.id}">一覧 (${a.length})</button>${z.id==='energy'?`<button data-ready="${p}">手動回復（補助）</button>`:''}${z.id==='main'?`<button data-draw="${p}">手動ドロー（補助）</button>`:''}${['main','extra'].includes(z.id)?`<button data-shuffle="${p}/${z.id}">シャッフル</button>`:''}</div></section>`;
 }
-// 開始処理専用。通常操作の制限を迂回する公開操作としては使わない。
-function deal(p,z,count,faceUp) {
-  const cards=state[p].main.splice(0,count);
-  cards.forEach(card=>{card.faceUp=faceUp;card.rest=false;});
-  state[p][z].push(...cards);
+function render(){
+ $('#current-mode').textContent='壁打ち：自分のターンのみ ／ ユニット7枠・上書き可';
+ $('#normal-controls').disabled=Game.status!=='ready'||!!Game.result||!!Game.operation;
+ $('#board').hidden=Game.status!=='ready'&&!Game.result;$('#control').hidden=$('#board').hidden;
+ renderSetup();renderTurn();
+ const scrolls=new Map([...document.querySelectorAll('.zone')].map(el=>[`${el.dataset.player}/${el.dataset.zone}`,el.querySelector('.cards').scrollLeft]));
+ $('#board').innerHTML=['p2','p1'].map(p=>`<section class="player ${p==='p2'?'opponent':'self'} ${active===p?'active':''}" data-player="${p}" aria-label="${Game.label(p)}の盤面"><h2 class="player-title">${Game.label(p)} ／ ${p==='p1'?'自分':'相手・手動確認用'}<span>${active===p?'● 確認対象':''}</span></h2><div class="layout"><section class="unit-field" aria-label="${Game.label(p)}のユニット7枠">${Game.ZONES.filter(z=>Game.isUnit(z.id)).map(z=>renderZone(p,z)).join('')}</section>${Game.ZONES.filter(z=>!Game.isUnit(z.id)).map(z=>renderZone(p,z)).join('')}</div></section>`).join('');
+ for(const el of document.querySelectorAll('.zone'))el.querySelector('.cards').scrollLeft=scrolls.get(`${el.dataset.player}/${el.dataset.zone}`)||0;
+ renderControl();$('#log-count').textContent=Game.log.length;$('#log-list').innerHTML=Game.log.slice().reverse().map(text=>`<li>${esc(text)}</li>`).join('');
 }
-function initial() {
-  if(turnTimer!==null){clearTimeout(turnTimer);turnTimer=null;}
-  turn={number:0,landsPlaced:0,busy:false,key:{}};
-  serial=0; selected=null; pendingPlay=null; active=SOLO_PLAYER;$('#active').value=active;phase='mulligan'; setupPlayer='p1';
-  exchangeSelection=new Set();
-  mulligan={p1:'pending',p2:'pending'};
-  state={};
-  for(const p of PLAYERS) {
-    state[p]=Object.fromEntries(ZONES.map(z=>[z.id,[]]));
-    state[p].main=buildDeck(p);
-    validateDeck(state[p].main);
-    shuffle(p,'main');
-    deal(p,'hand',CONFIG.hand,true);
-  }
+function renderControl(){
+ const s=Game.locate(selected);if(!s){$('#control').innerHTML='<p>カードをタップして操作を選んでください。「手動移動」はルール外の補助です。</p>';return;}
+ const playable=s.z==='hand'?Game.playStatus(s.card,s.p):null;
+ const attackReason=Game.isUnit(s.z)?Game.attackError(s.card.id):'';
+ const locked=!!Game.operation||!!Game.result;
+ $('#control').innerHTML=`<p><b>${esc(s.card.name)}</b> ／ ${Game.label(s.p)}・${Game.ZONES.find(z=>z.id===s.z).name} ／ ${s.card.rest?'使用済み':'未使用'}${s.card.sick?'・召喚酔い':''}</p>${playable?`<p class="selected-status">${esc(playable.reasons.join('／')||playable.text)}</p>`:''}${Game.isUnit(s.z)?`<p class="action-status">${esc(attackReason||'相手本体へ攻撃できます。')} ブロックは攻撃への応答で選びます。</p>`:''}<div class="actions">${s.z==='hand'&&s.card.type==='通常'?`<button id="play" ${!playable.ok?'disabled':''}>場に出す</button>`:''}${s.z==='hand'&&s.card.type==='土地'?`<button id="to-mana" ${!playable.ok?'disabled':''}>マナに置く</button>`:''}${Game.isUnit(s.z)&&s.card.type==='通常'?`<button id="attack" ${attackReason?'disabled':''}>本体へ攻撃</button><button id="sick" ${locked?'disabled':''}>召喚酔い切替（補助）</button>`:''}<button id="peek">拡大・内容確認</button><select id="destination" aria-label="手動移動先">${options()}</select><button id="move" ${locked?'disabled':''}>手動移動（ルール外の補助）</button><button id="flip" ${locked?'disabled':''}>表裏切替（補助）</button><button id="rotate" ${locked?'disabled':''}>縦横切替（補助）</button><button id="top" ${locked?'disabled':''}>山札の上へ（補助）</button><button id="bottom" ${locked?'disabled':''}>山札の下へ（補助）</button><button id="delete" ${locked?'disabled':''}>削除（補助）</button><button id="unselect">選択解除</button></div>`;
+ $('#destination').value=`${s.p}/${s.z}`;
+ if($('#play'))$('#play').onclick=()=>notify(Game.beginPayment(s.card.id));
+ if($('#to-mana'))$('#to-mana').onclick=()=>notify(Game.placeLand(s.card.id));
+ if($('#attack'))$('#attack').onclick=()=>notify(Game.declareAttack(s.card.id));
+ if($('#sick'))$('#sick').onclick=()=>notify(Game.toggle(s.card.id,'sick'));
+ $('#move').onclick=()=>{const [p,z]=$('#destination').value.split('/');notify(Game.manualMove(s.card.id,p,z));};
+ $('#flip').onclick=()=>notify(Game.toggle(s.card.id,'faceUp'));$('#rotate').onclick=()=>notify(Game.toggle(s.card.id));
+ $('#peek').onclick=()=>openModal('カードの拡大確認',`<div class="preview">${cardHTML(s.card)}</div><p>${s.card.id} ／ 表裏・使用状態・召喚酔いは変更しません。</p>`,'peek');
+ for(const [id,bottom]of [['top',false],['bottom',true]])$('#'+id).onclick=()=>{const [p,z]=$('#destination').value.split('/');if(!['main','extra'].includes(z)){notify({ok:false,message:'移動先にメインデッキかサイドボードを選んでください。'});return;}notify(Game.manualMove(s.card.id,p,z,bottom));};
+ $('#delete').onclick=()=>{const r=Game.remove(s.card.id);if(r.ok)selected=null;notify(r);};$('#unselect').onclick=()=>{selected=null;render();};
 }
-// シールド配置のタイミングを変更する場合は、この開始完了処理を変更する。
-function finishSetup() {
-  if(phase!=='mulligan'||PLAYERS.some(p=>mulligan[p]!=='done')) return;
-  phase='dealing';
-  for(const p of PLAYERS) deal(p,'life',CONFIG.shields,false);
-  selected=null; exchangeSelection.clear(); phase='ready';
-  startTurn(turn.key,true);
-}
-function completeMulligan(p,ids=[],skip=false) {
-  if(phase!=='mulligan'||mulligan[p]!=='pending') return false;
-  const unique=new Set(ids);
-  if(unique.size!==ids.length||ids.length>CONFIG.hand||
-     ids.some(id=>!state[p].hand.some(c=>c.id===id))||
-     state[p].main.length<ids.length) return false;
-  // 同期処理の開始時に完了へ進め、連打・古いイベントで再実行しない。
-  mulligan[p]='done';
-  if(!skip) {
-    const chosen=state[p].hand.filter(c=>unique.has(c.id));
-    state[p].hand=state[p].hand.filter(c=>!unique.has(c.id));
-    chosen.forEach(card=>{card.faceUp=false;card.rest=false;});
-    state[p].main.push(...chosen);       // 先に下へ戻す
-    deal(p,'hand',chosen.length,true);   // シャッフル前の上から同数引く
-    shuffle(p,'main');                  // 引き終わってから全体をシャッフル
-  }
-  exchangeSelection.clear();
-  setupPlayer=PLAYERS.find(player=>mulligan[player]==='pending')||p;
-  finishSetup();
-  return true;
-}
-function isFieldZone(z) {return ZONES.some(zone=>zone.id===z&&(zone.class==='signi'||zone.id==='lrig'));}
-function startTurn(expectedKey,first=false) {
-  if(phase!=='ready'||turn.busy||turn.key!==expectedKey)return false;
-  if(first&&turn.number!==0)return false;
-  turn.busy=true;
-  turn.key={}; // 古い画面・同じクリックの再実行を拒否する。
-  const currentKey=turn.key;
-  pendingPlay=null;selected=null;
-  if($('#modal').open)$('#modal').close();
-  turn.number++;
-  // 回復は自分の場とマナだけ。手札・山札・シールド・相手は触らない。
-  for(const z of ZONES)if(isFieldZone(z.id)||z.id==='energy') {
-    state[SOLO_PLAYER][z.id].forEach(card=>card.rest=false);
-  }
-  turn.landsPlaced=0;
-  turn.lastDraw=turn.number>1&&state[SOLO_PLAYER].main.length>0?1:0;
-  if(turn.lastDraw)deal(SOLO_PLAYER,'hand',1,true);
-  if(first)turn.busy=false;
-  else turnTimer=setTimeout(()=>{
-    if(turn.key!==currentKey)return;
-    turnTimer=null;turn.busy=false;renderTurn();
-  },400);
-  return true;
-}
-function nextTurn(expectedKey=turn.key) {
-  if(!startTurn(expectedKey))return false;
-  finish(`自分の第${turn.number}ターン。場と土地を回復し、土地配置を未配置に戻しました。${turn.lastDraw?'1枚ドローしました。':'山札が空のため、追加ドローはできません。'}`);
-  return true;
-}
-function landPlacementError(id) {
-  const source=locate(id);
-  if(phase!=='ready'||turn.number<1)return '開始準備中は土地を配置できません。';
-  if(!source||source.z!=='hand'||source.card.type!=='土地')return '手札の土地を選んでください。';
-  if(source.p!==SOLO_PLAYER)return '相手側は手動操作のみです。自分のターンはプレイヤー1です。';
-  if(turn.landsPlaced>=1)return 'このターンは土地を配置済み';
-  return '';
-}
-function placeLand(id) {
-  const reason=landPlacementError(id);
-  if(reason){say(reason);return false;}
-  const source=locate(id);
-  // 通常の土地配置はこの入口だけを使い、手動移動とは区別する。
-  if(!move(id,SOLO_PLAYER,'energy'))return false;
-  source.card.faceUp=true;
-  turn.landsPlaced++;
-  finish('土地を配置しました。このターンは土地を配置済みです。');
-  return true;
-}
-function useUnit(id,action) {
-  const source=locate(id);
-  if(phase!=='ready'||!['攻撃','ブロック'].includes(action)||!source||
-     source.p!==SOLO_PLAYER||!isFieldZone(source.z)||source.card.type!=='通常') {
-    say('自分の場の仮ユニットを選んでください。');return false;
-  }
-  if(source.card.rest){say('使用済みのため、攻撃・ブロックは再実行できません。');return false;}
-  source.card.rest=true;
-  finish(`${action}：${source.card.name}を横向きの使用済みにしました。${action==='ブロック'?'壁打ちでの動作確認用の操作です。':''}`);
-  return true;
-}
-function renderTurn() {
-  const ready=phase==='ready';
-  const mana=ready?availableMana(SOLO_PLAYER):ManaEngine.pool([]);
-  $('#turn-panel').innerHTML=`<div><b>${ready?`自分（プレイヤー1）の第${turn.number}ターン`:'開始準備中'}</b><span class="turn-land">土地配置：${turn.landsPlaced?'配置済み（1/1）':'未配置（0/1）'}</span><small>${ready?(turn.number===1?'先攻第1ターン：ドローなし':'ターン開始時：1枚ドロー'):'両者のマリガン完了後に第1ターンを開始'}</small><small>未使用土地から出せるマナ：合計${mana.total}点 ／ ${ManaEngine.colors.map(color=>`${color}${mana[color]}`).join('・')}</small></div><button id="next-turn" ${!ready||turn.busy?'disabled':''}>${turn.busy?'処理中…':'次のターン'}</button>`;
-  const key=turn.key;
-  $('#next-turn').onclick=()=>nextTurn(key);
-}
-function locate(id) {
-  for(const p of PLAYERS) for(const z of ZONES) {
-    const index=state[p][z.id].findIndex(c=>c.id===id);
-    if(index>=0) return {p,z:z.id,index,card:state[p][z.id][index]};
-  }
-  return null;
-}
-function placementError(card,p,z,source=null) {
-  if(phase!=='ready') return 'マリガン完了まで通常の壁打ち操作はできません。';
-  if(z==='energy'&&card.type!=='土地') return '土地以外のカードはマナゾーンに置けません。';
-  if(z==='extra'&&state[p].extra.length>=CONFIG.sideboard&&!(source?.p===p&&source?.z===z)) return 'サイドボードは10枚枠です。';
-  return '';
-}
-function move(id,p,z,bottom=false) {
-  const source=locate(id);
-  if(!source||!state[p]?.[z]) return false;
-  const reason=placementError(source.card,p,z,source);
-  if(reason){say(reason);return false;}
-  const [card]=state[source.p][source.z].splice(source.index,1);
-  if(bottom) state[p][z].push(card); else state[p][z].unshift(card);
-  return true;
-}
-function addCard(p,z,card) {
-  if(!state[p]?.[z]) return false;
-  const reason=placementError(card,p,z);
-  if(reason){say(reason);return false;}
-  state[p][z].push(card);
-  return true;
-}
-function manaCounts(p) {
-  const cards=state[p].energy;
-  return {total:cards.length,upright:cards.filter(c=>!c.rest).length,sideways:cards.filter(c=>c.rest).length};
-}
-function readyMana(p) {
-  if(phase!=='ready') return false;
-  state[p].energy.forEach(c=>c.rest=false);
-  return true;
-}
-function hidden(p,z,c) {return !c.faceUp||(z==='hand'&&visibility==='active'&&p!==active);}
-function emptySlots(p) {return ZONES.filter(z=>z.class==='signi'&&state[p][z.id].length===0);}
-function availableMana(p) {return ManaEngine.pool(state[p].energy);}
-function playStatus(card,p) {
-  if(card.type==='土地'){const reason=landPlacementError(card.id);return {ok:false,text:reason||'マナに置く',reasons:reason?[reason]:[]};}
-  if(card.type!=='通常'||!card.cost)return {ok:false,text:'通常使用の対象外',reasons:['通常使用の対象外です。手動移動で試せます。']};
-  const result=ManaEngine.assess(card.cost,availableMana(p));
-  const reasons=[...result.reasons];
-  if(p!==SOLO_PLAYER)reasons.unshift('相手側は手動操作のみです');
-  if(!emptySlots(p).length)reasons.push('配置先なし：シグニゾーンに空きがありません');
-  return {ok:reasons.length===0,text:p!==SOLO_PLAYER?'相手側は手動操作のみ':!emptySlots(p).length?'配置先なし':result.ok?'マナ支払い可':result.reasons[0],reasons};
-}
-function cardHTML(c,hide=false,context=null) {
-  const cost=c.type==='土地'?'配置コストなし':c.cost===null?'コスト未設定':ManaEngine.describe(c.cost);
-  const status=context?.z==='hand'&&!hide&&phase==='ready'?playStatus(c,context.p):null;
-  const manaState=c.rest?'使用済み':'未使用';
-  return `<button class="card ${!hide&&c.type==='土地'?'land':''} ${hide?'back':''} ${c.rest?'rest':''} ${selected===c.id?'selected':''} ${status?(status.ok?'playable':c.type==='土地'?'':'unplayable'):''}" style="--color:${COLORS[c.color]}" data-card="${c.id}" aria-label="${hide?'裏向きカード':esc(c.name)}${c.rest?'・横向き':''}${status?'・'+esc(status.text):''}${manaState?'・'+manaState:''}">${hide?'<strong>仮カード<br>裏向き</strong>':`<strong>${c.type==='土地'?'◆ 土地<br>':''}${esc(c.name)}</strong><span>${esc(c.type)} / ${esc(c.color)}<br>${cost}</span><em>${c.id}</em>`}${status?`<span class="play-status">${esc(status.text)}</span>`:''}${manaState?`<span class="mana-state ${c.rest?'spent':''}">${manaState}</span>`:''}</button>`;
-}
-function beginPlay(id) {
-  const source=locate(id);
-  if(phase!=='ready'||!source||source.z!=='hand')return false;
-  const status=playStatus(source.card,source.p);
-  if(!status.ok){say(status.reasons.join('／'));return false;}
-  pendingPlay={id,p:source.p,destination:null,landIds:ManaEngine.suggest(source.card.cost,state[source.p].energy)};
-  renderPayment();return true;
-}
-function paymentCheck(session) {
-  if(!session||pendingPlay!==session||phase!=='ready')return {ok:false,reason:'この支払い操作は終了しています。'};
-  const source=locate(session.id);
-  if(session.p!==SOLO_PLAYER)return {ok:false,reason:'相手側は手動操作のみです。'};
-  if(!source||source.p!==session.p||source.z!=='hand'||source.card.type!=='通常'||!source.card.cost)return {ok:false,reason:'対象カードが手札にありません。'};
-  if(!emptySlots(session.p).some(z=>z.id===session.destination))return {ok:false,reason:'配置先なし：空いているシグニゾーンを選んでください。'};
-  if(new Set(session.landIds).size!==session.landIds.length)return {ok:false,reason:'同じ土地を重複選択できません。'};
-  const lands=session.landIds.map(id=>state[session.p].energy.find(c=>c.id===id));
-  if(lands.some(c=>!c||c.type!=='土地'||c.rest||!c.mana))return {ok:false,reason:'選択土地は自分のマナゾーンの未使用土地である必要があります。'};
-  const result=ManaEngine.payment(source.card.cost,lands);
-  if(!result.ok)return {ok:false,reason:result.reasons.join('／')};
-  return {ok:true,source,lands};
-}
-function commitPlay(session) {
-  const check=paymentCheck(session);
-  if(!check.ok){say(check.reason);if($('#payment-error'))$('#payment-error').textContent=check.reason;return false;}
-  // 検証がすべて成功してから、一括で支払い・配置。再実行より先にセッションを失効させる。
-  pendingPlay=null;
-  check.lands.forEach(land=>land.rest=true);
-  const [card]=state[session.p].hand.splice(check.source.index,1);
-  card.faceUp=true;
-  state[session.p][session.destination].push(card);
-  $('#modal').close();
-  finish(`${card.name}を場に出しました。土地${check.lands.length}枚を使用済みにしました。`);
-  return true;
-}
-function closeModal() {pendingPlay=null;$('#modal').close();}
-function renderPayment() {
-  const session=pendingPlay;if(!session)return;
-  const source=locate(session.id);if(!source){closeModal();return;}
-  const slots=emptySlots(session.p);
-  const check=paymentCheck(session);
-  const usable=state[session.p].energy.filter(c=>c.type==='土地'&&!c.rest&&c.mana);
-  const chosen=usable.filter(c=>session.landIds.includes(c.id));
-  const mana=ManaEngine.pool(chosen);
-  openModal('場に出す：配置先とマナ支払い',`<p><b>${esc(source.card.name)}</b> ／ 必要：${ManaEngine.describe(source.card.cost)}</p><p>1. 空いている配置先をタップ</p><div class="payment-slots">${slots.map(z=>`<button data-pay-slot="${z.id}" aria-pressed="${session.destination===z.id}">${z.name}</button>`).join('')||'配置先なし'}</div><p>2. 支払いに使う土地をタップして変更</p><p>必須色を先に確保した自動案です。確定するまで土地は使用しません。</p><div class="payment-lands">${usable.map(c=>`<button data-pay-land="${c.id}" aria-pressed="${session.landIds.includes(c.id)}"><b>${esc(c.name)}</b><span>${esc(c.mana.color)} ${c.mana.amount}点 ／ ${c.id}</span>${session.landIds.includes(c.id)?'✓ 選択中':'未選択'}</button>`).join('')}</div><p>選択：${chosen.length}枚 ／ 合計${mana.total}点（${ManaEngine.colors.map(color=>`${color}${mana[color]}`).join('・')}）</p><p id="payment-error" role="status">${check.ok?'支払い可能です。内容を確認して確定してください。':esc(check.reason)}</p><div class="setup-actions"><button id="confirm-payment" ${check.ok?'':'disabled'}>支払いを確定して配置</button><button id="cancel-payment">キャンセル</button></div>`);
-  $('#confirm-payment').onclick=()=>commitPlay(session);
-  $('#cancel-payment').onclick=closeModal;
-}
-function renderSetup() {
-  $('#setup').hidden=phase==='ready';
-  if(phase==='ready') {$('#setup').innerHTML='';return;}
-  $('#setup').innerHTML=`<h2>開始準備：マリガン</h2><p>交換は各自1回まで。交換する手札をタップしてください。シールドは両者の完了後に配置します。</p><div class="setup-tabs">${PLAYERS.map(p=>`<button data-setup-player="${p}" ${mulligan[p]==='done'?'disabled':''} aria-pressed="${setupPlayer===p}">${label(p)}：${mulligan[p]==='done'?'完了':'未選択'}</button>`).join('')}</div><h3>${label(setupPlayer)}の初期手札：7枚</h3><div class="mulligan-hand">${state[setupPlayer].hand.map(c=>cardHTML(c).replace('data-card=','data-mulligan=').replace('class="card ',`aria-pressed="${exchangeSelection.has(c.id)}" class="card ${exchangeSelection.has(c.id)?'selected':''} `)).join('')}</div><p id="exchange-count" role="status">選択中：${exchangeSelection.size}枚 / 7枚</p><div class="setup-actions"><button id="exchange">${exchangeSelection.size}枚交換する</button><button id="keep">交換せず開始</button></div><p>選んだカードを山札の下へ → 同数ドロー → 山札をシャッフル。</p>`;
-  // pを描画時に固定し、以前のボタンを連打しても次のプレイヤーに作用させない。
-  const p=setupPlayer;
-  $('#exchange').onclick=()=>{if(completeMulligan(p,[...exchangeSelection])) finish(phase==='ready'?'準備完了。シールドを7枚ずつ配置しました。':'交換が完了しました。もう一人の選択へ進みます。');};
-  $('#keep').onclick=()=>{if(completeMulligan(p,[],true)) finish(phase==='ready'?'準備完了。シールドを7枚ずつ配置しました。':'手札を確定しました。もう一人の選択へ進みます。');};
-}
-function options() {
-  return PLAYERS.map(p=>`<optgroup label="${label(p)}">${ZONES.map(z=>`<option value="${p}/${z.id}">${label(p)}・${z.name}</option>`).join('')}</optgroup>`).join('');
-}
-function render() {
-  $('#current-mode').textContent='壁打ち：自分のターンのみ ／ マナ：土地のみ';
-  renderTurn();
-  $('#normal-controls').disabled=phase!=='ready';
-  $('#board').hidden=phase!=='ready';
-  $('#control').hidden=phase!=='ready';
-  renderSetup();
-  const scrolls=new Map([...document.querySelectorAll('.zone')].map(e=>[`${e.dataset.player}/${e.dataset.zone}`,e.querySelector('.cards').scrollLeft]));
-  $('#board').innerHTML=['p2','p1'].map(p=>`<section class="player ${p==='p2'?'opponent':'self'} ${active===p?'active':''}" aria-label="${label(p)}の盤面"><h2 class="player-title">${label(p)} ${p==='p2'?'／ 相手側':'／ 自分側'} <span>${active===p?'● 操作対象':''}</span></h2><div class="layout">${ZONES.map(z=>{
-    const a=state[p][z.id];
-    return `<section class="zone ${z.class||''}" data-player="${p}" data-zone="${z.id}"><div class="zone-title"><b>${z.name}</b><span class="count">${a.length}${z.id==='extra'?'/10':''}枚${z.id==='energy'?`<small class="mana-counts">縦 ${manaCounts(p).upright} / 横 ${manaCounts(p).sideways}</small>`:''}</span></div>${z.id==='energy'?`<p class="mana-summary">未使用土地から出せるマナ：合計${availableMana(p).total}点<br>${ManaEngine.colors.map(color=>`${color}${availableMana(p)[color]}`).join('・')}</p>`:''}<div class="cards">${(z.pile?a.slice(0,1):a).map(c=>cardHTML(c,hidden(p,z.id,c),{p,z:z.id})).join('')||'<span class="empty">カードなし</span>'}</div><div class="zone-tools">${z.id==='energy'?`<button data-ready="${p}">手動回復（補助）：土地を未使用に戻す</button>`:''}<button data-list="${p}/${z.id}">一覧 (${a.length})</button>${z.id==='main'?`<button data-draw="${p}">手動ドロー（補助）</button>`:''}${['main','extra'].includes(z.id)?`<button data-shuffle="${p}/${z.id}">シャッフル</button>`:''}</div></section>`;
-  }).join('')}</div></section>`).join('');
-  for(const e of document.querySelectorAll('.zone')) e.querySelector('.cards').scrollLeft=scrolls.get(`${e.dataset.player}/${e.dataset.zone}`)||0;
-  renderControl();
-}
-function renderControl() {
-  const s=locate(selected);
-  $('#control').innerHTML=s?`<p><b>選択中：${esc(s.card.name)}</b> ／ ${label(s.p)}・${ZONES.find(z=>z.id===s.z).name} ／ ${s.card.faceUp?'表向き':'裏向き'}・${s.card.rest?'使用済み（横向き）':'未使用（縦向き）'}</p>${s.z==='hand'?`<p class="selected-status">${s.card.type==='土地'?esc(landPlacementError(s.card.id)||'土地はマナに置けます。'):esc(playStatus(s.card,s.p).reasons.join('／')||'マナ支払い可')} ／ 手動移動は支払い・ターン制限を無視する補助操作です。</p>`:''}<div class="actions"><select id="destination" aria-label="移動先">${options()}</select><button id="move">手動移動（ルール外の補助）</button>${s.z==='hand'&&s.card.type==='通常'?`<button id="play" ${playStatus(s.card,s.p).ok?'':'disabled'}>場に出す</button>`:''}${s.z==='hand'&&s.card.type==='土地'?`<button id="to-mana" ${landPlacementError(s.card.id)?'disabled':''}>マナに置く</button>`:''}<button id="flip">表裏切替</button><button id="rotate">手動：縦横切替（補助）</button>${isFieldZone(s.z)&&s.card.type==='通常'?`<button id="attack" ${s.card.rest||s.p!==SOLO_PLAYER?'disabled':''}>攻撃</button><button id="block" ${s.card.rest||s.p!==SOLO_PLAYER?'disabled':''}>ブロック（確認用）</button>`:''}<button id="peek">拡大・内容確認</button><button id="top">山札の上へ</button><button id="bottom">山札の下へ</button><button id="delete">削除</button><button id="unselect">選択解除</button></div>`:'<p>カード未選択 — カード、または領域の「一覧」をタップしてください。</p>';
-  if(!s||phase!=='ready') return;
-  $('#destination').value=`${s.p}/${s.z}`;
-  $('#move').onclick=()=>{const [p,z]=$('#destination').value.split('/');if(move(selected,p,z))finish('手動移動（ルール外の補助）を実行しました。土地配置回数は変えません。');};
-  if(s.z==='hand'&&s.card.type==='通常')$('#play').onclick=()=>beginPlay(s.card.id);
-  if(s.z==='hand'&&s.card.type==='土地')$('#to-mana').onclick=()=>placeLand(s.card.id);
-  if(isFieldZone(s.z)&&s.card.type==='通常'){
-    $('#attack').onclick=()=>useUnit(s.card.id,'攻撃');
-    $('#block').onclick=()=>useUnit(s.card.id,'ブロック');
-  }
-  $('#flip').onclick=()=>{if(phase!=='ready')return;s.card.faceUp=!s.card.faceUp;finish('表裏を切り替えました。');};
-  $('#rotate').onclick=()=>{if(phase!=='ready')return;s.card.rest=!s.card.rest;finish('縦横を切り替えました。');};
-  $('#peek').onclick=()=>openModal('カードの内容確認',`<div class="preview">${cardHTML({...s.card,rest:false})}</div><p>${esc(s.card.id)} ／ 現在は${s.card.faceUp?'表向き':'裏向き'}。この確認では表裏・縦横を変更しません。</p>`);
-  for(const [id,bottom] of [['top',false],['bottom',true]]) $('#'+id).onclick=()=>{
-    const [p,z]=$('#destination').value.split('/');
-    if(!['main','extra'].includes(z)){say('移動先でメインデッキかサイドボードを選んでください。');return;}
-    if(move(selected,p,z,bottom))finish(`${ZONES.find(a=>a.id===z).name}の${bottom?'下':'上'}に戻しました。`);
-  };
-  $('#delete').onclick=()=>{if(phase!=='ready')return;state[s.p][s.z].splice(s.index,1);selected=null;finish('カードを削除しました。');};
-  $('#unselect').onclick=()=>{selected=null;render();};
-}
-function say(message) {$('#notice').textContent=message;}
-function finish(message) {render();say(message);}
-function openModal(title,body) {
-  $('#modal-title').textContent=title;$('#modal-body').innerHTML=body;
-  if(!$('#modal').open)$('#modal').showModal();
-}
-function showList(p,z) {
-  openModal(`${label(p)}・${ZONES.find(a=>a.id===z).name} (${state[p][z].length}枚)`,`<p>先頭が上、末尾が下です。カードをタップして選択します。</p><div class="list">${state[p][z].map(c=>cardHTML(c,hidden(p,z,c),{p,z})).join('')||'カードなし'}</div>`);
+function openModal(title,body,view='operation'){$('#modal-title').textContent=title;$('#modal-body').innerHTML=body;modalView=view;$('#close').textContent=Game.operation&&Game.operation.kind!=='payment'?'選択を保留':'閉じる';if(!$('#modal').open)$('#modal').showModal();}
+function closeModal(){if(Game.operation?.kind==='payment'){const r=Game.cancelPayment();$('#notice').textContent=r.message;}$('#modal').close();modalView=null;render();}
+function renderOperation(){
+ const o=Game.operation;if(!o)return;
+ if(o.kind==='payment'){
+  const source=Game.locate(o.id);if(!source)return;
+  const check=Game.paymentInfo(o),lands=Game.state[o.p].energy.filter(c=>!c.rest&&c.type==='土地'),mana=ManaEngine.pool(lands.filter(c=>o.landIds.includes(c.id)));
+  const replacement=o.replacedId?Game.locate(o.replacedId):null;
+  openModal('配置・上書きとマナ支払い',`<p><b>${esc(source.card.name)}</b> ／ 必要：${ManaEngine.describe(source.card.cost)} ／ パワー${source.card.power}</p><p>1. 配置先を選択。満杯の場合は上書き対象を選びます。</p><div class="payment-slots">${Game.placementOptions(o.p).map(z=>`<button data-pay-slot="${z.id}" aria-pressed="${o.slot===z.id}">${z.name}${Game.state[o.p][z.id].length?`：${esc(Game.state[o.p][z.id][0].name)}を上書き`:''}</button>`).join('')}</div><p id="overwrite-info">${replacement?`上書き対象：${esc(replacement.card.name)}（パワー${replacement.card.power}）をトラッシュへ送ります。`:'空き枠への配置です。'}</p><p>2. 支払い土地を確認・変更（必須色を先に確保した自動案）</p><div class="payment-lands">${lands.map(c=>`<button data-pay-land="${c.id}" aria-pressed="${o.landIds.includes(c.id)}"><b>${esc(c.name)}</b><span>${esc(c.mana.color)} ${c.mana.amount}点 ／ ${c.id}</span>${o.landIds.includes(c.id)?'✓ 選択中':'未選択'}</button>`).join('')}</div><p>選択${o.landIds.length}枚／合計${mana.total}点（${ManaEngine.colors.map(c=>`${c}${mana[c]}`).join('・')}）</p><p id="payment-error">${check.ok?'確定時に支払い・上書き・配置をまとめて実行します。':esc(check.message)}</p><div class="setup-actions"><button id="confirm-payment" ${!check.ok?'disabled':''}>支払いを確定して配置</button><button id="cancel-payment">キャンセル</button></div>`);
+  $('#confirm-payment').onclick=()=>{const r=Game.confirmPayment(o);if(r.ok){$('#modal').close();modalView=null;}notify(r);};$('#cancel-payment').onclick=closeModal;
+ }else if(o.kind==='combat'){
+  const a=Game.locate(o.id);if(!a)return;const blockers=Game.blockers(o.defender);
+  openModal('防御側：ブロックするか選択',`<p>${esc(a.card.name)}（パワー${a.card.power}）がプレイヤー2本体へ攻撃。攻撃側は使用済みです。</p><p>未使用の「ブロッカー」だけが選べます。召喚酔いでもブロック可能。今回は1枚までです。</p><div class="combat-blockers">${blockers.map(c=>cardHTML(c,{selectMode:'blocker',chosen:o.blockerId===c.id})).join('')||'<p>ブロック可能なユニットはありません。</p>'}</div><div class="setup-actions"><button id="confirm-block" ${!o.blockerId?'disabled':''}>選んだ1枚でブロック</button><button id="no-block">ブロックしない</button></div><p>同パワーは攻撃側有利。ブロック時はシールドへ処理しません。</p>`);
+  $('#confirm-block').onclick=()=>{const r=Game.resolveAttack(o.blockerId,o);if(r.ok){$('#modal').close();modalView=null;}notify(r);};$('#no-block').onclick=()=>{const r=Game.resolveAttack(null,o);if(r.ok){$('#modal').close();modalView=null;}notify(r);};
+ }else if(o.kind==='discard'){
+  openModal('エンド：手札を7枚に調整',`<p>${Game.label(o.p)}の手札${Game.state[o.p].hand.length}枚。<b>${o.required}枚</b>を選び、トラッシュへ送ってください。</p><div class="discard-hand">${Game.state[o.p].hand.map(c=>cardHTML(c,{selectMode:'discard',chosen:o.ids.includes(c.id)})).join('')}</div><p id="discard-count">選択中${o.ids.length}枚／必要${o.required}枚</p><button id="confirm-discard" ${o.ids.length!==o.required?'disabled':''}>選んだカードをトラッシュへ送る</button><p>完了するまで次のターンは開始しません。</p>`);
+  $('#confirm-discard').onclick=()=>{const r=Game.confirmDiscard(o);if(r.ok){$('#modal').close();modalView=null;}notify(r);};
+ }
 }
 document.addEventListener('click',e=>{
-  const b=e.target.closest('button');if(!b)return;
-  if(phase==='mulligan') {
-    if(b.dataset.setupPlayer&&mulligan[b.dataset.setupPlayer]==='pending') {setupPlayer=b.dataset.setupPlayer;exchangeSelection.clear();renderSetup();}
-    if(b.dataset.mulligan&&mulligan[setupPlayer]==='pending'&&state[setupPlayer].hand.some(c=>c.id===b.dataset.mulligan)) {
-      const id=b.dataset.mulligan;
-      if(exchangeSelection.has(id))exchangeSelection.delete(id);else exchangeSelection.add(id);
-      renderSetup();
-    }
-    return;
-  }
-  if(phase!=='ready')return;
-  if(b.dataset.paySlot&&pendingPlay){pendingPlay.destination=b.dataset.paySlot;renderPayment();return;}
-  if(b.dataset.payLand&&pendingPlay){const ids=pendingPlay.landIds,id=b.dataset.payLand;pendingPlay.landIds=ids.includes(id)?ids.filter(x=>x!==id):[...ids,id];renderPayment();return;}
-  if(b.dataset.ready){readyMana(b.dataset.ready);finish('使用済み土地をすべて未使用に戻しました。');return;}
-  if(b.dataset.card){selected=b.dataset.card;if($('#modal').open)$('#modal').close();render();const chosen=locate(selected);say(chosen?.z==='hand'&&chosen.card.type==='通常'?(playStatus(chosen.card,chosen.p).reasons.join('／')||'マナ支払い可。場に出す操作を選べます。'):'カードを選択しました。');}
-  if(b.dataset.list)showList(...b.dataset.list.split('/'));
-  if(b.dataset.draw){const p=b.dataset.draw,c=state[p].main[0];if(c){if(move(c.id,p,'hand'))finish('1枚ドローしました。表裏・縦横は保持します。');}else say('メインデッキは空です。');}
-  if(b.dataset.shuffle){shuffle(...b.dataset.shuffle.split('/'));finish('シャッフルしました。');}
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.setupPlayer){setupPlayer=b.dataset.setupPlayer;exchangeIds.clear();renderSetup();return;}
+ if(b.dataset.mulligan){const id=b.dataset.mulligan;if(exchangeIds.has(id))exchangeIds.delete(id);else exchangeIds.add(id);renderSetup();return;}
+ if(b.dataset.paySlot){notify(Game.chooseSlot(b.dataset.paySlot));return;}if(b.dataset.payLand){notify(Game.togglePaymentLand(b.dataset.payLand));return;}
+ if(b.dataset.blocker){notify(Game.chooseBlocker(b.dataset.blocker));return;}if(b.dataset.discard){notify(Game.toggleDiscard(b.dataset.discard));return;}
+ if(b.dataset.card){selected=b.dataset.card;if(modalView==='list'){$('#modal').close();modalView=null;}render();return;}
+ if(b.dataset.list){const [p,z]=b.dataset.list.split('/');openModal(`${Game.label(p)}・${Game.ZONES.find(x=>x.id===z).name} (${Game.state[p][z].length}枚)`,`<p>山札は先頭が上、末尾が下です。</p><div class="list">${Game.state[p][z].map(c=>cardHTML(c,{hide:hidden(p,z,c),p,z})).join('')||'カードなし'}</div>`,'list');return;}
+ if(b.dataset.ready)notify(Game.readyMana(b.dataset.ready));if(b.dataset.draw)notify(Game.draw(b.dataset.draw));if(b.dataset.shuffle){const [p,z]=b.dataset.shuffle.split('/');notify(Game.shuffle(p,z));}
 });
-$('#active').onchange=e=>{if(phase!=='ready')return;active=e.target.value;finish('手動確認対象を切り替えました。自分のターンはプレイヤー1のままです。');};
-$('#visibility').onchange=e=>{if(phase!=='ready')return;visibility=e.target.value;render();};
-$('#compact').onchange=e=>document.body.classList.toggle('compact',e.target.checked);
-$('#close').onclick=closeModal;
-$('#modal').addEventListener('cancel',()=>{pendingPlay=null;});
-$('#reset').onclick=()=>{
-  if(confirm('現在の配置を破棄し、60枚のデッキと初期手札7枚で最初からやり直しますか？')) {
-    if($('#modal').open)$('#modal').close();
-    initial();finish('新しいデッキを配りました。各自のマリガンを選択してください。');
-  }
-};
+$('#active').onchange=e=>{active=e.target.value;render();};$('#visibility').onchange=e=>{visibility=e.target.value;render();};$('#compact').onchange=e=>document.body.classList.toggle('compact',e.target.checked);
+$('#close').onclick=closeModal;$('#modal').addEventListener('cancel',()=>{if(Game.operation?.kind==='payment')Game.cancelPayment();modalView=null;render();});
+$('#reset').onclick=()=>{if(confirm('現在の配置・選択・結果を破棄し、60枚のデッキから最初からやり直しますか？')){if(advanceTimer!==null)clearTimeout(advanceTimer);advanceTimer=null;$('#modal').close();modalView=null;selected=null;active='p1';$('#active').value=active;setupPlayer='p1';exchangeIds.clear();notify(Game.reset());}};
 $('#add').onclick=()=>{
-  if(phase!=='ready')return;
-  openModal('仮カードを追加',`<form id="add-form"><label>追加先<select name="destination">${options()}</select></label><label>名前<input name="name" value="仮カード ${serial+1}" required maxlength="60"></label><label>種類<select name="type"><option>通常</option><option>土地</option><option>ルリグ</option><option>仮カード</option></select></label><label>不特定コスト<input name="generic" type="number" min="0" max="999" step="1" value="0"></label><div class="cost-inputs">${ManaEngine.colors.map(color=>`<label>${color}<input name="cost-${color}" type="number" min="0" max="99" step="1" value="${color==='赤'?1:0}"></label>`).join('')}</div><label>色<select name="color">${Object.keys(COLORS).map(c=>`<option>${c}</option>`).join('')}</select></label><label>表裏<select name="face"><option value="up">表向き</option><option value="down">裏向き</option></select></label><p>追加はルール外の補助操作です。土地配置回数に数えず、初期の60枚にも含めません。土地の配置コストは未設定です。</p><p id="add-error" role="alert"></p><button type="submit">追加</button></form>`);
-  $('#add-form select').value=`${active}/hand`;
-  $('#add-form [name="type"]').onchange=e=>{for(const input of document.querySelectorAll('#add-form input[type=number]'))input.disabled=e.target.value==='土地';};
-  $('#add-form').onsubmit=e=>{
-    e.preventDefault();if(phase!=='ready')return;
-    const f=new FormData(e.target),[p,z]=f.get('destination').split('/');
-    const card=createCard(f.get('name'),f.get('type'),f.get('color'),f.get('face')==='up',f.get('type')==='土地'?null:ManaEngine.cost(Number(f.get('generic')),Object.fromEntries(ManaEngine.colors.map(color=>[color,Number(f.get('cost-'+color))]))));
-    if(!addCard(p,z,card)){$('#add-error').textContent=placementError(card,p,z);return;}
-    $('#modal').close();finish('仮カードを追加しました。');
-  };
+ if(Game.status!=='ready'||Game.operation||Game.result)return;
+ openModal('仮カード追加（ルール外の補助）',`<form id="add-form"><label>追加先<select name="destination">${options()}</select></label><label>名前<input name="name" value="確認用カード" required maxlength="60"></label><label>種類<select name="type"><option>通常</option><option>土地</option><option>ルリグ</option><option>仮カード</option></select></label><label>不特定コスト<input name="generic" type="number" min="0" max="999" value="0" required></label><div class="cost-inputs">${ManaEngine.colors.map(c=>`<label>${c}<input name="cost-${c}" type="number" min="0" max="99" value="${c==='赤'?1:0}" required></label>`).join('')}</div><label>色<select name="color">${Object.keys(COLORS).map(c=>`<option ${c==='赤'?'selected':''}>${c}</option>`).join('')}</select></label><label>パワー（確認用の通常ユニット）<input name="power" type="number" min="0" max="999999" value="1000" required></label><label><input name="blocker" type="checkbox"> ブロッカー（確認用。初期60枚には追加しません）</label><label>表裏<select name="face"><option value="up">表向き</option><option value="down">裏向き</option></select></label><p>土地にはパワー・能力を設定しません。場に追加したユニットは召喚酔いになります。土地配置回数には数えません。</p><p id="add-error" role="alert"></p><button type="submit">追加</button></form>`,'add');
+ $('#add-form select').value=`${active}/hand`;
+ $('#add-form [name="type"]').onchange=e=>{const land=e.target.value==='土地';for(const el of document.querySelectorAll('#add-form input[type=number],#add-form [name=blocker]'))el.disabled=land;};
+ $('#add-form').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),[p,z]=f.get('destination').split('/'),type=f.get('type');const c=Game.card(f.get('name'),type,f.get('color'),type==='土地'?null:ManaEngine.cost(Number(f.get('generic')),Object.fromEntries(ManaEngine.colors.map(color=>[color,Number(f.get('cost-'+color))]))));c.faceUp=f.get('face')==='up';if(type==='通常'){c.power=Number(f.get('power'));c.abilities=f.has('blocker')?['ブロッカー']:[];}const r=Game.addCard(p,z,c);if(!r.ok){$('#add-error').textContent=r.message;return;}$('#modal').close();modalView=null;notify(r);};
 };
-initial();render();
+render();
