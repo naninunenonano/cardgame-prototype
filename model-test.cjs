@@ -1,7 +1,7 @@
 const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
 const elements=new Map();
-const element=key=>{if(!elements.has(key))elements.set(key,{innerHTML:'',textContent:'',value:'',querySelector:()=>({scrollLeft:0}),classList:{toggle(){}},close(){this.open=false;},showModal(){this.open=true;}});return elements.get(key);};
-const context=vm.createContext({console,document:{querySelector:element,querySelectorAll:()=>[],addEventListener(){}},confirm:()=>false});
+const element=key=>{if(!elements.has(key))elements.set(key,{innerHTML:'',textContent:'',value:'',querySelector:()=>({scrollLeft:0}),classList:{toggle(){}},addEventListener(){},close(){this.open=false;},showModal(){this.open=true;}});return elements.get(key);};
+const context=vm.createContext({ManaEngine:require('./mana.js'),console,document:{querySelector:element,querySelectorAll:()=>[],addEventListener(){}},confirm:()=>false});
 vm.runInContext(fs.readFileSync(__dirname+'/app.js','utf8'),context);
 const run=s=>vm.runInContext(s,context);
 run(`render=()=>{};renderSetup=()=>{};function all(p){return Object.values(state[p]).flat();}function signature(p){return all(p).map(c=>c.id).sort().join();}`);
@@ -16,7 +16,7 @@ for(let repeat=0;repeat<24;repeat++)for(const count of [0,1,3,7]) {
     assert.equal(run(`state.${p}.main.length`),53);
     assert.equal(run(`state.${p}.life.length`),0);
     assert.equal(run(`state.${p}.extra.length`),0);
-    for(let cost=1;cost<=12;cost++) assert.equal(run(`all('${p}').filter(c=>c.cost===${cost}&&c.color==='赤').length`),3);
+    for(let cost=1;cost<=12;cost++) assert.equal(run(`all('${p}').filter(c=>c.cost&&ManaEngine.total(c.cost)===${cost}&&c.color==='赤').length`),3);
   }
   run('var before=signature("p1");var ids=state.p1.hand.slice(0,'+count+').map(c=>c.id);var expected=state.p1.main.slice(0,'+count+').map(c=>c.id);var existing=state.p1.hand.filter(c=>!ids.includes(c.id)).map(c=>c.id);');
   assert.equal(run('move(state.p1.hand[0].id,"p1","trash")'),false);
