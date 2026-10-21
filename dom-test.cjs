@@ -1,7 +1,7 @@
 const {JSDOM}=require('jsdom'),fs=require('node:fs'),assert=require('node:assert/strict');
 const dom=new JSDOM(fs.readFileSync(__dirname+'/index.html','utf8'),{runScripts:'outside-only'}),w=dom.window;
 w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};w.confirm=()=>true;
-for(const name of ['mana.js','game.js','app.js'])w.eval(fs.readFileSync(__dirname+'/'+name,'utf8')+(name==='app.js'?'\nglobalThis.Game=Game;':''));
+for(const name of ['mana.js','cards.js','game.js','app.js'])w.eval(fs.readFileSync(__dirname+'/'+name,'utf8')+(name==='app.js'?'\nglobalThis.Game=Game;':''));
 const $=s=>w.document.querySelector(s),click=s=>$(s).click(),change=(s,value)=>{$(s).value=value;$(s).dispatchEvent(new w.Event('change'));};
 const ids=w.Game.state.p1.hand.map(c=>c.id);for(const id of ids)click(`[data-mulligan="${id}"]`);assert.equal($('#exchange-count').textContent,'選択中：7枚 / 7枚');const stale=$('#exchange');stale.click();stale.click();assert.equal(w.Game.mulligan.p2,'pending');click('#keep');assert.equal(w.Game.turn.step,'main1');
 change('#active','p2');click('#add');change('#add-form [name=destination]','p2/signi-1');$('#add-form [name=name]').value='UI確認ブロッカー';$('#add-form [name=power]').value='2500';$('#add-form [name=blocker]').checked=true;$('#add-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));const blocker=w.Game.state.p2['signi-1'][0];assert.equal(blocker.power,2500);assert.equal(blocker.abilities[0],'ブロッカー');assert.equal(blocker.sick,true);
