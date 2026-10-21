@@ -25,3 +25,6 @@
 
 /* Ver.0.8: separate land supply and discard without widening the board. */
 .zone[data-zone=landDeck]{grid-area:landdeck}.zone[data-zone=landTrash]{grid-area:landtrash}.self .layout{grid-template-areas:'units units units units' 'extra lrig main life' 'landdeck landtrash energy energy' 'trash exile structures structures' 'check check check check' 'hand hand hand hand'}.opponent .layout{grid-template-areas:'hand hand hand hand' 'check check check check' 'structures structures exile trash' 'energy energy landtrash landdeck' 'life main lrig extra' 'units units units units'}.deck-summary{font-size:10px;line-height:1.5;color:#bdd6cb;overflow-wrap:anywhere}.deck-summary b{color:#ffd69f}.free-unit-options{display:flex;gap:12px;flex-wrap:wrap}.free-unit-options .card{width:135px;flex-basis:135px}.effect-targets>section{display:flex;flex-direction:column;gap:5px}.effect-targets p{font-size:12px}.zone[data-zone=landTrash]{border-color:#9a936e}
+
+/* Ver.0.9: mode and bot status only; board layout retained. */
+#mode-select{border:1px solid #71b9a7;border-radius:12px;padding:18px;background:#193b3a;margin-bottom:14px}#mode-select h2{font-size:18px}#mode-select p,#bot-status{font-size:12px;line-height:1.6}#bot-status{color:#b9eadb;background:#1a2b38;padding:9px;border-radius:7px;overflow-wrap:anywhere}

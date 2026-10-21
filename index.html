@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>盤面試作 Ver.0.8</title><link rel="stylesheet" href="style.css?v=0.8"></head>
-<body><header><div><small> CARD LAB / SOLO TABLE</small><h1>盤面試作 <span>Ver.0.8</span></h1></div><button id="reset">初期状態へ</button></header>
-<section id="turn-panel" aria-label="壁打ちターン"></section>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>盤面試作 Ver.0.9</title><link rel="stylesheet" href="style.css?v=0.9"></head>
+<body><header><div><small> CARD LAB / SOLO TABLE</small><h1>盤面試作 <span>Ver.0.9</span></h1></div><button id="change-mode">モード選択へ</button><button id="reset">初期状態へ</button></header>
+<section id="mode-select"><h2>遊び方を選択</h2><p>緑メイン40枚＋土地20枚。初手7枚・盾7枚。Bot戦の先攻はランダムです。</p><div class="setup-actions"><button id="start-solo">壁打ち：自分のターンだけ</button><button id="start-bot">Bot戦：交互に対戦</button></div></section><p id="bot-status" role="status" aria-live="polite"></p><section id="turn-panel" aria-label="壁打ちターン"></section>
 <fieldset id="normal-controls" class="toolbar"><label>手動確認対象 <select id="active"><option value="p1">プレイヤー1</option><option value="p2">プレイヤー2</option></select></label><label>手札表示 <select id="visibility"><option value="active">操作対象のみ公開</option><option value="both">両者公開</option></select></label><label><input id="compact" type="checkbox">盤面全体を見る</label><button id="add">＋ 仮カード追加（補助）</button></fieldset>
 <div class="mode-bar"><strong id="current-mode">マナ：土地のみ</strong></div>
 <p class="guide">カードをタップ →「場に出す」で支払い・配置。「手動移動」はルール外の補助です。各領域の「一覧」から重なったカードも選べます。</p>
 <section id="setup" aria-label="マリガン"></section>
-<main id="board"></main><section id="control" aria-label="選択カードの操作"></section><p id="notice" role="status" aria-live="polite">各プレイヤーのマリガンを選択してください。</p><details id="event-log"><summary>操作ログ（<span id="log-count">0</span>件）</summary><ol id="log-list"></ol></details><footer>試作設定：緑メイン40枚（バハムートのみ同名1枚制限、残り13種×3）＋土地デッキ20枚。初手7枚・マリガン後に盾7枚はメインから。ターン開始時に土地を自動配置。両デッキは対応するトラッシュだけでリフレッシュし、補充不能時の敗北条件は保留。サイド10枚枠・プレイヤーキャラは空。再読み込みで初期化。</footer>
-<dialog id="modal"><div class="modal-head"><h2 id="modal-title"></h2><button id="close">閉じる</button></div><div id="modal-body"></div></dialog><script src="mana.js?v=0.8"></script><script src="cards.js?v=0.8"></script><script src="game.js?v=0.8"></script><script src="app.js?v=0.8"></script></body></html>
+<main id="board"></main><section id="control" aria-label="選択カードの操作"></section><p id="notice" role="status" aria-live="polite">各プレイヤーのマリガンを選択してください。</p><details id="event-log"><summary>操作ログ（<span id="log-count">0</span>件）</summary><ol id="log-list"></ol></details><footer>試作設定：緑メイン40枚（バハムートのみ同名1枚制限、残り13種×3）＋土地デッキ20枚。初手7枚・マリガン後に盾7枚はメインから。ターン開始時に土地を自動配置。両デッキは対応するトラッシュだけでリフレッシュし、メインのリフレッシュ時は固定位置の盾1枚をトラッシュへ（トリガーなし）。補充不能だけでは敗北しません。盾0枚への本体攻撃成功で勝利。サイド10枚枠・プレイヤーキャラは空。再読み込みで初期化。</footer>
+<dialog id="modal"><div class="modal-head"><h2 id="modal-title"></h2><button id="close">閉じる</button></div><div id="modal-body"></div></dialog><script src="mana.js?v=0.9"></script><script src="cards.js?v=0.9"></script><script src="game.js?v=0.9"></script><script src="bot.js?v=0.9"></script><script src="bot-runner.js?v=0.9"></script><script src="app.js?v=0.9"></script></body></html>
 
