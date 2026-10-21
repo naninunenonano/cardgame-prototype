@@ -1,6 +1,13 @@
 const {chromium}=require('playwright');const assert=require('node:assert/strict');const path=require('node:path');
-(async()=>{const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1280,height:1000}});await page.goto('file://'+path.join(__dirname,'index.html'));const run=fn=>page.evaluate(fn);
+(async()=>{const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1280,height:1000}});await page.goto('file://'+path.join(__dirname,'index.html'));const run=fn=>page.evaluate(fn);await page.click('[data-mode="A"]');
 assert.equal(await page.locator('.zone').count(),22);
+await page.locator('[data-player="p1"][data-zone="hand"] .card').nth(1).click();await page.click('#to-mana');assert.equal(await run(()=>state.p1.energy.length),1);await page.click('#rotate');assert.match(await page.locator('[data-player="p1"][data-zone="energy"] .count').innerText(),/縦 0 \/ 横 1/);await page.click('[data-ready="p1"]');assert.equal(await run(()=>state.p1.energy[0].rest),false);
+await page.click('#mode-change');page.once('dialog',d=>d.dismiss());await page.click('[data-mode="B"]');assert.equal(await run(()=>mode),'A');await page.click('#close');
+await page.click('#mode-change');page.once('dialog',d=>d.accept());await page.click('[data-mode="B"]');assert.equal(await run(()=>mode),'B');
+await page.locator('[data-player="p1"][data-zone="hand"] .card').nth(1).click();await page.click('#to-mana');assert.equal(await run(()=>state.p1.energy.length),0);assert.match(await page.locator('#notice').innerText(),/土地/);await page.selectOption('#destination','p2/energy');await page.click('#move');assert.equal(await run(()=>state.p2.energy.length),0);
+await page.locator('[data-player="p1"][data-zone="hand"] .card').first().click();await page.click('#to-mana');assert.equal(await run(()=>state.p1.energy.length),1);
+await page.click('#mode-change');page.once('dialog',d=>d.accept());await page.click('[data-mode="A"]');
+
 await run(()=>{const ids=()=>Object.values(state).flatMap(p=>Object.values(p).flat()).map(c=>c.id);const before=ids().sort().join();const c=state.p1.hand[0];c.faceUp=false;c.rest=true;move(c.id,'p2','signi-1');if(ids().sort().join()!==before)throw Error('identity');const s=locate(c.id);if(s.card.faceUp||!s.card.rest)throw Error('orientation');move(c.id,'p2','main');if(state.p2.main[0].id!==c.id)throw Error('top');move(c.id,'p2','main',true);if(state.p2.main.at(-1).id!==c.id)throw Error('bottom');shuffle('p2','main');if(ids().sort().join()!==before)throw Error('shuffle identity');render();});
 await page.locator('[data-draw="p1"]').click();assert.equal(await run(()=>state.p1.main.length),11);assert.equal(await run(()=>state.p1.hand.length),5);
 await page.selectOption('#visibility','both');assert.equal(await page.locator('[data-player="p2"][data-zone="hand"] .card:not(.back)').count(),5);
