@@ -230,7 +230,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(f.canceled){c.resolving=false;rawMove(source,f.p,'trash');record(`${c.name}を無効化し、トラッシュへ。支払いは戻りません。`);announce({kind:'countered',p:f.p,cardId:c.id,method:f.method,text:'無効化'},'stack');return;}
   if(c.responseOnly){const target=stack.find(x=>x.id===f.counterTarget);if(target)target.canceled=true;c.resolving=false;rawMove(source,f.p,'trash');resolveStack();return;}
   c.resolving=false;
-  if(c.type==='呪文'){useSpell(source,f.p,f.foretold,f.targetId);}else if(c.evolution){const base=state[f.p][f.slot]?.[0];if(!base||base.id!==f.baseId){rawMove(source,f.p,'trash');record('進化元がなく、配置を終了。');}else{state[f.p][f.slot].shift();c.under=[...(base.under||[]),base];base.under=[];rawMove(source,f.p,f.slot);c.rest=base.rest;c.sick=false;c.enteredTurn=turn.counts[f.p];enqueue(c.onEnter||[],f.p,c.id);record(`${c.name}が進化。使用済みを継承。`);}}
+  if(c.type==='呪文'){useSpell(source,f.p,f.foretold,f.targetId);}else if(c.evolution){const base=state[f.p][f.slot]?.[0];if(!base||base.id!==f.baseId){rawMove(source,f.p,'trash');record('進化元がなく、配置を終了。');}else{state[f.p][f.slot].shift();c.under=[...(base.under||[]),base];base.under=[];rawMove(source,f.p,f.slot);unitEntered(c,f.p);c.rest=base.rest;c.sick=false;record(`${c.name}が進化。使用済みを継承。`);}}
   else {const replacement=f.replacedId?locate(f.replacedId)?.card:null;enterCard(source,f.p,f.slot,replacement);}
   if(stack.length)resolveStack();else pump();
  }
@@ -278,7 +278,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
     for(const owner of PLAYERS)for(const c of [...fieldCards(owner)])if(c.id!==sourceId&&(c.type==='通常'||c.type==='設置物'))rawMove(locate(c.id),owner,'trash');
     refreshDerived();record('本人以外の両者のユニット・設置物をトラッシュへ送りました。');
    }else if(effect.kind==='revealBlue'){
-    const a=state[p].main.splice(0,effect.count);state[p].holding.push(...a);record(`公開：${a.map(c=>c.name).join('／')||'カードなし'}。青を手札へ（ドローではない）。`);
+    const a=[];for(let i=0;i<effect.count;i++){const c=mainCard(p);if(!c)break;a.push(c);state[p].holding.push(c);}record(`公開：${a.map(c=>c.name).join('／')||'カードなし'}。青を手札へ（ドローではない）。`);
     for(const c of a){state[p].holding.splice(state[p].holding.indexOf(c),1);c.faceUp=true;state[p][c.color==='青'?'hand':'trash'].push(c);}refreshDeck(p);
    }else if(effect.kind==='reorder'||effect.kind==='scry'){
     if(!state[p].main.length)refreshDeck(p);const a=state[p].main.slice(0,effect.count);if(a.length){operation={kind:'reorder',p,sourceId,ids:a.map(c=>c.id),order:a.map(c=>c.id),scry:effect.kind==='scry'};break;}
