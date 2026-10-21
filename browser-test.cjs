@@ -1,35 +1,36 @@
-const {chromium}=require('playwright');
-const assert=require('node:assert/strict'),path=require('node:path');
+const {chromium}=require('playwright'),assert=require('node:assert/strict'),path=require('node:path');
 (async()=>{
  const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH,args:['--no-sandbox','--disable-gpu']}: {})});
- try {
- const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
- const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('file://'+path.join(__dirname,'index.html'));
- const run=fn=>page.evaluate(fn);
- assert.equal(await page.locator('#setup').isVisible(),true);assert.equal(await page.locator('#add').isDisabled(),true);
- assert.equal(await page.locator('[data-mulligan]').count(),7);
- assert(await run(()=>document.documentElement.scrollWidth<=innerWidth));
- await page.locator('[data-mulligan]').first().tap();assert.match(await page.locator('#exchange-count').innerText(),/1枚/);await page.locator('[data-mulligan]').first().tap();assert.match(await page.locator('#exchange-count').innerText(),/0枚/);
- const returned=await run(()=>state.p1.hand.slice(0,3).map(c=>c.id));const expected=await run(()=>state.p1.main.slice(0,3).map(c=>c.id));
- for(const id of returned)await page.locator(`[data-mulligan="${id}"]`).tap();await page.locator('#exchange').tap();
- assert.equal(await run(()=>mulligan.p1),'done');assert.equal(await run(()=>state.p1.life.length),0);
- const newHand=await run(()=>state.p1.hand.map(c=>c.id));assert(returned.every(id=>!newHand.includes(id)));assert(expected.every(id=>newHand.includes(id)));
- const p2=await run(()=>state.p2.hand.map(c=>c.id));for(const id of p2)await page.locator(`[data-mulligan="${id}"]`).tap();await page.locator('#exchange').tap();
- assert.equal(await run(()=>phase),'ready');assert.equal(await page.locator('#setup').isVisible(),false);
- for(const p of ['p1','p2'])assert.deepEqual(await page.evaluate(p=>[state[p].hand.length,state[p].life.length,state[p].main.length,new Set(Object.values(state[p]).flat().map(c=>c.id)).size,state[p].life.every(c=>!c.faceUp)],p),[7,7,46,60,true]);
- assert.match(await page.locator('[data-player="p1"][data-zone="main"] .count').innerText(),/46枚/);
- await page.selectOption('#visibility','both');assert.equal(await page.locator('[data-zone="hand"] .card:not(.back)').count(),14);
- await run(()=>{const land=Object.values(state.p1).flat().find(c=>c.type==='土地');const normal=Object.values(state.p1).flat().find(c=>c.type==='通常');move(land.id,'p1','hand');move(normal.id,'p1','hand');land.faceUp=true;normal.faceUp=true;render();});
- const nonland=await run(()=>state.p1.hand.find(c=>c.type==='通常').id);await page.locator(`[data-player="p1"][data-zone="hand"] [data-card="${nonland}"]`).tap();assert.equal(await page.locator('#to-mana').count(),0);assert.equal(await page.locator('#play').isDisabled(),true);assert.match(await page.locator('.selected-status').innerText(),/マナ不足/);
- await page.selectOption('#destination','p2/energy');await page.locator('#move').tap();assert.equal(await run(()=>state.p2.energy.length),0);
- const land=await run(()=>state.p1.hand.find(c=>c.type==='土地').id);await page.locator(`[data-player="p1"][data-zone="hand"] [data-card="${land}"]`).tap();await page.locator('#to-mana').tap();await page.locator('#rotate').tap();assert.match(await page.locator('[data-player="p1"][data-zone="energy"] .count').innerText(),/縦 0 \/ 横 1/);await page.locator('[data-ready="p1"]').tap();assert.equal(await run(()=>state.p1.energy[0].rest),false);
- assert(await run(()=>document.documentElement.scrollWidth<=innerWidth));
- const before=await run(()=>JSON.stringify(state));page.once('dialog',d=>d.dismiss());await page.locator('#reset').tap();assert.equal(await run(()=>JSON.stringify(state)),before);
- page.once('dialog',d=>d.accept());await page.locator('#reset').tap();assert.equal(await run(()=>phase),'mulligan');assert.deepEqual(await run(()=>[mulligan.p1,mulligan.p2,selected]),['pending','pending',null]);
- await page.locator('#exchange').tap();await page.locator('#keep').tap();assert.equal(await run(()=>phase),'ready');
- await page.screenshot({path:process.env.SCREENSHOT_DIR?path.join(process.env.SCREENSHOT_DIR,'cardgame-mobile.png'):'/tmp/cardgame-mobile.png',fullPage:true});
- await page.setViewportSize({width:1280,height:1000});assert(await run(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:process.env.SCREENSHOT_DIR?path.join(process.env.SCREENSHOT_DIR,'cardgame-desktop.png'):'/tmp/cardgame-desktop.png',fullPage:true});
- assert.deepEqual(errors,[]);console.log('PASS Chromium: 390px touch multi-select, partial/all/zero exchange, keep, 7/7/46 counts and 60 unique IDs, setup lock, visibility, land-only moves, mana counts, reset, PC/mobile width, no page errors.');
- } finally {await browser.close();}
+ try{
+ const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('file://'+path.join(__dirname,'index.html'));assert.equal(await page.locator('[data-mulligan]').count(),7);await page.locator('[data-mulligan]').first().tap();assert.match(await page.locator('#exchange-count').innerText(),/1枚/);await page.locator('#exchange').tap();await page.locator('#keep').tap();assert.equal(await page.locator('.zone').count(),32);assert.equal(await page.locator('[data-player="p1"] .unit-field>.zone').count(),7);assert.match(await page.locator('#turn-panel').innerText(),/先攻第1ターン：ドローなし/);assert.deepEqual(await page.evaluate(()=>['p1','p2'].map(p=>[Game.state[p].hand.length,Game.state[p].life.length,Game.state[p].main.length])),[[7,7,46],[7,7,46]]);
+ const f=await page.evaluate(()=>{
+  for(const p of ['p1','p2'])for(const z of Game.ZONES)Game.state[p][z.id]=[];
+  for(const p of ['p1','p2'])for(let n=0;n<20;n++)Game.state[p].main.push(Game.card('山札確認','通常','赤',ManaEngine.cost(0)));
+  for(let n=1;n<=7;n++)Game.addCard('p1','signi-'+n,Game.card('既存'+n,'通常','赤',ManaEngine.cost(0)));
+  const c=Game.card('上書き確認','通常','赤',ManaEngine.cost(0,{赤:1}));Game.addCard('p1','hand',c);Game.addCard('p1','energy',Game.card('赤土地','土地'));
+  const b=Game.card('防御確認','通常','赤',ManaEngine.cost(0));b.power=1000;b.abilities=['ブロッカー'];Game.addCard('p2','signi-1',b);
+  const plain=Game.card('能力なし','通常','赤',ManaEngine.cost(0));plain.power=9999;Game.addCard('p2','signi-2',plain);
+  const shield=Game.card('盾確認','通常');shield.faceUp=false;Game.state.p2.life.push(shield);
+  const old=Game.state.p1['signi-4'][0].id;render();return {unit:c.id,blocker:b.id,plain:plain.id,old};
+ });
+ const tap=async(id,p='p1',z='hand')=>page.locator(`[data-player="${p}"][data-zone="${z}"] [data-card="${id}"]`).tap();
+ await tap(f.unit);assert.equal(await page.locator('#play').isEnabled(),true);await page.locator('#peek').tap();assert.match(await page.locator('.preview').innerText(),/パワー：1000/);assert.match(await page.locator('.preview').innerText(),/能力：なし/);await page.locator('#close').tap();
+ const before=await page.evaluate(()=>JSON.stringify(Game.state));await page.locator('#play').tap();await page.locator('[data-pay-slot="signi-4"]').tap();assert.match(await page.locator('#overwrite-info').innerText(),/トラッシュ/);await page.locator('#cancel-payment').tap();assert.equal(await page.evaluate(()=>JSON.stringify(Game.state)),before);
+ await page.locator('#play').tap();await page.locator('[data-pay-slot="signi-4"]').tap();await page.locator('#confirm-payment').tap();assert.equal(await page.evaluate(id=>Game.state.p1.trash.some(c=>c.id===id),f.old),true);assert.equal(await page.evaluate(id=>Game.locate(id).card.sick,f.unit),true);
+ const advance=async()=>{await page.waitForFunction(()=>Game.canAdvance);const button=await page.locator('#next-phase').count()?'#next-phase':'#next-turn';await page.locator(button).tap();};
+ await advance();await tap(f.unit,'p1','signi-4');assert.equal(await page.locator('#attack').isDisabled(),true);assert.match(await page.locator('.action-status').innerText(),/召喚酔い/);await page.locator('#rotate').tap();await page.locator('#rotate').tap();assert.equal(await page.locator('#attack').isDisabled(),true);
+ await advance();await advance();await advance();assert.equal(await page.evaluate(()=>Game.turn.number),2);await advance();await tap(f.unit,'p1','signi-4');assert.equal(await page.locator('#attack').isEnabled(),true);await page.locator('#attack').tap();assert.equal(await page.locator(`[data-blocker="${f.blocker}"]`).count(),1);assert.equal(await page.locator(`[data-blocker="${f.plain}"]`).count(),0);await page.locator(`[data-blocker="${f.blocker}"]`).tap();await page.locator('#confirm-block').tap();assert.equal(await page.evaluate(()=>Game.state.p2.life.length),1);assert.equal(await page.evaluate(id=>Game.locate(id).z,f.blocker),'trash');assert.equal(await page.evaluate(id=>Game.locate(id).z,f.unit),'signi-4');
+ // 相手を回復せず、次の自分ターンのブロックなし攻撃で盾を手札へ。
+ const enemy=await page.evaluate(()=>JSON.stringify(Game.state.p2));await advance();await advance();await advance();assert.equal(await page.evaluate(()=>JSON.stringify(Game.state.p2)),enemy);await advance();await tap(f.unit,'p1','signi-4');await page.locator('#attack').tap();await page.locator('#no-block').tap();assert.deepEqual(await page.evaluate(()=>[Game.state.p2.life.length,Game.state.p2.hand.length]),[0,1]);
+ // エンドで初めて7枚へ調整する。
+ await page.evaluate(()=>{for(let i=0;i<8;i++)Game.addCard('p1','hand',Game.card('調整','通常','赤',ManaEngine.cost(0)));render();});const count=await page.evaluate(()=>Game.state.p1.hand.length);assert(count>7);await advance();await advance();assert.equal(await page.locator('#modal').isVisible(),true);assert.match(await page.locator('#modal-title').innerText(),/エンド/);assert.equal(await page.locator('#next-turn').isDisabled(),true);const need=await page.evaluate(()=>Game.operation.required);const chosen=await page.evaluate(n=>Game.state.p1.hand.slice(0,n).map(c=>c.id),need);for(const id of chosen)await page.locator(`[data-discard="${id}"]`).tap();await page.locator('#confirm-discard').tap();assert.equal(await page.evaluate(()=>Game.state.p1.hand.length),7);
+ // トラッシュと除外を別領域として操作・一覧確認。
+ const ex=await page.evaluate(()=>{const c=Game.state.p1.hand[0];Game.manualMove(c.id,'p1','exile');render();return c.id;});await page.locator('[data-list="p1/exile"]').tap();assert.equal(await page.locator(`#modal [data-card="${ex}"]`).count(),1);await page.locator('#close').tap();await page.locator('[data-list="p1/trash"]').tap();assert(await page.locator('#modal .card').count()>0);await page.locator('#close').tap();
+ // 手動ドローで最後を引いた瞬間に敗北、リセットで復帰。
+ await page.evaluate(()=>{const a=Game.state.p1.main;Game.state.p1.trash.push(...a.splice(0,a.length-1));render();});await page.locator('[data-draw="p1"]').tap();assert.match(await page.locator('#turn-panel').innerText(),/敗北/);assert.equal(await page.evaluate(()=>Game.state.p1.main.length),0);
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/cardgame-combat-mobile.png',fullPage:true});page.once('dialog',d=>d.accept());await page.locator('#reset').tap();assert.equal(await page.locator('[data-mulligan]').count(),7);assert.equal(await page.evaluate(()=>Game.result),null);
+ await page.setViewportSize({width:1280,height:1000});await page.locator('#keep').click();await page.locator('#keep').click();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.deepEqual(errors,[]);
+ console.log('PASS Chromium 390px touch + 1280px: opening/mulligan, seven slots, cost-power-ability preview, overwrite cancel/confirm, sickness independent of orientation, blocker-only/tie/shields, solo phases, end discard lock, trash/exile lists, draw-last defeat/reset, width and no JS errors.');
+ }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});
