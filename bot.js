@@ -22,7 +22,12 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
   if(c.key==='dolt'&&enemy.units.some(x=>(x.power||0)<=c.power))score+=18;
   if(c.key==='bahamut'){const gain=wipeGain(v);if(gain<=0&&(me.units.length||me.structures.length))return -100;score+=gain;}
   if(me.units.length>=7){const old=replacement(v);if(unitValue(c,me.landCount)<=unitValue(old,me.landCount)+3)return -100;score-=unitValue(old,me.landCount);}
- }else if(c.key==='vegas')score=me.structures.length<3?20:3;
+ }else if(c.key==='themis'){const gain=enemy.units.reduce((n,x)=>n+unitValue(x,enemy.landCount),0)-me.units.reduce((n,x)=>n+unitValue(x,me.landCount),0);score=gain>0?gain+(danger?35:0):-100;}
+ else if(c.key==='holyMail')score=me.hand.length>1?(danger?70:me.counts.life<3?22:-5):-100;
+ else if(c.key==='fateWhim')score=canRefill?(me.units.some(c=>c.key==='jil')?55:30):-100;
+ else if(c.key==='fateWings')score=canRefill?(danger?90:me.units.some(c=>c.key==='jil')?45:me.counts.life<3?25:-5):-100;
+ else if(c.key==='fateReversal')score=me.units.some(c=>c.key==='jil')?75:enemy.units.length<me.units.length?35:5;
+ else if(c.key==='vegas')score=me.structures.length<3?20:3;
  else if(c.key==='brain'||c.key==='shaper')score=canRefill?(me.hand.some(x=>x.key==='cosmo')&&me.hand.length<10?45:me.hand.length<6?35:8):-100;
  else if(c.key==='snow')score=me.units.length<5?40:5;
  else if(c.key==='gate')score=enemy.units.length||enemy.structures.length?(danger?65:12):-100;
@@ -77,6 +82,11 @@ function decide(v){
   const counts={};const ids=me.hand.filter(c=>{counts[c.key]=(counts[c.key]||0)+1;return total(c)>4||counts[c.key]>2||(c.key==='repair'&&counts[c.key]>1);}).map(c=>c.id);return {type:'mulligan',ids};
  }
  if(o){
+  if(o.kind==='fateChoice'){return {type:'fate',key:danger?'fateWings':v.sources.length>=8&&me.units.filter(c=>!c.cannotAttack).length>=2?'fateReversal':'fateWhim'};}
+  if(o.kind==='optionalEffect')return {type:'optional',use:me.counts.main+me.counts.trash>0};
+  if(o.kind==='untapLands'){const c=o.candidates.find(c=>c.rest&&!o.ids.includes(c.id));return c&&o.ids.length<o.max?{type:'untapSelect',id:c.id}:{type:'untap'};}
+  if(o.kind==='handPick'){const c=best(o.candidates,c=>(o.effect==='handShield'&&c.trigger?60:0)-keepScore(v,c));return {type:'private',id:c?.id||null};}
+  if(o.kind==='recoverUnit'){const c=best(o.candidates,c=>unitValue(c,me.landCount));return {type:'private',id:c?.id||null};}
   if(o.kind==='response'){const threat=o.target,important=threat&&(threat.responseOnly||threat.unblockable||threat.key==='bahamut'||(threat.power||0)>=5000||danger||['trap','mother','gate','corile','snow'].includes(threat.key));return important&&o.candidates.length?{type:'play',id:o.candidates[0].id,method:'counter'}:{type:'pass'};}
   if(o.kind==='optionalDraw')return {type:'optional',use:me.counts.main+me.counts.trash>0};
   if(o.kind==='tokens'){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.landCount):10000);return {type:'token',slot:slot&&(!slot.card||unitValue(slot.card,me.landCount)<10)?slot.id:null};}
@@ -87,7 +97,7 @@ function decide(v){
   if(o.kind==='inspectHand'){const c=best(o.candidates.filter(c=>c.cost&&total(c)<=o.max),c=>total(c)+unitValue(c,enemy.landCount));return {type:'private',id:c?.id||null};}
   if(o.kind==='freeCast'){if(!o.targetId){const c=best(o.targets,c=>(c.owner!==p?100:0)+unitValue(c,enemy.landCount));return {type:'useTarget',id:c.id};}return {type:'freeCast'};}
   if(o.kind==='payment'){const c=[...me.hand,...(v.exile||[])].find(c=>c.id===o.id);if(o.targets?.length&&!o.targetId){const target=best(o.targets,c=>(c.owner!==p?100:0)+unitValue(c,enemy.landCount));return {type:'useTarget',id:target.id};}if(c?.type==='通常'&&o.purpose!=='set'&&!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.landCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'pay'};}
-  if(['freePlace','triggerPlace'].includes(o.kind)){const c=me.hand.find(x=>x.id===o.id);if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.landCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'freePlace'};}
+  if(['freePlace','triggerPlace','returnPlace'].includes(o.kind)){const c=me.hand.find(x=>x.id===o.id);if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.landCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:o.kind==='returnPlace'?'returnPlace':'freePlace'};}
   if(o.kind==='freeUnit'){const c=best(o.candidates,c=>playScore(v,c));return {type:'freeUnit',id:c&&playScore(v,c)>0?c.id:null};}
   if(o.kind==='effectTarget'){const c=o.effect==='mother'?motherTarget(v,o.candidates):best(o.candidates,c=>(c.owner===p?-100:0)+unitValue(c,enemy.landCount));return {type:'target',id:c.id};}
   if(o.kind==='triggers'){const cards=o.ids.map(id=>me.hand.find(c=>c.id===id)).filter(Boolean),c=best(cards,c=>triggerScore(v,c));return {type:'trigger',id:c.id,use:triggerScore(v,c)>0};}
