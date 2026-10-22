@@ -99,7 +99,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(!skip){const selected=new Set(ids),a=state[p].hand.filter(c=>selected.has(c.id));state[p].hand=state[p].hand.filter(c=>!selected.has(c.id));a.forEach(c=>{c.faceUp=false;c.rest=false;});state[p].main.push(...a);drawRaw(p,a.length);if(!result)shuffleRaw(p,'main');}
   record(`${label(p)}：${skip?'交換せず確定':ids.length+'枚交換、ドロー後にシャッフル'}。`);
   if(!result&&PLAYERS.every(w=>mulligan[w]==='done')){for(const w of PLAYERS)putShield(w,7);status='ready';beginTurn();}
-  return ok(result?'山札切れにより開始処理を終了しました。':status==='ready'?'シールドを7枚ずつ配置し、第1ターンを開始しました。':'もう一人のマリガンを選択してください。');
+  return ok(status==='ready'?'シールドを7枚ずつ配置し、第1ターンを開始しました。':'もう一人のマリガンを選択してください。');
  }
  function locate(id) {for(const p of PLAYERS)for(const z of ZONES){const index=state[p][z.id].findIndex(c=>c.id===id);if(index>=0)return {p,z:z.id,index,card:state[p][z.id][index]};}return null;}
  function rawMove(source,p,z,bottom=true) {
@@ -126,6 +126,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(isUnit(z)&&(!isUnit(source.z)||source.p!==p)){enterCard(source,p,z);pump();}else rawMove(source,p,z,bottom);return ok(z==='exile'?'明示的な手動操作で除外ゾーンへ移しました。':'手動移動（ルール外の補助）を実行しました。土地配置回数は変更しません。');
  }
  function addCard(p,z,c) {
+  if(!c?.id||vanishedIds.has(c.id)||locate(c.id))return fail('消滅した個体や、既に存在する個体は追加できません。');
   if(mode==='bot')return fail('Bot戦では仮カード追加を使えません。');
   const error=interactionError();if(error)return fail(error);if(!state[p]?.[z])return fail('追加先が見つかりません。');
   if(z==='main'&&c.type==='土地')return fail('土地はメインデッキへ入れられません。');
@@ -144,7 +145,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  }
  function readyMana(p) {if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError();if(e)return fail(e);state[p].energy.forEach(c=>c.rest=false);return ok('補助操作で土地を未使用に戻しました。');}
  function remove(id) {if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError(),s=locate(id);if(e)return fail(e);if(!s)return fail('カードが見つかりません。');state[s.p][s.z].splice(s.index,1);return ok('補助操作でカードを削除しました。');}
- function draw(p,n=1) {if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError();if(e)return fail(e);if(!Number.isInteger(n)||n<1)return fail('ドロー枚数が不正です。');const count=drawRaw(p,n);return ok(result?`${label(p)}：ドローによる山札切れで敗北。`:`手動ドロー（補助）：${label(p)}が${count}枚引きました。`);}
+ function draw(p,n=1) {if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError();if(e)return fail(e);if(!Number.isInteger(n)||n<1)return fail('ドロー枚数が不正です。');const count=drawRaw(p,n);return ok(`手動ドロー（補助）：${label(p)}が${count}枚引きました。`);}
  function shuffle(p,z) {if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError();if(e)return fail(e);shuffleRaw(p,z);return ok('山札をシャッフルしました。');}
  function availableMana(p) {const sources=paymentSources(p);return {total:sources.length,...Object.fromEntries(Mana.colors.map(color=>[color,sources.filter(s=>s.colors.includes(color)).length])),flexible:sources.filter(s=>s.colors.length>1).length};}
  function landError(){return '手札からの通常土地配置は廃止。ターン開始時に土地デッキから自動配置します。';}
@@ -255,7 +256,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(turn.step==='main1')turn.step='attack';else if(turn.step==='attack')turn.step='main2';else if(turn.step==='main2'){
    turn.step='end';enqueue(fieldCards(turn.player).flatMap(c=>c.onEnd||[]),turn.player,null);pump();
   }else if(turn.step==='end'){beginTurn();}else return fail('進行できないフェイズです。');
-  return ok(result?'山札切れにより敗北しました。':`${STEPS[turn.step]}${operation?.kind==='discard'?`：手札から${operation.required}枚を選び、トラッシュへ送ってください。`:'へ進みました。'}`);
+  return ok(`${STEPS[turn.step]}へ進みました。`);
  }
  function toggleDiscard(){return fail('手札上限はありません。');}
  function confirmDiscard(){return fail('手札上限はありません。');}
@@ -267,7 +268,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
    if(effect.kind==='startDrawLand'){startDrawLand(p);}
    else if(effect.kind==='return'){const s=locate(effect.id);if(s?.z==='exile'&&s.card.returnReservation?.owner===p){operation={kind:'returnPlace',p,id:effect.id,slot:null,replacedId:null};break;}}
    else if(effect.kind==='chooseFate'){operation={kind:'fateChoice',p,sourceId};break;}
-   else if(effect.kind==='fateWhim'){const before=new Set(state[p].hand.map(c=>c.id));drawRaw(p,1);const c=state[p].hand.find(c=>!before.has(c.id));if(c&&hasJil(p))c.usageCostOverride=Mana.cost(1);record(`${label(p)}：運命で1枚ドロー${c?.usageCostOverride?'し、その個体の使用コストを1に変更':''}。`);}
+   else if(effect.kind==='fateWhim'){const before=new Set(state[p].hand.map(c=>c.id)),drawn=drawRaw(p,1);const c=state[p].hand.find(c=>!before.has(c.id));if(c&&hasJil(p))c.usageCostOverride=Mana.cost(1);record(`${label(p)}：運命で${drawn}枚ドロー${c?.usageCostOverride?'し、その個体の使用コストを1に変更':''}。`);}
    else if(effect.kind==='drawIfJil'){if(hasJil(p))drawRaw(p,effect.count);}
    else if(effect.kind==='extraTurns'){grantExtraTurns(p);}
    else if(effect.kind==='blinkSelf'){blinkSelf(sourceId);}

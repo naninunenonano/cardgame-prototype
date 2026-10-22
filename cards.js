@@ -1,4 +1,4 @@
-// 色・種類・カード定義・効果列・デッキ構成を分離。今回の開始デッキはgreen。
+// 色・種類・カード定義・効果列・デッキ構成を分離。プリセットの構成は維持し、独立した土地デッキと自作デッキから選択。
 (function(root,factory){const c=factory(typeof module==='object'&&module.exports?require('./mana.js'):root.ManaEngine);if(typeof module==='object'&&module.exports)module.exports=c;else root.CardCatalog=c;})(globalThis,function(M){
  const COLORS=['白','青','黒','赤','緑'],TYPES={unit:'通常',spell:'呪文',structure:'設置物',land:'土地'};
  const addLand={kind:'land',count:1};
