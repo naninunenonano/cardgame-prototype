@@ -57,15 +57,14 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   return {sourceIds:[...chosen.keys()],sourceColors:Object.fromEntries(chosen)};
  }
  function selectedMana(o){return o.sourceIds.map(id=>{const source=paymentSources(o.p).find(s=>s.id===id);return source?{id,type:'土地',rest:false,mana:{color:o.sourceColors[id]||source.colors[0],amount:source.amount},source}:null;});}
- function validateDeck(a,expected=60) {
-  if(a.length!==expected)throw Error(`メインデッキは${expected}枚です。`);
-  const counts=new Map(),limits=new Map();
-  for(const c of a){if(c.type==='土地'||c.generated||c.token)throw Error('土地・生成専用カードはメインデッキに入れられません。');const definition=Object.values(Catalog.cards).find(d=>d.name===c.name);counts.set(c.name,(counts.get(c.name)||0)+1);limits.set(c.name,Math.min(limits.get(c.name)||3,c.deckLimit||3,definition?.deckLimit||3));}
-  for(const [name,n] of counts)if(n>limits.get(name))throw Error(`${name}の同名採用上限は${limits.get(name)}枚です。`);
-  return true;
+ function validateDeck(a,expected=40,presetSpec=null) {
+  if(a.length!==Decks.MAIN_SIZE)throw Error('通常デッキは40枚です。');
+  const exempt=Decks.isOfficialPreset(presetSpec)&&JSON.stringify(a.map(c=>c.key).sort())===JSON.stringify(presetSpec.main.flatMap(e=>Array(e.count).fill(e.key)).sort());
+  const counts=new Map(),limits=new Map();for(const c of a){const d=Catalog.cards[c.key];if(!d||d.deckEligible===false||d.generated||d.token||Decks.sectionOf(d)!=='main')throw Error('土地・生成専用・採用不可カードは通常デッキに入れられません。');counts.set(d.name,(counts.get(d.name)||0)+1);limits.set(d.name,Math.min(limits.get(d.name)??Infinity,Decks.limit(d)));}
+  if(!exempt)for(const [name,n]of counts)if(n>limits.get(name))throw Error(`${name}の同名採用上限は${limits.get(name)}枚です。`);return true;
  }
  function buildLandDeck(p,deck=Catalog.startLandDeck){const spec=typeof deck==='string'?Decks.resolve(deck,deckRecords):deck;const a=[];for(const entry of spec.lands)for(let n=0;n<entry.count;n++)a.push(fromDefinition(entry.key,p));a.forEach(c=>c.faceUp=false);return a;}
- function validateLandDeck(a){if(a.length!==20||a.some(c=>c.type!=='土地'||!c.basic))throw Error('土地デッキは基本土地20枚です。');return true;}
+ function validateLandDeck(a){if(a.length!==20||a.some(c=>Decks.sectionOf(c)!=='lands'))throw Error('土地デッキは20枚です。');return true;}
  function shuffleRaw(p,z) {const a=state[p][z];for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
  function refreshDeck(p,land=false){
   const deck=land?'landDeck':'main',trash=land?'landTrash':'trash';if(state[p][deck].length)return true;
@@ -85,11 +84,11 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   }if(placed)record(`${label(p)}：${reason}で土地${placed}枚を未使用で追加。`);refreshDerived();return placed;
  }
  function reset(nextMode=mode,nextDecks=deckChoices) {
-  let specs;try{specs=Object.fromEntries(PLAYERS.map(p=>{const d=Decks.resolve(nextDecks[p],deckRecords),errors=Decks.validate(d,{preset:d.preset});if(errors.length)throw Error(errors.join('／'));return [p,d];}));}catch(e){return fail(e.message);}chosenSpecs=specs;deckChoices={...nextDecks};vanishedIds=new Set();extraTurns=[];normalNext=null;stack=[];events=[];eventSerial=0;frameSerial=0;
+  let specs;try{specs=Object.fromEntries(PLAYERS.map(p=>{const d=Decks.resolve(nextDecks[p],deckRecords),errors=Decks.validate(d);if(errors.length)throw Error(errors.join('／'));return [p,d];}));}catch(e){return fail(e.message);}chosenSpecs=specs;deckChoices={...nextDecks};vanishedIds=new Set();extraTurns=[];normalNext=null;stack=[];events=[];eventSerial=0;frameSerial=0;
   if(!['solo','bot'].includes(nextMode))return fail('モードを選んでください。');mode=nextMode;epoch++;firstPlayer=mode==='bot'?(random()<.5?'p1':'p2'):SELF;
   serial=0;log=[];queue=[];supplyStatus={p1:{main:'',land:''},p2:{main:'',land:''}};result=null;operation=null;status='mulligan';turn={player:firstPlayer,counts:{p1:0,p2:0},sequence:0,number:0,step:'untap',landsPlaced:0,key:{},notBefore:0,lastDraw:0};mulligan={p1:'pending',p2:'pending'};
   state=Object.fromEntries(PLAYERS.map(p=>[p,Object.fromEntries(ZONES.map(z=>[z.id,[]]))]));
-  for(const p of PLAYERS){state[p].main=buildDeck(p,chosenSpecs[p]);validateDeck(state[p].main,chosenSpecs[p].preset?40:60);state[p].landDeck=buildLandDeck(p,chosenSpecs[p]);state[p].extra=(chosenSpecs[p].sideboard||[]).flatMap(e=>Array.from({length:e.count},()=>fromDefinition(e.key,p)));validateLandDeck(state[p].landDeck);shuffleRaw(p,'main');shuffleRaw(p,'landDeck');drawRaw(p,INITIAL_HAND);}
+  for(const p of PLAYERS){state[p].main=buildDeck(p,chosenSpecs[p]);validateDeck(state[p].main,40,chosenSpecs[p]);state[p].landDeck=buildLandDeck(p,chosenSpecs[p]);state[p].extra=(chosenSpecs[p].sideboard||[]).flatMap(e=>Array.from({length:e.count},()=>fromDefinition(e.key,p)));validateLandDeck(state[p].landDeck);shuffleRaw(p,'main');shuffleRaw(p,'landDeck');drawRaw(p,INITIAL_HAND);}
   record(`${mode==='bot'?'Bot戦':'壁打ち'}：先攻は${label(firstPlayer)}。選択したメインデッキ・土地20枚から初期手札5枚を配りました。`);return ok('各プレイヤーのマリガンを選択してください。');
  }
  function completeMulligan(p,ids=[],skip=false) {
