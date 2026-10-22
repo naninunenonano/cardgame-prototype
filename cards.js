@@ -41,7 +41,24 @@
  for(const d of blueDefs)cards[d.key]={color:'青',power:null,symbols:{},breaks:0,abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:{minimum:{青:1}},...d};
  cards.blueLand={...cards.greenLand,key:'blueLand',name:'青の基本土地',color:'青'};
  cards.snowToken={key:'snowToken',name:'スノーマン',type:'通常',color:'青',cost:null,power:1000,symbols:{青:1},breaks:1,abilities:[],token:true,onUse:[],onEnter:[],onDefeat:[]};
+ const neutralDefs=[
+ {key:'jil',name:'慟哭のジル・クライハート',type:'通常',cost:M.cost(8),power:5000,symbols:{無色:1},breaks:1,deckLimit:1,genericReduction:{maximum:4,minimum:4},onEnter:[{kind:'chooseFate'}],provisional:true,text:'運命を選ぶ。有色シンボル1つにつき1軽減、最大4・最低4。パワー5000は暫定。'},
+ {key:'peridot',name:'永遠の蜃気楼 ペリドット',type:'通常',cost:M.cost(4),power:4000,symbols:{無色:1},breaks:1,deckLimit:1,onEnter:[{kind:'blinkSelf'}],onBodySuccess:[{kind:'blinkSelf'}],provisional:true,text:'登場時・本体への攻撃成功時に自身を除外。次の自分のターン開始時、スピードアタッカーを持って帰還。パワー4000は暫定。'},
+ {key:'themis',name:'テミスの審判',type:'呪文',cost:M.cost(6),onUse:[{kind:'wipeUnits'}],text:'お互いの場のユニットをすべてトラッシュへ。設置物・土地は対象外。'},
+ {key:'holyMail',name:'ホーリー・メール',type:'呪文',cost:M.cost(4),onUse:[{kind:'handShield'}],text:'自分の手札1枚を選び、裏向きでシールドに加える。内容は相手へ非公開。'},
+ {key:'kaiser',name:'ショットガン・カイザー',type:'通常',cost:M.cost(7),power:9000,symbols:{無色:2},breaks:2,onEnd:[{kind:'untapLands',count:4}],text:'自分のターン終了時、自分の土地を最大4枚選んで未使用に戻す。複数体はそれぞれ誘発。'},
+ {key:'glennya',name:'グレンニャー',type:'通常',cost:M.cost(2),power:1000,symbols:{無色:1},breaks:1,onEnter:[{kind:'draw',count:1}],text:'登場時：カードを1枚引く。'},
+ {key:'walsura',name:'プラチナ・ワルスラS',type:'通常',cost:M.cost(4),power:6000,symbols:{無色:2},breaks:2,evolution:{any:true},onAttack:[{kind:'optionalEffect',label:'3枚引いて手札1枚を捨てますか？',effects:[{kind:'draw',count:3},{kind:'handDiscard',count:1}]}],text:'自分のユニット1体の上に進化（文明不問）。攻撃時、3枚引いてもよい。そうしたら手札1枚を選びトラッシュへ。'},
+ {key:'honenbee',name:'白骨の守護者ホネンビー',type:'通常',cost:M.cost(4),power:3000,symbols:{},breaks:0,abilities:['ブロッカー'],onEnter:[{kind:'optionalEffect',label:'上から3枚をトラッシュへ置き、ユニット1枚を回収しますか？',effects:[{kind:'millRecover',count:3}]}],text:'ブロッカー。登場時、上から3枚をトラッシュへ置いてもよい。そうしたらトラッシュのユニット1枚を手札へ。シンボル0でも攻撃可能。'}
+ ];
+ for(const d of neutralDefs)cards[d.key]={color:'無色',power:null,symbols:{},breaks:0,abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:null,...d};
+ const fates=[
+ {key:'fateWhim',name:'運命の気まぐれ',cost:M.cost(1),onUse:[{kind:'fateWhim'}],text:'1枚引く。自分の場にジルがいる場合、その個体の使用コストを1にする。使用後消滅。'},
+ {key:'fateWings',name:'運命の翼',cost:M.cost(4),onUse:[{kind:'shield',count:1},{kind:'drawIfJil',count:2}],text:'山札の上1枚を裏向きで盾へ。自分の場にジルがいればさらに2枚引く。使用後消滅。'},
+ {key:'fateReversal',name:'運命の逆転',cost:M.cost(8),onUse:[{kind:'extraTurns'}],text:'自分が追加ターンを得る。自分の場にジルがいなければ相手も追加ターンを得る。使用後消滅。'}
+ ];
+ for(const d of fates)cards[d.key]={color:'無色',type:'呪文',power:null,symbols:{},breaks:0,abilities:[],onUse:[],onEnter:[],onDefeat:[],generated:true,vanishAfterUse:true,reduction:null,...d};
  const decks={green:defs.map(c=>({key:c.key,count:c.key==='bahamut'?1:3})),blue:blueDefs.map(c=>({key:c.key,count:c.key==='shaper'?1:3}))};
  const landDecks={green:[{key:'greenLand',count:20}],blue:[{key:'blueLand',count:20}]};
- return {COLORS,TYPES,cards,decks,landDecks,startDeck:'green',startLandDeck:'green'};
+ return {COLORS,TYPES,cards,neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,landDecks,startDeck:'green',startLandDeck:'green'};
 });
