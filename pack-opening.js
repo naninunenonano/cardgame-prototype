@@ -1,0 +1,35 @@
+/* Visual presentation only. Draws and collection grants happen once in app.js. */
+(function(root){
+'use strict';
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let session=null,timer=null,returnFocus=null;
+const dialog=()=>document.querySelector('#pack-opening');
+function dispose(){clearTimeout(timer);timer=null;session=null;}
+function close(){const d=dialog();if(!d?.open)return;dispose();d.close();d.innerHTML='';returnFocus?.focus({preventScroll:true});}
+function group(cards){if(cards.length===5)return [cards];return Array.from({length:10},(_,i)=>[...cards.slice(i*4,i*4+4),cards[40+i]]);}
+function start({cards,catalog,ownedBefore={},ownedAfter={},again}){
+ if(dialog()?.open)return false;
+ const seen={...ownedBefore},batches=group(cards).map(pack=>pack.map(x=>{const c=catalog[x.key];const fresh=!seen[x.key];seen[x.key]=(seen[x.key]||0)+1;return {...x,card:c,fresh,owned:ownedAfter[x.key]||seen[x.key]};}));
+ returnFocus=document.activeElement;session={batches,batch:0,shown:new Set(),stage:'sealed',again,total:cards.length};render();dialog().showModal();dialog().querySelector('[data-pack-tear]').focus({preventScroll:true});return true;
+}
+function cardMarkup(x,i,summary=false){const c=x.card,revealed=summary||session.shown.has(i),cost=c.type==='シールドカード'?'コスト不要':root.ManaEngine.describe(c.cost),stats=c.attack!==undefined?`${c.attack} / ${c.maxHealth}`:c.type;
+ return `<button class="pack-card rarity-${esc(x.rarity)} ${revealed?'is-revealed':''}" data-pack-card="${i}" ${summary?'data-pack-summary="true"':''} aria-label="${revealed?esc(c.name)+'・詳細を見る':'裏向きカード'+(i+1)+'を公開'}" style="--deal:${i%5}"><span class="pack-card-rotor"><span class="pack-card-back" ${revealed?'aria-hidden="true"':''}><span class="pack-sigil">✦</span><span>タップで公開</span></span><span class="pack-card-front" ${!revealed?'aria-hidden="true"':''}><span class="pack-rarity">${esc(x.rarity)}</span><span class="pack-emblem">${c.type==='キャラクター'?'♛':c.type==='シールドカード'?'◇':c.type==='呪文'?'✧':'✦'}</span><strong>${esc(c.name)}</strong><span>${esc(cost)}</span><b>${esc(stats)}</b><span class="pack-owned">${x.fresh?'NEW · 初入手':'入手'} ／ 所持${x.owned}枚</span></span></span></button>`;
+}
+function render(){const s=session;if(!s)return;let d=dialog();if(!d){d=document.createElement('dialog');d.id='pack-opening';d.setAttribute('aria-labelledby','pack-opening-title');document.body.append(d);d.addEventListener('click',click);d.addEventListener('cancel',e=>{e.preventDefault();close();});}
+ const summary=s.stage==='results',pack=s.batches[s.batch],all=summary?s.batches.flat():pack;
+ d.className='pack-stage stage-'+s.stage;d.innerHTML=`<div class="pack-top"><div><small>カードコレクション</small><h2 id="pack-opening-title">${summary?'パック開封結果':'新たな一枚との出会い'}</h2></div><button data-pack-close aria-label="開封画面を閉じる">閉じる</button></div><div class="pack-progress" aria-live="polite">${summary?s.total+'枚入手 · 所持カードに追加済み':`PACK ${s.batch+1} / ${s.batches.length} <span>公開 ${s.shown.size} / 5</span>`}</div><div class="pack-scene">${s.stage==='sealed'||s.stage==='opening'?`<div class="pack-halo"></div><button class="pack-wrapper ${s.stage==='opening'?'is-tearing':''}" data-pack-tear ${s.stage==='opening'?'disabled':''}><span class="pack-seal"></span><span class="pack-wrapper-body"><small>暫定パック</small><span class="pack-crest">✦</span><strong>未知の力を、<br>その手に。</strong><span>5 CARDS</span></span><span class="pack-touch">${s.stage==='opening'?'開封中…':'タップして開封'}</span></button>`:`<div class="pack-cards ${summary?'pack-summary':''}">${all.map((x,i)=>cardMarkup(x,i,summary)).join('')}</div>`}</div><p class="pack-hint">${summary?'カードをタップして、能力と詳細を確認できます。':s.stage==='reveal'?'カードをタップして公開。公開後はもう一度タップで詳細。':'封を切ると、5枚のカードが現れます。'}</p><div class="pack-detail" hidden></div><div class="pack-actions">${summary?`<button data-pack-again>もう一度${s.total===50?'10連':'1パック'}開封</button><button data-pack-close>デッキ選択へ</button>`:`${s.stage==='reveal'?`<button data-pack-reveal-all ${s.shown.size===5?'disabled':''}>この5枚をすべて公開</button><button data-pack-next ${s.shown.size<5?'disabled':''}>${s.batch+1<s.batches.length?'次のパックへ':'結果一覧へ'}</button>`:''}<button class="pack-skip" data-pack-skip>演出をスキップ・全結果へ</button>`}</div>`;d.scrollTop=0;
+}
+function click(e){const b=e.target.closest('button');if(!b||!session)return;const s=session,d=b.dataset;
+ if('packClose'in d){close();return;}
+ if('packAgain'in d){const again=s.again;close();again?.();return;}
+ if('packSkip'in d){clearTimeout(timer);s.stage='results';render();dialog().querySelector('[data-pack-again]').focus({preventScroll:true});return;}
+ if('packTear'in d&&s.stage==='sealed'){s.stage='opening';render();timer=setTimeout(()=>{if(session!==s||s.stage!=='opening')return;s.stage='reveal';render();dialog().querySelector('[data-pack-card]').focus({preventScroll:true});},matchMedia('(prefers-reduced-motion: reduce)').matches?0:700);return;}
+ if('packRevealAll'in d&&s.stage==='reveal'){s.shown=new Set([0,1,2,3,4]);render();dialog().querySelector('[data-pack-next]').focus({preventScroll:true});return;}
+ if('packNext'in d&&s.stage==='reveal'&&s.shown.size===5){if(s.batch+1<s.batches.length){s.batch++;s.shown=new Set();s.stage='sealed';}else s.stage='results';render();dialog().querySelector('[data-pack-tear],[data-pack-again]')?.focus({preventScroll:true});return;}
+ if('packCard'in d){const i=Number(d.packCard),x=(s.stage==='results'?s.batches.flat():s.batches[s.batch])[i];if(!x)return;
+ if(s.stage==='reveal'&&!s.shown.has(i)){s.shown.add(i);b.classList.add('is-revealed');b.setAttribute('aria-label',x.card.name+'・詳細を見る');b.querySelector('.pack-card-back').setAttribute('aria-hidden','true');b.querySelector('.pack-card-front').removeAttribute('aria-hidden');dialog().querySelector('.pack-progress').innerHTML=`PACK ${s.batch+1} / ${s.batches.length} <span>公開 ${s.shown.size} / 5 · ${esc(x.rarity)} ${esc(x.card.name)}</span>`;if(s.shown.size===5){dialog().querySelector('[data-pack-next]').disabled=false;dialog().querySelector('[data-pack-reveal-all]').disabled=true;}if(['SSR','UR'].includes(x.rarity)){dialog().classList.remove('rare-burst');void dialog().offsetWidth;dialog().classList.add('rare-burst');}return;}
+ const c=x.card,detail=dialog().querySelector('.pack-detail');detail.hidden=false;detail.innerHTML=`<b>${esc(c.rarity)} 《${esc(c.name)}》</b><p>${esc(c.text||'能力なし')}</p>${c.useCondition?'<p>使用条件：'+esc(c.useCondition)+'</p>':''}${c.triggerCondition?'<p>誘発条件：'+esc(c.triggerCondition)+'</p>':''}<p>${esc((c.abilities||[]).join('・'))} ${esc(c.sideboardScope||'')}${c.symbols&&Object.keys(c.symbols).length?' ／ シンボル '+esc(Object.entries(c.symbols).map(([k,v])=>k+v).join('・')):''}</p>`;detail.scrollIntoView({block:'nearest',behavior:'smooth'});
+ }
+}
+root.PackOpening={start,close,isOpen:()=>!!dialog()?.open};
+})(globalThis);

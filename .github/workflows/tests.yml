@@ -24,3 +24,15 @@ jobs:
       - run: node combat-test.cjs
       - run: node construction-test.cjs
       - run: for f in *.js *.cjs; do node --check "$f"; done
+  pack-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/cardgame-browser playwright
+      - run: /tmp/cardgame-browser/node_modules/.bin/playwright install --with-deps chromium
+      - run: node pack-opening-browser-test.cjs
+        env:
+          NODE_PATH: /tmp/cardgame-browser/node_modules
