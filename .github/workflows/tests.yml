@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node battle-log-test.cjs
       - run: node mana-test.cjs
       - run: node sideboard-test.cjs
       - run: node shield-test.cjs
