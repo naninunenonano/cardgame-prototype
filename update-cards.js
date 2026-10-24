@@ -14,6 +14,6 @@ function install(M,c,a){
  for(const [rarity,keys]of Object.entries(groups))for(const k of keys.split(' '))if(c[k]){c[k].rarity=rarity;c[k].rarityProvisional=false;c[k].deckLimit=rarity==='UR'?1:3;}
  for(const k of ['alegre','dogiragon','technology','vt5000','conspiracy'])delete c[k].requiredCharacter;
  for(const k of ['gunveet','interstellar','lostSoul','viceCharger'])c[k].requiredCharacter='piruluk';
- c.interstellar.packExcluded=true;c.interstellar.specificationHold='ジャストダイバーの確定全文・期限の確認待ち。旧効果は維持。';c.holyMail.packExcluded=true;for(const x of Object.values(c))if(x.token||x.generated||x.deckEligible===false)x.packExcluded=true;
+ c.holyMail.packExcluded=true;for(const x of Object.values(c))if(x.token||x.generated||x.deckEligible===false)x.packExcluded=true;
 }
 return {install};});
