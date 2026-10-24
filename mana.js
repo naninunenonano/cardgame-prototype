@@ -5,7 +5,8 @@
   else root.ManaEngine=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const colors=['白','青','黒','赤','緑'];
+  const colors=['白','青','黒','赤','緑'],manaColors=[...colors,'無色'];
+  function producedColors(c){const a=c.civilizations||c.manaColors||[c.color];return [...new Set(a)].filter(k=>manaColors.includes(k));}
   function cost(generic=0,colored={}) {
     const result={generic,...Object.fromEntries(colors.map(color=>[color,colored[color]||0]))};
     if(Object.values(result).some(n=>!Number.isInteger(n)||n<0))throw Error('コストは0以上の整数です。');
@@ -13,10 +14,10 @@
   }
   function total(required){return required.generic+colors.reduce((n,color)=>n+required[color],0);}
   function pool(lands) {
-    const result={total:0,...Object.fromEntries(colors.map(color=>[color,0]))};
+    const result={total:0,...Object.fromEntries(manaColors.map(color=>[color,0]))};
     for(const land of lands) {
-      const mana=land.mana;
-      if(land.type!=='土地'||land.rest||!mana||!colors.includes(mana.color)||!Number.isInteger(mana.amount)||mana.amount<=0)continue;
+      const mana=land.mana||{color:producedColors(land)[0],amount:1};
+      if(land.rest||!mana||!manaColors.includes(mana.color)||!Number.isInteger(mana.amount)||mana.amount<=0)continue;
       result[mana.color]+=mana.amount;result.total+=mana.amount;
     }
     return result;
@@ -29,16 +30,16 @@
   }
   function payment(required,lands) {
     const result=assess(required,pool(lands));
-    // 今回は1枚1点。必要以上の土地を選んで誤消費しない。
-    if(lands.every(c=>c.mana?.amount===1)&&lands.length>total(required))result.reasons.push(`土地の選択過多：${total(required)}枚を選んでください`);
+    // 今回は1枚1点。必要以上のマナを選んで誤消費しない。
+    if(lands.every(c=>c.mana?.amount===1)&&lands.length>total(required))result.reasons.push(`マナの選択過多：${total(required)}枚を選んでください`);
     result.ok=result.reasons.length===0;
     return result;
   }
   function suggest(required,lands) {
-    const usable=lands.filter(c=>c.type==='土地'&&!c.rest&&c.mana&&colors.includes(c.mana.color)&&c.mana.amount>0);
+    const usable=lands.filter(c=>!c.rest&&c.mana&&manaColors.includes(c.mana.color)&&c.mana.amount>0);
     if(!assess(required,pool(usable)).ok)return [];
     const picked=[],chosen=new Set();
-    // 必須色をすべて確保してから、残りの土地を不特定部分に割り当てる。
+    // 必須色をすべて確保してから、残りのマナを不特定部分に割り当てる。
     for(const color of colors) {
       let remaining=required[color];
       for(const land of usable)if(remaining>0&&land.mana.color===color&&!chosen.has(land.id)){
@@ -56,5 +57,5 @@
     for(const color of colors)if(required[color])parts.push(`${color}${required[color]}`);
     return parts.join('＋')||'0';
   }
-  return {colors,cost,total,pool,assess,payment,suggest,describe};
+  return {colors,manaColors,producedColors,cost,total,pool,assess,payment,suggest,describe};
 });
