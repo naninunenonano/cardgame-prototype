@@ -22,7 +22,13 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
   if(c.key==='dolt'&&enemy.units.some(x=>x.health<=c.attack))score+=18;
   if(c.key==='bahamut'){const gain=wipeGain(v);if(gain<=0&&(me.units.length||me.structures.length))return -100;score+=gain;}
   if(me.units.length>=7){const old=replacement(v);if(unitValue(c,me.manaCount)<=unitValue(old,me.manaCount)+3)return -100;score-=unitValue(old,me.manaCount);}
- }else if(c.key==='lostSoul')score=enemy.counts.hand*10+(me.character?.level===4?30:0);
+ }else if(['c7','r6','s8'].includes(c.key))score=enemy.life<=(c.key==='s8'?7:3)?10000:40;
+ else if(c.key==='s4')score=me.life<=24?35:-100;
+ else if(c.key==='s6')score=enemy.units.length||enemy.structures.length?45:-100;
+ else if(c.key==='s7')score=50;
+ else if(c.key==='b6')score=enemy.units.reduce((n,c)=>n+unitValue(c),0)-me.units.reduce((n,c)=>n+unitValue(c),0)>0?50:-100;
+ else if(c.key==='r5')score=30;
+ else if(c.key==='lostSoul')score=enemy.counts.hand*10+(me.character?.level===4?30:0);
  else if(c.key==='conspiracy')score=enemy.units.length?35:-100;
  else if(c.key==='technology')score=me.counts.main>3?55:-100;
  else if(c.key==='themis'){const gain=enemy.units.reduce((n,x)=>n+unitValue(x,enemy.manaCount),0)-me.units.reduce((n,x)=>n+unitValue(x,me.manaCount),0);score=gain>0?gain+(danger?35:0):-100;}
@@ -82,6 +88,8 @@ function decide(v){
   const counts={};const ids=me.hand.filter(c=>{counts[c.key]=(counts[c.key]||0)+1;return total(c)>4||counts[c.key]>2||(c.key==='repair'&&counts[c.key]>1);}).map(c=>c.id);return {type:'mulligan',ids};
  }
  if(o){
+  if(o.kind==='scryMany'){const c=o.candidates.find(c=>o.top.includes(c.id)&&keepScore(v,c)<8);return c?{type:'scryMove',id:c.id,destination:'bottom'}:{type:'scry'};}
+  if(o.kind==='starterChoice'){const c=best(o.candidates,c=>['discardDamage','discardDestroy'].includes(o.choice)?-keepScore(v,c):o.choice==='invasion'?100:o.choice==='redFree'?unitValue(c,me.manaCount):c.type==='プレイヤー'?(enemy.life<=3?10000:10):(c.owner!==p?100:0)+unitValue(c,enemy.manaCount));return {type:'starter',id:c?.id||null};}
   if(o.kind==='manaCharge')return {type:'confirmCharge'};
   if(o.kind==='refreshPenalty'){const need=Math.min(2,me.mana.length);const c=best(o.candidates.filter(c=>!o.ids.includes(c.id)),c=>(c.manaToken?40:0)+(c.rest?10:0)-me.hand.filter(x=>x.color===c.color).length*3);return o.ids.length<need&&c?{type:'refreshSelect',id:c.id}:{type:'refresh'};}
 
@@ -102,7 +110,7 @@ function decide(v){
   if(o.kind==='untapMana'){const c=o.candidates.find(c=>c.rest&&!o.ids.includes(c.id));return c&&o.ids.length<o.max?{type:'untapSelect',id:c.id}:{type:'untap'};}
   if(o.kind==='handPick'){const c=best(o.candidates,c=>-keepScore(v,c));return {type:'private',id:c?.id||null};}
   if(o.kind==='recoverUnit'){const c=best(o.candidates,c=>unitValue(c,me.manaCount));return {type:'private',id:c?.id||null};}
-  if(o.kind==='response'){const threat=o.target,important=threat&&(threat.responseOnly||threat.unblockable||threat.key==='bahamut'||(threat.attack||0)>=5||danger||['trap','mother','gate','corile','snow'].includes(threat.key));return important&&o.candidates.length?{type:'play',id:o.candidates[0].id,method:'counter'}:{type:'pass'};}
+  if(o.kind==='response'){const c=o.candidates.find(c=>c.responseOnly&&o.target?.type==='呪文'&&o.target.owner!==p)||o.candidates.find(c=>!c.responseOnly&&(enemy.units.length>0));return c?{type:'play',id:c.id,method:'instant'}:{type:'pass'};}
   if(o.kind==='optionalDraw')return {type:'optional',use:me.counts.main+me.counts.trash>0};
   if(o.kind==='tokens'){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount):10000);return {type:'token',slot:slot&&(!slot.card||unitValue(slot.card,me.manaCount)<10)?slot.id:null};}
   if(['reorder','stackOrder'].includes(o.kind)){if(o.scry)return {type:'order',bottom:keepScore(v,o.candidates[0])<8};const desired=o.candidates.slice().sort((a,b)=>keepScore(v,b)-keepScore(v,a)||a.id.localeCompare(b.id));const i=desired.findIndex((c,i)=>c.id!==o.order[i]);if(i>=0){const index=o.order.indexOf(desired[i].id);return {type:'orderMove',id:desired[i].id,delta:index>i?-1:1};}return {type:'order'};}
@@ -122,11 +130,11 @@ function decide(v){
  if(['main1','main2'].includes(v.turn.step)){
   // Preserve an immediate direct win rather than tapping its mana creature to deploy more cards.
   if(v.turn.step==='main1'&&enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))&&!enemy.units.some(c=>c.lure)&&me.units.some(c=>!c.rest&&!c.sick&&!c.cannotAttack))return {type:'advance'};
+  if(me.character?.key==='redCaptain'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p]&&me.units.length<7&&me.hand.some(c=>c.type==='通常'&&(!me.summonLocks.length||c.attack>5)))return {type:'characterAbility'};
   if(me.growth?.ok)return {type:'grow'};
   const usable=[...me.hand,...(v.exile||[]),...(me.sideboard||[])].filter(c=>c.canPlay);
-  const set=best(me.hand.filter(c=>c.canForetell),c=>c.key==='counter'?35:c.key==='goby'?12:c.key==='snow'&&enemy.units.length?25:-5);
   const c=best(usable,c=>playScore(v,c));
-  if(set&&((set.key==='counter'&&(!c||playScore(v,c)<40))||(!c&&set.key!=='gate')))return {type:'foretell',id:set.id};if(c&&playScore(v,c)>0)return {type:'play',id:c.id};
+  if(c&&playScore(v,c)>0)return {type:'play',id:c.id};
  }else if(v.turn.step==='attack'){const a=attackChoice(v);if(a)return {type:'attack',id:a.id,target:a.target};}
  return v.canAdvance?{type:'advance'}:{type:'wait'};
 }

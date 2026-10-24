@@ -1,9 +1,9 @@
 const {JSDOM}=require('jsdom'),fs=require('node:fs'),assert=require('node:assert/strict');
 const dom=new JSDOM(fs.readFileSync(__dirname+'/index.html','utf8'),{runScripts:'outside-only'}),w=dom.window;
 w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};w.confirm=()=>true;
-for(const name of ['mana.js','cards.js','decks.js','deck-editor.js','game.js','bot.js','bot-runner.js','app.js'])w.eval(fs.readFileSync(__dirname+'/'+name,'utf8')+(name==='app.js'?'\nglobalThis.Game=Game;':''));
+for(const name of ['mana.js','starter-cards.js','cards.js','decks.js','collection.js','deck-editor.js','game.js','bot.js','bot-runner.js','app.js'])w.eval(fs.readFileSync(__dirname+'/'+name,'utf8')+(name==='app.js'?'\nObject.defineProperty(globalThis,"Game",{get:()=>Game,configurable:true});':''));
 const $=s=>w.document.querySelector(s),click=s=>$(s).click(),change=(s,value)=>{$(s).value=value;$(s).dispatchEvent(new w.Event('change'));};
-click('#start-solo');
+change('#content-mode-select','debug');click('#start-solo');
 const ids=w.Game.state.p1.hand.map(c=>c.id);for(const id of ids)click(`[data-mulligan="${id}"]`);assert.equal($('#exchange-count').textContent,'選択中：5枚 / 5枚');const stale=$('#exchange');stale.click();stale.click();assert.equal(w.Game.mulligan.p2,'pending');click('#keep');assert.equal(w.Game.turn.step,'charge');click('#next-phase');assert.equal(w.Game.turn.step,'main1');
 change('#active','p2');click('#add');change('#add-form [name=destination]','p2/signi-1');$('#add-form [name=name]').value='UI確認ブロッカー';$('#add-form [name=attack]').value='5';$('#add-form [name=blocker]').checked=true;$('#add-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));const blocker=w.Game.state.p2['signi-1'][0];assert.equal(blocker.attack,5);assert.equal(blocker.abilities[0],'ブロッカー');assert.equal(blocker.sick,true);
 click(`[data-player="p2"][data-zone="signi-1"] [data-card="${blocker.id}"]`);click('#peek');assert.match($('.preview').textContent,/5 \/ 5/);assert.match($('.preview').textContent,/能力：ブロッカー/);click('#close');

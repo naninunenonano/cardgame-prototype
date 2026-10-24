@@ -25,14 +25,14 @@
  {key:'shaper',name:'ストリーミング・シェイパー',type:'呪文',cost:M.cost(0,{青:3}),deckLimit:1,onUse:[{kind:'revealBlue',count:4}],text:'上から4枚を公開。青をすべて手札へ、残りをトラッシュへ。ドローではない。同名1枚制限。'},
  {key:'vegas',name:'Dの博才 サイバーダイス・ベガス',type:'設置物',cost:M.cost(4,{青:1}),symbols:{青:1},onEnd:[{kind:'optionalDraw',count:1}],text:'自分のターン終了時、1枚引いてもよい。Dスイッチ・置き換えルールなし。'},
  {key:'cosmo',name:'ルナ・コスモビュー',type:'通常',cost:M.cost(8,{青:1}),attack:6,maxHealth:6,symbols:{青:2},abilities:['ブロッカー'],gZero:{hand:10},onEnter:[{kind:'draw',count:1}],provisional:true,text:'ブロッカー。G・ゼロ：使用前の手札10枚以上なら無料召喚。登場時1枚ドロー。コスト内訳は仮値。'},
- {key:'counter',name:'対抗呪文',type:'呪文',cost:M.cost(3,{青:1}),responseOnly:true,foretell:{cost:M.cost(0),useCost:M.cost(3,{青:1}),onSet:[]},text:'カード使用への応答で使用を無効化。予顕0（伏せる費用）。後の使用は不特定3＋青1。予顕ターン使用不可。'},
- {key:'gate',name:'スパイラル・ゲート',type:'呪文',cost:M.cost(1,{青:1}),onUse:[{kind:'bounce'}],foretell:{cost:M.cost(1),useCost:M.cost(2,{青:1}),onSet:[],onUse:[{kind:'bounce'},{kind:'draw',count:1}]},text:'ユニット・設置物1枚を持ち主の手札へ。マナ対象外。予顕1、後の使用は不特定2＋青1。この使用だけ追加1ドロー。'},
- {key:'goby',name:'パルピィ・ゴービー',type:'通常',cost:M.cost(2,{青:1}),attack:2,maxHealth:2,symbols:{青:1},abilities:['ブロッカー'],cannotAttack:true,onEnter:[{kind:'reorder',count:5}],foretell:{cost:M.cost(1),useCost:M.cost(2),onSet:[{kind:'scry',count:1}]},text:'ブロッカー・攻撃不可。登場時上5枚を自分だけ見て並べ直す。予顕1で占術1。後の使用は不特定2（色不要・軽減なし）。'},
+ {key:'counter',name:'対抗呪文',type:'呪文',cost:M.cost(2,{青:1}),responseOnly:true,instant:true,spellCounter:true,text:'インスタント。呪文1つを打ち消す。'},
+ {key:'gate',name:'スパイラル・ゲート',type:'呪文',cost:M.cost(1,{青:1}),instant:true,onUse:[{kind:'unitBounce'}],text:'インスタント。クリーチャー1体を持ち主の手札へ。'},
+ {key:'goby',name:'パルピィ・ゴービー',type:'通常',cost:M.cost(2,{青:1}),attack:2,maxHealth:2,symbols:{青:1},abilities:['ブロッカー'],cannotAttack:true,onEnter:[{kind:'reorder',count:5}],text:'ブロッカー・攻撃不可。登場時上5枚を自分だけ見て並べ直す。'},
  {key:'zwei',deckLimit:1,name:'クリスタル・ツヴァイランサー',type:'通常',cost:M.cost(3,{青:5}),attack:13,maxHealth:13,symbols:{青:3},evolution:{color:'青'},unblockable:true,text:'自分の青ユニットの上へ進化。ブロックされない。最上段だけがシンボル・能力・攻撃力・最大体力を供給。使用済みを継承、召喚酔いなし。'},
  {key:'amaterasu',name:'蒼狼の始祖アマテラス',type:'通常',cost:M.cost(4,{青:2}),attack:5,maxHealth:5,symbols:{青:1},onEnter:[{kind:'searchSpell',max:4}],text:'登場時：山札の軽減前4コスト以下かつ使用条件を満たす呪文1枚を無料使用。残りをシャッフルしてから通常効果を解決。'},
  {key:'emeral',name:'エメラル',type:'通常',cost:M.cost(1,{青:1}),attack:1,maxHealth:1,symbols:{青:1},onEnter:[{kind:'inspectShield'}],text:'登場時：相手の未使用シールド1枚を選び、自分だけ内容を確認する。使用状態は変えない。'},
  {key:'corile',name:'コーライル',type:'通常',cost:M.cost(4,{青:1}),attack:2,maxHealth:2,symbols:{青:1},onEnter:[{kind:'topUnit'}],text:'登場時：相手ユニット1体を持ち主のメインデッキの上へ戻す。設置物・マナ・キャラ対象外。'},
- {key:'snow',name:'スノーマン召喚',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'tokens',count:3}],foretell:{cost:M.cost(3),useCost:M.cost(3,{青:1}),onSet:[{kind:'bounce'}]},text:'スノーマントークン3体を召喚。予顕3でユニット・設置物1枚をバウンス（場のマナは対象外）。後の使用は不特定3＋青1で3体召喚。'},
+ {key:'snow',name:'スノーマン召喚',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'tokens',count:3}],text:'スノーマントークン3体を召喚。'},
  {key:'inquiry',name:'ウォズレックの審問',type:'呪文',cost:M.cost(1,{青:1}),onUse:[{kind:'inspectDiscard',max:3}],text:'相手の手札を一時的に確認し、軽減前合計3以下のカード1枚を選んでトラッシュへ。対象があれば1枚必須。'},
  {key:'vice',name:'スケルトン・バイス',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'randomDiscard',count:2}],text:'相手の手札からランダムに2枚を重複せずトラッシュへ。手札全体は公開しない。1枚なら1枚だけ。'}
  ];
@@ -61,7 +61,7 @@
  ];
  for(const d of shieldDefs)cards[d.key]={color:'無色',type:'シールドカード',deckSection:'shields',cost:null,symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],...d};
  // 成長コストLv3/Lv4・未記載の覚醒前数値はデータで調整できる試作値。
- const characterLevels={1:{cost:1,text:'成長時・開始時：1ドロー。',effects:[{kind:'draw',count:1}]},2:{cost:3,text:'成長時・開始時：相手ランダム1捨て。成長直後のみバイス・チャージャーを任意使用。',effects:[{kind:'randomDiscard',count:1}]},3:{cost:5,provisional:true,text:'成長時・開始時：相手の場1枚をバウンス（マナ不可）→ランダム1捨て。',effects:[{kind:'enemyBounce'},{kind:'randomDiscard',count:1}]},4:{cost:7,provisional:true,text:'成長時：相手2捨て。常時：自分の効果で相手が実際に1枚捨てるごと1ドロー＋アクア・ガード。サイドの不特定3軽減。',effects:[{kind:'randomDiscard',count:2}]}};
+ const characterLevels={1:{cost:1,text:'成長時・開始時：1ドロー。',effects:[{kind:'draw',count:1}]},2:{cost:3,text:'成長時・開始時：相手ランダム1捨て。成長直後のみバイス・チャージャーを任意使用。',effects:[{kind:'randomDiscard',count:1}]},3:{cost:5,text:'成長時・開始時：相手の場1枚をバウンス（マナ不可）→ランダム1捨て。',effects:[{kind:'enemyBounce'},{kind:'randomDiscard',count:1}]},4:{cost:7,text:'成長時：相手2捨て。常時：自分の効果で相手が実際に1枚捨てるごと1ドロー＋アクア・ガード。サイドの不特定3軽減。',effects:[{kind:'randomDiscard',count:2}]}};
  const sideDefs=[
  {key:'piruluk',name:'ピルルク',type:'キャラクター',cost:M.cost(1),level:0,text:'Lv1→Lv4へ順番に成長。成長もサイド使用1ターン1枚に含む。通常の攻撃・ブロックは行わない。'},
  {key:'gunveet',name:'ブラック・ガンヴィート',type:'通常',cost:M.cost(4,{青:3}),attack:7,maxHealth:7,symbols:{青:1},requiredCharacter:'piruluk',provisional:true,onEnter:[{kind:'destroyTapped'}],awaken:'darkGunveet',text:'登場時：相手の横向き1体を破壊。相手ターン終了時、相手手札0なら覚醒。覚醒前7/7・青1は仮設定。'},
@@ -81,6 +81,7 @@
  };
  cards.aquaGuard={key:'aquaGuard',name:'アクア・ガード',type:'通常',color:'青',cost:null,attack:0,maxHealth:1,symbols:{青:1},abilities:['ブロッカー'],cannotAttack:true,token:true,onUse:[],onEnter:[],onDefeat:[],text:'攻撃不可。場を離れれば消滅。'};
  const sideboardPreset=sideDefs.map(c=>({key:c.key,count:1}));
- const decks={green:defs.map(c=>({key:c.key,count:c.key==='bahamut'?1:3})),blue:blueDefs.map(c=>({key:c.key,count:c.key==='shaper'?1:3}))};
- return {COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:shieldDefs.map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'};
+ const starter=(typeof module==='object'&&module.exports?require('./starter-cards.js'):globalThis.StarterContent).install(M,cards,awakened);
+ const decks={...starter.decks,green:defs.map(c=>({key:c.key,count:c.key==='bahamut'?1:3})),blue:blueDefs.map(c=>({key:c.key,count:c.key==='shaper'?1:3}))};
+ return {starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:shieldDefs.map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'};
 });
