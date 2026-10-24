@@ -7,7 +7,7 @@ make('blazeClaw','ブレイズクロー','N',0,1,'赤','通常',[2,2],{symbols:{
 make('rageArm','レイジアーム','N',1,1,'赤','通常',[1,2],{symbols:{},rageArm:true,text:'他のクリーチャーが場に出るたび、このターン攻撃力+1。自身では誘発しない。'});
 make('apache','狂葬者 アパッチ','N',2,1,'赤','通常',[4,3],{onEnter:[{kind:'selfDamage',amount:3}],text:'登場時、自分のライフに3ダメージ。'});
 make('arianrhod','アリアンロッド','N',1,1,'赤','通常',[1,1],{symbols:{},lootAbility:true,nameProvisional:true,text:'タップ＋手札1枚を捨てることをコストに1ドロー。召喚酔い中不可。名称は仮登録。'});
-make('redManaBreaker','名称未定（赤2・3/2）','N',1,1,'赤','通常',[3,2],{nameProvisional:true,packExcluded:true,onEnter:[{kind:'ownDestroyMana'}],text:'登場時、自分のマナ1枚を選び破壊。正式名称未確定、内部仮IDで管理。'});
+make('redManaBreaker','野蛮な侵略者','N',1,1,'赤','通常',[3,2],{onEnter:[{kind:'ownDestroyMana'}],text:'登場時、自分のマナ1枚を選び破壊。'});
 make('scrapper','地獄スクラッパー','N',3,1,'赤','呪文',null,{instant:true,onUse:[{kind:'scrapper',remaining:5}],text:'インスタント。敵の盤面のカード1枚に1ダメージを5回順番に処理。毎回対象を選び直す。相手プレイヤーは対象外。'});
 
 make('bolmeteus','ボルメテウス・ホワイト・ドラゴン','UR',6,1,'赤','通常',[7,7],{sideboardOnly:true,symbols:{赤:2},shieldSilence:true,text:'攻撃中、相手はシールドを使用できない。本体のライフを減らした攻撃の終了時、相手の裏向きシールド1枚を発動させず表へ。ブロック可能。'});
