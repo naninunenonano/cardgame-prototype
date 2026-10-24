@@ -8,9 +8,9 @@ function context(v){const p=v.viewer,e=other(p),me=v.players[p],enemy=v.players[
 function replacement(v){const {me}=context(v);return best(me.units,c=>-unitValue(c,me.manaCount));}
 function wipeGain(v){const {me,enemy}=context(v);return enemy.units.reduce((n,c)=>n+unitValue(c,enemy.manaCount),0)+enemy.structures.length*9-me.units.reduce((n,c)=>n+unitValue(c,me.manaCount),0)-me.structures.length*9;}
 function freeValue(v,c){const {me}=context(v);if(c.key==='bahamut'&&wipeGain(v)<=0&&(me.units.length||me.structures.length))return -100;return unitValue(c,me.manaCount)+(c.key==='bronze'?8:0)+(c.key==='bahamut'?wipeGain(v):0);}
-function motherTarget(v,targets){const {p,me,enemy,danger}=context(v);const possible=me.hand.filter(c=>c.type==='通常'&&total(c)<=me.manaCount);const upgrade=best(possible,c=>freeValue(v,c));
+function motherTarget(v,targets){const {p,me,enemy,danger}=context(v);const possible=me.mana.filter(c=>c.type==='通常'&&total(c)<=me.manaCount+1);const upgrade=best(possible,c=>freeValue(v,c));
  return best(targets,c=>c.owner===p?(upgrade?freeValue(v,upgrade)-unitValue(c,me.manaCount)+2:-100):unitValue(c,enemy.manaCount)-(enemy.counts.hand?10:0)-(enemy.manaCount>=8?7:3)+(danger?8:0));}
-function motherGain(v){const {p,me,enemy,danger}=context(v),c=motherTarget(v,[...me.units,...enemy.units]);if(!c)return -100;if(c.owner!==p)return unitValue(c,enemy.manaCount)-(enemy.counts.hand?10:0)-(enemy.manaCount>=8?7:3)+(danger?8:0);const choices=me.hand.filter(x=>x.type==='通常'&&total(x)<=me.manaCount);return Math.max(-100,...choices.map(x=>freeValue(v,x)-unitValue(c,me.manaCount)));}
+function motherGain(v){const {p,me,enemy,danger}=context(v),c=motherTarget(v,[...me.units,...enemy.units]);if(!c)return -100;if(c.owner!==p)return unitValue(c,enemy.manaCount)-(enemy.counts.hand?10:0)-(enemy.manaCount>=8?7:3)+(danger?8:0);const choices=me.mana.filter(x=>x.type==='通常'&&total(x)<=me.manaCount+1);return Math.max(-100,...choices.map(x=>freeValue(v,x)-unitValue(c,me.manaCount)));}
 function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.counts.main+me.counts.trash>0;let score=-100;
  if(c.type==='通常'){
   score=unitValue(c,me.manaCount)+8;
@@ -101,7 +101,7 @@ function decide(v){
   }
   if(o.kind==='sideFreePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount):10000);return {type:'slot',slot:slot.id};}return {type:'sideFree'};}
 
-  if(o.kind==='shieldWindow'){const c=o.candidates.find(c=>c.shieldRule.effect==='destroyAttacker')||o.candidates.find(c=>c.shieldRule.effect==='draw'&&me.counts.main+me.counts.trash>=2);return {type:'shield',id:c?.id||null};}
+  if(o.kind==='shieldWindow'){const c=o.candidates.find(c=>c.shieldRule.effect==='revive')||o.candidates.find(c=>!['draw'].includes(c.shieldRule.effect))||o.candidates.find(c=>c.shieldRule.effect==='destroyAttacker')||o.candidates.find(c=>c.shieldRule.effect==='draw'&&me.counts.main+me.counts.trash>=2);return {type:'shield',id:c?.id||null};}
   if(o.kind==='resetShield')return {type:'shieldEffect',id:o.candidates[0]?.id||null};
   if(o.kind==='inspectShield')return {type:'shieldEffect',id:o.candidates[0]?.id||null};
   if(o.kind==='shieldReveal')return {type:'shieldEffect'};
@@ -119,7 +119,7 @@ function decide(v){
   if(o.kind==='freeCast'){if(!o.targetId){const c=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:c.id};}return {type:'freeCast'};}
   if(o.kind==='payment'){const c=[...me.hand,...(v.exile||[]),...(me.sideboard||[])].find(c=>c.id===o.id);if(o.targets?.length&&!o.targetId){const target=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:target.id};}if(c?.type==='通常'&&o.purpose!=='set'&&!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'pay'};}
   if(['freePlace','returnPlace'].includes(o.kind)){const c=me.hand.find(x=>x.id===o.id);if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:o.kind==='returnPlace'?'returnPlace':'freePlace'};}
-  if(o.kind==='freeUnit'){const c=best(o.candidates,c=>playScore(v,c));return {type:'freeUnit',id:c&&playScore(v,c)>0?c.id:null};}
+  if(o.kind==='freeUnit'){const c=best(o.candidates,c=>(c.owner===p?1:-1)*unitValue(c,c.owner===p?me.manaCount:enemy.manaCount));return {type:'freeUnit',id:c?.id||null};}
   if(o.kind==='effectTarget'){const c=o.effect==='mother'?motherTarget(v,o.candidates):best(o.candidates,c=>(c.owner===p?-100:0)+unitValue(c,enemy.manaCount));return {type:'target',id:c.id};}
   if(o.kind==='combat')return {type:'block',id:chooseBlock(v,o)};
   if(o.kind==='attackTarget'){const c=me.units.find(c=>c.id===o.id),a=attackChoice(v,[{card:c,targets:o.targets}]);return a?{type:'attackTarget',target:a.target}:{type:'cancelAttackTarget'};}

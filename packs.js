@@ -1,0 +1,5 @@
+(function(root,factory){const a=factory(typeof module==='object'&&module.exports?require('./cards.js'):root.CardCatalog);if(typeof module==='object'&&module.exports)module.exports=a;else root.CardPacks=a;})(globalThis,function(C){
+const rates={normal:{N:60,R:25,SR:7,SSR:5,UR:3},rare:{N:0,R:65,SR:20,SSR:10,UR:5},super:{N:0,R:0,SR:80,SSR:13,UR:7}};
+const pool=()=>Object.values(C.cards).filter(c=>!c.packExcluded&&!c.token&&!c.generated&&c.deckEligible!==false&&c.cost!==undefined&&c.name&&!c.name.includes('名称未定'));
+function open(count=1,random=Math.random){if(![1,10].includes(count))throw Error('1パックまたは10連を選択してください。');const cards=pool(),slots=[...Array(count*4).fill('normal'),...Array(count===10?9:1).fill('rare'),...(count===10?['super']:[])];return slots.map(slot=>{let roll=random()*100,rarity;for(const [r,w]of Object.entries(rates[slot])){roll-=w;if(roll<0){rarity=r;break;}}rarity=rarity||'UR';const a=cards.filter(c=>c.rarity===rarity);if(!a.length)throw Error('排出対象のないレアリティ：'+rarity);return {key:a[Math.min(a.length-1,Math.floor(random()*a.length))].key,rarity,slot};});}
+return {rates,pool,open};});
