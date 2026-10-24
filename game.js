@@ -8,14 +8,14 @@ const ZONES=[...Array.from({length:7},(_,i)=>({id:`signi-${i+1}`,name:`ユニッ
  {id:'lrig',name:'プレイヤーキャラ',class:'lrig'},{id:'extra',name:'サイドボード',pile:true},{id:'main',name:'メインデッキ',pile:true},
  {id:'landDeck',name:'土地デッキ',pile:true},{id:'landTrash',name:'土地トラッシュ',pile:true},
  {id:'energy',name:'マナゾーン'},{id:'trash',name:'トラッシュ',pile:true},
- {id:'structures',name:'設置物'},{id:'exile',name:'除外ゾーン',pile:true},{id:'holding',name:'一時確認',internal:true},{id:'check',name:'チェックゾーン'},{id:'hand',name:'手札',class:'hand'}];
+ {id:'shields',name:'シールドデッキ',internal:true},{id:'structures',name:'設置物'},{id:'exile',name:'除外ゾーン',pile:true},{id:'holding',name:'一時確認',internal:true},{id:'check',name:'チェックゾーン'},{id:'hand',name:'手札',class:'hand'}];
 const PLAYERS=['p1','p2'],SELF='p1';
 const STEPS={untap:'アンタップ',draw:'ドロー',land:'土地配置',main1:'メイン1',attack:'アタック',main2:'メイン2',end:'エンド'};
 const isUnit=z=>ZONES.some(zone=>zone.id===z&&zone.class==='unit');
 const isField=z=>isUnit(z)||z==='lrig'||z==='structures';
 const label=p=>p==='p1'?'プレイヤー1':'プレイヤー2';
 function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode='solo',boundaries={},decks:initialDecks={p1:'green',p2:'green'},presentationMs=0,strictTargets=false}={}) {
- let life={p1:30,p2:30},state,status,turn,mulligan,operation,result,serial=0,log=[],queue=[],supplyStatus,mode=initialMode,firstPlayer=SELF,epoch=0,deckChoices={...initialDecks},stack=[],events=[],eventSerial=0,frameSerial=0,deckRecords=[],chosenSpecs={},vanishedIds=new Set(),extraTurns=[],normalNext=null;
+ let life={p1:30,p2:30},state,status,turn,mulligan,operation,result,serial=0,log=[],queue=[],supplyStatus,mode=initialMode,firstPlayer=SELF,epoch=0,deckChoices={...initialDecks},stack=[],events=[],eventSerial=0,frameSerial=0,deckRecords=[],chosenSpecs={},vanishedIds=new Set(),extraTurns=[],normalNext=null,shieldTiming=0,closedShieldTimings=new Set();
  const clone=x=>JSON.parse(JSON.stringify(x));
  const INITIAL_HAND=5;
  const other=p=>p==='p1'?'p2':'p1';
@@ -39,16 +39,49 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  }
  function landCount(p){return state[p].energy.filter(c=>c.type==='土地').length;}
  function fieldCards(p){return [...unitSlots(p).flatMap(z=>state[p][z.id]),...state[p].structures];}
- function attack(c,p=null){const owner=p||locate(c.id)?.p||c.origin||SELF;return c.statMode==='lands'?landCount(owner):c.attack;}
+ function attack(c,p=null){const owner=p||locate(c.id)?.p||c.origin||SELF;return c.statMode==='lands'?landCount(owner)+(c.statBonus?.attack||0):c.attack;}
  function refreshDerived(){
   for(const p of PLAYERS)for(const [z,a] of Object.entries(state[p]))for(const c of [...a])if(c.type==='通常'){
-   if(c.statMode==='lands'){const damage=isUnit(z)?Math.max(0,(c.maxHealth||0)-(c.health??c.maxHealth??0)):0;c.attack=landCount(p);c.maxHealth=c.attack;c.health=c.maxHealth-damage;}
+   if(c.statMode==='lands'){const damage=isUnit(z)?Math.max(0,(c.maxHealth||0)-(c.health??c.maxHealth??0)):0;c.attack=landCount(p)+(c.statBonus?.attack||0);c.maxHealth=landCount(p)+(c.statBonus?.health||0);c.health=c.maxHealth-damage;}
    if(isUnit(z)&&c.health<=0){rawMove(locate(c.id),p,'trash');enqueue(c.onDeath||[],p,c.id);record(`${c.name}は現在体力0以下のため破壊。`);}
   }
  }
- function resetHealth(c,p){if(c.type==='通常'){c.attack=attack(c,p);if(c.statMode==='lands')c.maxHealth=c.attack;c.health=c.maxHealth;}}
+ function resetHealth(c,p){if(c.type==='通常'){c.attack=attack(c,p);if(c.statMode==='lands')c.maxHealth=landCount(p)+(c.statBonus?.health||0);c.health=c.maxHealth;}}
  function healUnit(id,amount){const s=locate(id);if(result||!s||s.card.type!=='通常'||!isUnit(s.z)||!Number.isFinite(amount)||amount<0)return fail('回復対象が不正です。');s.card.health=Math.min(s.card.maxHealth,s.card.health+amount);return ok('体力を回復しました。');}
- function healLife(p,amount){if(!PLAYERS.includes(p)||!Number.isFinite(amount)||amount<0||result)return fail('回復対象が不正です。');life[p]=Math.min(30,life[p]+amount);return ok('ライフを回復しました。');}
+ function healLife(p,amount){if(!PLAYERS.includes(p)||!Number.isFinite(amount)||amount<0||result)return fail('回復対象が不正です。');const before=life[p];life[p]=Math.min(30,life[p]+amount);events.push({id:++eventSerial,kind:'lifeRecovered',p,amount:life[p]-before,text:`ライフ${life[p]-before}回復`});return ok('ライフを回復しました。');}
+ function shieldCandidates(p,event){return state[p].shields.filter(c=>!c.faceUp&&c.shieldRule?.event===event.kind&&(c.shieldRule.maxLife===undefined||event.life<=c.shieldRule.maxLife));}
+ function queueShield(p,event){const timing=++shieldTiming,ids=shieldCandidates(p,event).map(c=>c.id);if(ids.length)enqueue([{kind:'shieldWindow',timing,event,ids}],p,null);}
+ function loseLife(p,amount,reason='カード効果'){
+  if(result||!PLAYERS.includes(p)||!Number.isFinite(amount)||amount<0)return fail('ライフ減少が不正です。');
+  const before=life[p];life[p]-=amount;events.push({id:++eventSerial,kind:'lifeLost',p,amount,text:`${reason}：ライフ${amount}減少`});
+  if(life[p]<=0){finish(other(p),'相手ライフが0以下');return ok('ライフ0以下で敗北。');}
+  if(life[p]<before)queueShield(p,{kind:'lifeLost',life:life[p],amount:before-life[p]});if(!operation)pump();return ok(`ライフ ${life[p]}/30。`);
+ }
+ function destroyUnit(id,reason='効果'){
+  const s=locate(id);if(!s||!isUnit(s.z)||s.card.type!=='通常')return false;
+  if(s.card.indestructible){record(`${s.card.name}は破壊耐性により場に残ります。`);return false;}
+  const c=s.card;rawMove(s,s.p,'trash');events.push({id:++eventSerial,kind:'unitDestroyed',p:s.p,cardId:id,text:`${reason}で${c.name}を破壊`});enqueue(c.onDeath||[],s.p,id);return true;
+ }
+ function resolveShield(id=null,expected=operation){
+  const o=operation;if(result||o!==expected||o?.kind!=='shieldWindow'||closedShieldTimings.has(o.timing))return fail('この誘発タイミングの受付は終了しています。');
+  const c=id?state[o.p].shields.find(c=>c.id===id&&!c.faceUp&&o.ids.includes(id)):null;if(id&&!c)return fail('今回の候補から未使用シールドを1枚選んでください。');
+  closedShieldTimings.add(o.timing);operation=null;
+  if(c){c.faceUp=true;events.push({id:++eventSerial,kind:'shieldUsed',p:o.p,card:clone(c),timing:o.timing,method:'シールド使用',text:c.name+'を使用'});record(`${label(o.p)}が${c.name}を使用（同時誘発はこの1枚で終了）。`);
+   if(c.shieldRule.effect==='destroyAttacker')destroyUnit(o.event.attackerId,c.name);
+   else if(c.shieldRule.effect==='draw')enqueue([{kind:'draw',count:c.shieldRule.count}],o.p,c.id);
+  }else record(`${label(o.p)}は今回のシールド使用を見送りました。`);
+  pump();return ok('シールドの使用受付を終了しました。');
+ }
+ function shieldEffectCandidates(){const o=operation;if(o?.kind==='resetShield')return state[o.p].shields.filter(c=>c.faceUp);if(o?.kind==='inspectShield')return state[other(o.p)].shields.filter(c=>!c.faceUp);return [];}
+ function resolveShieldEffect(id=null,expected=operation){
+  const o=operation;if(result||o!==expected||!['resetShield','inspectShield','shieldReveal'].includes(o?.kind))return fail('このシールド選択は終了しています。');
+  if(o.kind==='shieldReveal'){operation=null;pump();return ok('確認を終了しました。');}
+  const c=id?shieldEffectCandidates().find(c=>c.id===id):null;if(id&&!c)return fail('対象のシールドを選んでください。');if(!id&&o.kind==='inspectShield'&&shieldEffectCandidates().length)return fail('相手の裏向きシールド1枚を選んでください。');operation=null;
+  if(c&&o.kind==='resetShield'){c.faceUp=false;events.push({id:++eventSerial,kind:'shieldReset',p:o.p,cardId:c.id,text:'使用済みシールド1枚を裏向きへ'});record(`${label(o.p)}が使用済みシールド1枚を裏向きへ戻しました。`);}
+  if(c&&o.kind==='inspectShield'){operation={kind:'shieldReveal',p:o.p,id:c.id};return ok('内容は使用者だけに表示します。');}
+  pump();return ok('シールドへの効果を解決しました。');
+ }
+ function addBasicLand(p){if(!refreshDeck(p,true))return 0;const index=state[p].landDeck.findIndex(c=>c.basic);if(index<0){record('土地デッキに基本土地がありません。');return 0;}const c=state[p].landDeck.splice(index,1)[0];c.faceUp=true;c.rest=false;state[p].energy.push(c);refreshDerived();return 1;}
  function symbols(p){const sum=Object.fromEntries(Mana.colors.map(c=>[c,0]));for(const c of fieldCards(p))if(c.type==='通常'||c.type==='設置物')for(const color of Mana.colors)sum[color]+=c.symbols?.[color]||0;return sum;}
  function effectiveCost(c,p,base=c.cost){if(c.usageCostOverride)return clone(c.usageCostOverride);const cost={...base},provided=symbols(p);if(fieldCards(p).some(x=>x.id===c.id))for(const color of Mana.colors)provided[color]=Math.max(0,provided[color]-(c.symbols?.[color]||0));if(c.genericReduction){const n=Mana.colors.reduce((n,k)=>n+provided[k],0);cost.generic=Math.max(c.genericReduction.minimum??0,cost.generic-Math.min(c.genericReduction.maximum??Infinity,n));}if(c.reduction)for(const color of Mana.colors)if(cost[color]>0)cost[color]=Math.max(c.reduction.minimum?.[color]??1,cost[color]-Math.min(c.reduction.maximum??Infinity,provided[color]));return cost;}
  function paymentSources(p){
@@ -91,11 +124,11 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   }if(placed)record(`${label(p)}：${reason}で土地${placed}枚を未使用で追加。`);refreshDerived();return placed;
  }
  function reset(nextMode=mode,nextDecks=deckChoices) {
-  let specs;try{specs=Object.fromEntries(PLAYERS.map(p=>{const d=Decks.resolve(nextDecks[p],deckRecords),errors=Decks.validate(d);if(errors.length)throw Error(errors.join('／'));return [p,d];}));}catch(e){return fail(e.message);}chosenSpecs=specs;deckChoices={...nextDecks};vanishedIds=new Set();extraTurns=[];normalNext=null;stack=[];events=[];eventSerial=0;frameSerial=0;
+  let specs;try{specs=Object.fromEntries(PLAYERS.map(p=>{const d=Decks.resolve(nextDecks[p],deckRecords),errors=Decks.validate(d);if(errors.length)throw Error(errors.join('／'));return [p,d];}));}catch(e){return fail(e.message);}chosenSpecs=specs;deckChoices={...nextDecks};vanishedIds=new Set();extraTurns=[];normalNext=null;shieldTiming=0;closedShieldTimings=new Set();stack=[];events=[];eventSerial=0;frameSerial=0;
   if(!['solo','bot'].includes(nextMode))return fail('モードを選んでください。');mode=nextMode;epoch++;firstPlayer=mode==='bot'?(random()<.5?'p1':'p2'):SELF;
   life={p1:30,p2:30};serial=0;log=[];queue=[];supplyStatus={p1:{main:'',land:''},p2:{main:'',land:''}};result=null;operation=null;status='mulligan';turn={player:firstPlayer,counts:{p1:0,p2:0},sequence:0,number:0,step:'untap',landsPlaced:0,key:{},notBefore:0,lastDraw:0};mulligan={p1:'pending',p2:'pending'};
   state=Object.fromEntries(PLAYERS.map(p=>[p,Object.fromEntries(ZONES.map(z=>[z.id,[]]))]));
-  for(const p of PLAYERS){state[p].main=buildDeck(p,chosenSpecs[p]);validateDeck(state[p].main,40,chosenSpecs[p]);state[p].landDeck=buildLandDeck(p,chosenSpecs[p]);state[p].extra=(chosenSpecs[p].sideboard||[]).flatMap(e=>Array.from({length:e.count},()=>fromDefinition(e.key,p)));validateLandDeck(state[p].landDeck);shuffleRaw(p,'main');shuffleRaw(p,'landDeck');drawRaw(p,INITIAL_HAND);}
+  for(const p of PLAYERS){state[p].shields=(chosenSpecs[p].shields??Decks.defaultShields()).flatMap(e=>Array.from({length:e.count},()=>{const c=fromDefinition(e.key,p);c.faceUp=false;return c;}));state[p].main=buildDeck(p,chosenSpecs[p]);validateDeck(state[p].main,40,chosenSpecs[p]);state[p].landDeck=buildLandDeck(p,chosenSpecs[p]);state[p].extra=(chosenSpecs[p].sideboard||[]).flatMap(e=>Array.from({length:e.count},()=>fromDefinition(e.key,p)));validateLandDeck(state[p].landDeck);shuffleRaw(p,'main');shuffleRaw(p,'landDeck');drawRaw(p,INITIAL_HAND);}
   record(`${mode==='bot'?'Bot戦':'壁打ち'}：先攻は${label(firstPlayer)}。選択したメインデッキ・土地20枚から初期手札5枚を配りました。`);return ok('各プレイヤーのマリガンを選択してください。');
  }
  function completeMulligan(p,ids=[],skip=false) {
@@ -112,7 +145,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(z==='trash'&&source.card.type==='土地')z='landTrash';
   const [c]=state[source.p][source.z].splice(source.index,1),leaving=isUnit(source.z)&&!isUnit(z);
   if(source.z==='exile'&&z!=='exile')delete c.returnReservation;
-  if(leaving){const group=[...(c.under||[]),c];c.under=[];const real=group.filter(x=>!x.token);if(!real.length)return c;
+  if(leaving){if(c.statBonus){c.attack-=c.statBonus.attack;c.maxHealth-=c.statBonus.health;delete c.statBonus;}const group=[...(c.under||[]),c];c.under=[];const real=group.filter(x=>!x.token);if(!real.length)return c;
    if(z==='main'&&real.length>1){state[p].holding.push(...real);operation={kind:'stackOrder',p,ids:real.map(c=>c.id),order:real.map(c=>c.id),destination:z};return c;}
    for(const item of real){if(z==='hand')item.faceUp=true;if(bottom)state[p][z].push(item);else state[p][z].unshift(item);}if(z==='trash')refreshDeck(p);return c;
   }
@@ -122,7 +155,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function interactionError() {if(result)return '対戦は終了しています。最初からやり直してください。';if(status!=='ready')return '開始準備中は通常操作を使えません。';if(operation)return '選択中の処理を完了してください。';return '';}
  function mainError(p,allowPayment=false) {if(result)return '対戦は終了しています。';if(status!=='ready')return '開始準備中です。';if(p!==turn.player)return '現在のターンのプレイヤーだけが使用できます。';if(!['main1','main2'].includes(turn.step))return 'カードの使用はメイン1・メイン2で行ってください。';if(operation&&!(allowPayment&&operation.kind==='payment'))return '選択中の処理を完了してください。';return '';}
  function manualMove(id,p,z,bottom=false) {
-  if(mode==='bot')return fail('Bot戦ではルール外の手動移動を使えません。');
+  if(mode==='bot')return fail('Bot戦ではルール外の手動移動を使えません。');if(z==='shields'||locate(id)?.z==='shields')return fail('シールドは専用処理で管理します。');
   const source=locate(id),error=interactionError();if(error)return fail(error);if(!source||!state[p]?.[z])return fail('カードまたは領域が見つかりません。');
   if(['main','trash'].includes(z)&&source.card.type==='土地'&&z!=='trash')return fail('土地はメインデッキへ入れられません。');
   if(['landDeck','landTrash'].includes(z)&&source.card.type!=='土地')return fail('土地専用の領域です。');
@@ -132,6 +165,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(isUnit(z)&&(!isUnit(source.z)||source.p!==p)){enterCard(source,p,z);pump();}else rawMove(source,p,z,bottom);return ok(z==='exile'?'明示的な手動操作で除外ゾーンへ移しました。':'手動移動（ルール外の補助）を実行しました。土地配置回数は変更しません。');
  }
  function addCard(p,z,c) {
+  if(z==='shields'||c?.type==='シールドカード')return fail('シールドは専用デッキで管理します。');
   if(!c?.id||vanishedIds.has(c.id)||locate(c.id))return fail('消滅した個体や、既に存在する個体は追加できません。');
   if(mode==='bot')return fail('Bot戦では仮カード追加を使えません。');
   const error=interactionError();if(error)return fail(error);if(!state[p]?.[z])return fail('追加先が見つかりません。');
@@ -145,12 +179,12 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function toggle(id,property='rest') {
   if(mode==='bot')return fail('Bot戦では状態切替の補助操作を使えません。');
   const error=interactionError(),s=locate(id);if(error)return fail(error);if(!s)return fail('カードが見つかりません。');
-  if(!['rest','faceUp','sick'].includes(property))return fail('変更できない項目です。');
+  if(s.z==='shields')return fail('シールドは専用処理で管理します。');if(!['rest','faceUp','sick'].includes(property))return fail('変更できない項目です。');
   if(property==='sick'&&(!isUnit(s.z)||s.card.type!=='通常'))return fail('場の仮ユニットを選んでください。');
   s.card[property]=!s.card[property];return ok(property==='sick'?'補助操作で召喚酔いを変更しました。':'補助操作でカードの状態を変更しました。');
  }
  function readyMana(p) {if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError();if(e)return fail(e);state[p].energy.forEach(c=>c.rest=false);return ok('補助操作で土地を未使用に戻しました。');}
- function remove(id) {if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError(),s=locate(id);if(e)return fail(e);if(!s)return fail('カードが見つかりません。');state[s.p][s.z].splice(s.index,1);return ok('補助操作でカードを削除しました。');}
+ function remove(id) {if(locate(id)?.z==='shields')return fail('シールドは削除できません。');if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError(),s=locate(id);if(e)return fail(e);if(!s)return fail('カードが見つかりません。');state[s.p][s.z].splice(s.index,1);return ok('補助操作でカードを削除しました。');}
  function draw(p,n=1) {if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError();if(e)return fail(e);if(!Number.isInteger(n)||n<1)return fail('ドロー枚数が不正です。');const count=drawRaw(p,n);return ok(`手動ドロー（補助）：${label(p)}が${count}枚引きました。`);}
  function shuffle(p,z) {if(mode==='bot')return fail('Bot戦では補助操作を使えません。');const e=interactionError();if(e)return fail(e);shuffleRaw(p,z);return ok('山札をシャッフルしました。');}
  function availableMana(p) {const sources=paymentSources(p);return {total:sources.length,...Object.fromEntries(Mana.colors.map(color=>[color,sources.filter(s=>s.colors.includes(color)).length])),flexible:sources.filter(s=>s.colors.length>1).length};}
@@ -217,7 +251,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function useSpell(s,p,foretold=false,targetId=null){const c=s.z==='check'?s.card:rawMove(s,p,'check');c.faceUp=true;c.resolving=true;enqueue([...(foretold&&c.foretell?.onUse?c.foretell.onUse:c.onUse||[]),{kind:'cleanup'}],p,c.id,targetId);return c;}
  function confirmPayment(expected=operation){
   const checked=paymentInfo(expected);if(!checked.ok)return checked;const o=operation,c=checked.source.card;
-  const targetEffect=(o.purpose==='set'?c.foretell?.onSet:(c.foretold?(c.foretell?.onUse||c.onUse):c.onUse))?.find(e=>['bounce','trap','mother'].includes(e.kind));
+  const targetEffect=(o.purpose==='set'?c.foretell?.onSet:(c.foretold?(c.foretell?.onUse||c.onUse):c.onUse))?.find(e=>['bounce','trap','mother','buffUnit'].includes(e.kind));
   if(strictTargets&&targetEffect&&targetOptions(targetEffect,o.p).length&&!targetOptions(targetEffect,o.p).some(x=>x.id===o.targetId))return fail('使用前に対象を1枚選んでください。');
   operation=null;checked.sources.forEach(s=>s.source.card.rest=true);
   if(o.purpose==='set'){rawMove(checked.source,o.p,'exile');c.faceUp=false;c.foretold={owner:o.p,sequence:turn.sequence};enqueue(c.foretell.onSet||[],o.p,c.id,o.targetId);announce({kind:'foretell',p:o.p,cardId:c.id,method:'予顕として伏せる',text:'予顕カードを裏向きに伏せました。'},'effects');}
@@ -225,12 +259,12 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   return ok('支払いを確定しました。');
  }
  function cancelPayment(){if(operation?.kind!=='payment')return fail('キャンセルできる支払い操作がありません。');operation=operation.response||null;return ok('支払いをキャンセルしました。支払い元は変更していません。');}
- function selectUseTarget(id){const o=operation;if(!o||!['payment','freePlace','freeCast','returnPlace'].includes(o.kind))return fail('使用確認中ではありません。');const c=locate(o.id)?.card,e=(o.purpose==='set'?c?.foretell?.onSet:c?.foretold?(c.foretell.onUse||c.onUse):c?.onUse)?.find(e=>['bounce','trap','mother'].includes(e.kind));if(!e||!targetOptions(e,o.p).some(x=>x.id===id))return fail('有効なユニット・設置物を選んでください。土地は対象外です。');o.targetId=id;return ok('使用前の対象を確定しました。');}
+ function selectUseTarget(id){const o=operation;if(!o||!['payment','freePlace','freeCast','returnPlace'].includes(o.kind))return fail('使用確認中ではありません。');const c=locate(o.id)?.card,e=(o.purpose==='set'?c?.foretell?.onSet:c?.foretold?(c.foretell.onUse||c.onUse):c?.onUse)?.find(e=>['bounce','trap','mother','buffUnit'].includes(e.kind));if(!e||!targetOptions(e,o.p).some(x=>x.id===id))return fail('有効なユニット・設置物を選んでください。土地は対象外です。');o.targetId=id;return ok('使用前の対象を確定しました。');}
  function announce(event,after){const publicEvent={id:++eventSerial,...event};if(event.kind!=='foretell'){const c=locate(event.cardId)?.card;if(c)publicEvent.card=clone(c);}events.push(publicEvent);if(events.length>80)events.shift();if(presentationMs>0){operation={kind:'presentation',event:publicEvent,until:clock()+presentationMs,after};}else continueAnnouncement(after);}
  function continueAnnouncement(after){if(after==='window')responseWindow();else if(after==='stack')resolveStack();else pump();}
  function finishPresentation(expected=operation){const o=operation;if(o!==expected||o?.kind!=='presentation'||result)return fail('以前の演出です。');if(clock()<o.until)return fail('カード表示中です。');operation=null;continueAnnouncement(o.after);return ok('公開行動を表示しました。');}
- function prepareFreeUse(source,options){const c=source.card,e=c.onUse?.find(e=>['bounce','trap','mother'].includes(e.kind));if(strictTargets&&e&&targetOptions(e,options.p).length)operation={kind:'freeCast',id:c.id,p:options.p,options,targetId:null};else declareUse(source,options);}
- function confirmFreeCast(expected=operation){const o=operation;if(o!==expected||o?.kind!=='freeCast')return fail('以前の無料使用です。');const s=locate(o.id),e=s?.card.onUse?.find(e=>['bounce','trap','mother'].includes(e.kind));if(!s||!targetOptions(e,o.p).some(c=>c.id===o.targetId))return fail('対象を確定してください。');operation=null;declareUse(s,{...o.options,targetId:o.targetId});return ok('無料使用を宣言しました。');}
+ function prepareFreeUse(source,options){const c=source.card,e=c.onUse?.find(e=>['bounce','trap','mother','buffUnit'].includes(e.kind));if(strictTargets&&e&&targetOptions(e,options.p).length)operation={kind:'freeCast',id:c.id,p:options.p,options,targetId:null};else declareUse(source,options);}
+ function confirmFreeCast(expected=operation){const o=operation;if(o!==expected||o?.kind!=='freeCast')return fail('以前の無料使用です。');const s=locate(o.id),e=s?.card.onUse?.find(e=>['bounce','trap','mother','buffUnit'].includes(e.kind));if(!s||!targetOptions(e,o.p).some(c=>c.id===o.targetId))return fail('対象を確定してください。');operation=null;declareUse(s,{...o.options,targetId:o.targetId});return ok('無料使用を宣言しました。');}
  function declareUse(source,options){const c=source.card,p=options.p;rawMove(source,p,'check');c.faceUp=true;c.resolving=true;const frame={id:++frameSerial,cardId:c.id,...options,responded:false,canceled:false};delete c.foretold;stack.push(frame);record(`${label(p)}が${c.name}を${frame.method}で使用宣言。`);announce({kind:'use',p,cardId:c.id,method:frame.method,cost:frame.paidCost||Mana.cost(0),text:'使用宣言・解決待ち'},'window');}
  function responseWindow(){const f=stack.at(-1);if(!f)return pump();const c=locate(f.cardId)?.card;f.responded=true;const responder=other(f.p);if(c&&!c.uncounterable&&counterCards(responder).length){operation={kind:'response',p:responder,frameId:f.id,cardId:f.cardId};return;}resolveStack();}
  function passResponse(expected=operation){const o=operation;if(o!==expected||o?.kind!=='response')return fail('応答待ちではありません。');operation=null;resolveStack();return ok('対抗呪文を使わず解決へ進みます。');}
@@ -272,6 +306,11 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
    const effect=queue.shift(),p=effect.p,sourceId=effect.sourceId;
    if(effect.kind==='startDrawLand'){startDrawLand(p);}
    else if(effect.kind==='return'){const s=locate(effect.id);if(s?.z==='exile'&&s.card.returnReservation?.owner===p){operation={kind:'returnPlace',p,id:effect.id,slot:null,replacedId:null};break;}}
+   else if(effect.kind==='shieldWindow'){if(!closedShieldTimings.has(effect.timing)){const ids=effect.ids.filter(id=>state[p].shields.some(c=>c.id===id&&!c.faceUp));if(ids.length){operation={kind:'shieldWindow',p,timing:effect.timing,event:effect.event,ids};break;}}}
+   else if(effect.kind==='healLife'){healLife(p,effect.count);}
+   else if(effect.kind==='loseLife'){loseLife(p,effect.count);}
+   else if(effect.kind==='basicLand'){addBasicLand(p);}
+   else if(effect.kind==='resetShield'||effect.kind==='inspectShield'){const owner=effect.kind==='resetShield'?p:other(p),candidates=state[owner].shields.filter(c=>effect.kind==='resetShield'?c.faceUp:!c.faceUp);if(candidates.length){operation={kind:effect.kind,p};break;}}
    else if(effect.kind==='chooseFate'){operation={kind:'fateChoice',p,sourceId};break;}
    else if(effect.kind==='fateWhim'){const before=new Set(state[p].hand.map(c=>c.id)),drawn=drawRaw(p,1);const c=state[p].hand.find(c=>!before.has(c.id));if(c&&hasJil(p))c.usageCostOverride=Mana.cost(1);record(`${label(p)}：運命で${drawn}枚ドロー${c?.usageCostOverride?'し、その個体の使用コストを1に変更':''}。`);}
    else if(effect.kind==='drawIfJil'){if(hasJil(p))drawRaw(p,effect.count);}
@@ -286,8 +325,8 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
    else if(effect.kind==='land'){if(effect.triggerName)record(`${effect.triggerName}のユニット登場誘発。`);addLands(p,effect.count||1);}
    else if(effect.kind==='draw'){const n=drawRaw(p,effect.count);record(`${label(p)}が${n}枚ドロー。`);}
    else if(effect.kind==='drawIfLandMax'){if(landCount(p)<=effect.max)drawRaw(p,effect.count);record(`土地追加後の土地${landCount(p)}枚でドロー条件を判定。`);}
-   else if(['trap','mother','bounce','topUnit'].includes(effect.kind)){
-    const targetPlayer=other(p),targetPlayers=['mother','bounce'].includes(effect.kind)?PLAYERS:[targetPlayer],candidates=targetOptions(effect,p);
+   else if(['trap','mother','bounce','topUnit','buffUnit'].includes(effect.kind)){
+    const targetPlayer=other(p),targetPlayers=effect.kind==='buffUnit'?[p]:['mother','bounce'].includes(effect.kind)?PLAYERS:[targetPlayer],candidates=targetOptions(effect,p);
     if(candidates.length){operation={kind:'effectTarget',p,targetPlayer,targetPlayers,effect:effect.kind,sourceId,selectedId:null};if(effect.targetId&&candidates.some(c=>c.id===effect.targetId))resolveEffectTarget(effect.targetId);else break;}
     else record('対象がないため、後半を含め効果を省略。');
    }else if(effect.kind==='freeUnit'){
@@ -317,11 +356,11 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   }
   refreshDerived();
  }
- function targetOptions(effect,p){if(!['mother','bounce','trap','topUnit'].includes(effect.kind))return [];const owners=['mother','bounce'].includes(effect.kind)?PLAYERS:[other(p)];return owners.flatMap(owner=>unitSlots(owner).flatMap(z=>state[owner][z.id]).filter(c=>c.type==='通常').concat(effect.kind==='bounce'?state[owner].structures.filter(c=>c.type==='設置物'):[]));}
+ function targetOptions(effect,p){if(!['mother','bounce','trap','topUnit','buffUnit'].includes(effect.kind))return [];const owners=effect.kind==='buffUnit'?[p]:['mother','bounce'].includes(effect.kind)?PLAYERS:[other(p)];return owners.flatMap(owner=>unitSlots(owner).flatMap(z=>state[owner][z.id]).filter(c=>c.type==='通常').concat(effect.kind==='bounce'?state[owner].structures.filter(c=>c.type==='設置物'):[]));}
  function effectTargets(){const o=operation;return o?.kind==='effectTarget'?targetOptions({kind:o.effect},o.p):[];}
  function resolveEffectTarget(id,expected=operation){
   const o=operation;if(o!==expected||o?.kind!=='effectTarget'||!effectTargets().some(c=>c.id===id))return fail('有効な対象を1枚選んでください。土地は対象外です。');
-  const source=locate(id),owner=source.p,c=source.card;operation=null;rawMove(source,owner,o.effect==='bounce'?'hand':o.effect==='topUnit'?'main':'trash',o.effect!=='topUnit');
+  const source=locate(id),owner=source.p,c=source.card;operation=null;if(o.effect==='buffUnit'){c.statBonus={attack:(c.statBonus?.attack||0)+2,health:(c.statBonus?.health||0)+2};c.attack+=2;c.maxHealth+=2;c.health+=2;record(`${c.name}を＋2/＋2。`);pump();return ok('強化しました。');}rawMove(source,owner,o.effect==='bounce'?'hand':o.effect==='topUnit'?'main':'trash',o.effect!=='topUnit');
   record(`${c.name}を${o.effect==='bounce'?'手札へ戻した':o.effect==='topUnit'?'メインデッキの上へ戻した':'トラッシュへ送った'}。`);
   if(['trap','mother'].includes(o.effect))enqueue([{kind:o.effect==='mother'?'freeUnit':'land',count:1}],owner,o.sourceId);pump();return ok('対象の処理を完了しました。');
  }
@@ -370,7 +409,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function cancelAttackTarget(){if(operation?.kind!=='attackTarget')return fail('対象選択ではありません。');operation=null;return ok('攻撃前の対象選択を取りやめました。');}
  function startAttack(id,target){
   const s=locate(id);s.card.rest=true;events.push({id:++eventSerial,kind:'attack',p:s.p,attackerId:id,targetId:target,text:s.card.name+'が'+(target==='body'?'相手本体':locate(target)?.card.name)+'へ攻撃'});record(`${s.card.name}が${target==='body'?'相手本体':locate(target)?.card.name}へ攻撃宣言。使用済みにしました。`);
-  turn.attacks=(turn.attacks||0)+1;enqueue([...(s.card.onAttack||[]),{kind:'attackContinue',id,target}],s.p,id);pump();return ok('攻撃を宣言しました。');
+  turn.attacks=(turn.attacks||0)+1;enqueue([...(s.card.onAttack||[]),{kind:'attackContinue',id,target}],s.p,id);if(target==='body')queueShield(other(s.p),{kind:'attackDeclared',life:life[other(s.p)],attackerId:id});pump();return ok('攻撃を宣言しました。');
  }
  function continueAttack(id,target){const s=locate(id);if(!s||!isUnit(s.z)||s.p!==turn.player)return;
   if(target!=='body'){const b=locate(target);if(!b||!isUnit(b.z)||b.p===s.p)return fail('対象ユニットが場にありません。');battle(s,b,false);pump();return ok('ユニットへの直接攻撃を解決しました。');}
@@ -383,7 +422,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   a.card.health-=bp;b.card.health-=ap;
   const dead=[a,b].filter(s=>s.card.health<=0);
   record(`戦闘：${a.card.name} ${ap}/${a.card.health} 対 ${b.card.name} ${bp}/${b.card.health}。同時ダメージ。`);
-  for(const s of dead){const current=locate(s.card.id);if(current){rawMove(current,s.p,'trash');enqueue(s.card.onDeath||[],s.p,s.card.id);}}
+  for(const s of dead){const current=locate(s.card.id);if(current){rawMove(current,s.p,'trash');events.push({id:++eventSerial,kind:'unitDestroyed',p:s.p,cardId:s.card.id,text:s.card.name+'が戦闘で破壊'});enqueue(s.card.onDeath||[],s.p,s.card.id);}}
   if(dead.includes(b))enqueue(a.card.onDefeat||[],a.p,a.card.id);
   if(dead.includes(a))enqueue(b.card.onDefeat||[],b.p,b.card.id);
   refreshDerived();
@@ -394,11 +433,10 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   let b=null;if(blockerId){if(!blockers(o.defender).some(c=>c.id===blockerId))return fail('選んだユニットはブロックできません。');b=locate(blockerId);}
   operation=null;
   if(b){battle(a,b,true);pump();return ok('ブロック戦闘を解決。');}
-  const damage=attack(a.card,a.p);life[o.defender]-=damage;
-  record(`${label(o.defender)}に${damage}ダメージ。ライフ ${life[o.defender]}/30。`);
-  if(life[o.defender]<=0){finish(o.p,'相手ライフが0以下');return ok(`${label(o.p)}の勝利です。`);}
+  const damage=attack(a.card,a.p);
+  record(`${label(o.defender)}に${damage}ダメージ。`);
   if(a.card.onBodySuccess)enqueue(a.card.onBodySuccess,a.p,a.card.id);
-  pump();return ok('プレイヤーへの攻撃を解決しました。');
+  events.push({id:++eventSerial,kind:'playerCombatDamage',p:o.defender,amount:damage,text:`戦闘ダメージ${damage}`});loseLife(o.defender,damage,'戦闘ダメージ');pump();return ok('プレイヤーへの攻撃を解決しました。');
  }
  function finish(winner,reason){result={winner,loser:other(winner),reason};operation=null;queue=[];stack=[];turn.key={};epoch++;record(`${label(winner)}の勝利：${reason}。`);}
  function chooseFate(key,expected=operation){const o=operation;if(o!==expected||o?.kind!=='fateChoice'||!Catalog.fateKeys.includes(key))return fail('3種類の運命から1枚を選んでください。');const c=fromDefinition(key,o.p);state[o.p].hand.push(c);operation=null;record(`${label(o.p)}が${c.name}を手札に生成しました。`);pump();return ok('運命を選びました。');}
@@ -411,9 +449,9 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function observe(p){
   const copy=c=>JSON.parse(JSON.stringify(c)),publicCard=(c,owner,z)=>({...copy(c),owner,zone:z,...(c.type==='通常'?{attack:attack(c,owner)}:{})});
   const players={};
-  for(const owner of PLAYERS){const zones=state[owner];players[owner]={hand:owner===p?zones.hand.map(c=>({...publicCard(c,owner,'hand'),canPlay:playStatus(c,owner).ok,canForetell:!!c.foretell&&!useError(c,owner,'set')&&!!planPayment(c.foretell.cost,owner),effectiveCost:effectiveCost(c,owner),paymentPlan:c.cost?planPayment(effectiveCost(c,owner),owner):null})):null,counts:Object.fromEntries(ZONES.map(z=>[z.id,zones[z.id].length])),units:unitSlots(owner).flatMap(z=>zones[z.id].filter(c=>c.faceUp).map(c=>publicCard(c,owner,z.id))),structures:zones.structures.filter(c=>c.faceUp).map(c=>publicCard(c,owner,'structures')),lands:zones.energy.filter(c=>c.faceUp).map(c=>publicCard(c,owner,'energy')),trash:zones.trash.map(c=>publicCard(c,owner,'trash')),life:life[owner],maxLife:30,landCount:landCount(owner),symbols:symbols(owner)};}
+  for(const owner of PLAYERS){const zones=state[owner];players[owner]={hand:owner===p?zones.hand.map(c=>({...publicCard(c,owner,'hand'),canPlay:playStatus(c,owner).ok,canForetell:!!c.foretell&&!useError(c,owner,'set')&&!!planPayment(c.foretell.cost,owner),effectiveCost:effectiveCost(c,owner),paymentPlan:c.cost?planPayment(effectiveCost(c,owner),owner):null})):null,counts:Object.fromEntries(ZONES.map(z=>[z.id,zones[z.id].length])),units:unitSlots(owner).flatMap(z=>zones[z.id].filter(c=>c.faceUp).map(c=>publicCard(c,owner,z.id))),structures:zones.structures.filter(c=>c.faceUp).map(c=>publicCard(c,owner,'structures')),lands:zones.energy.filter(c=>c.faceUp).map(c=>publicCard(c,owner,'energy')),shields:zones.shields.map(c=>owner===p||c.faceUp?publicCard(c,owner,'shields'):{id:c.id,faceUp:false,owner,zone:'shields'}),trash:zones.trash.map(c=>publicCard(c,owner,'trash')),life:life[owner],maxLife:30,landCount:landCount(owner),symbols:symbols(owner)};}
   const actor=decisionPlayer(),o=operation;let projected=o?{kind:o.kind,p:actor}:null;
-  if(o&&actor===p){projected=copy(o);if(['payment','freePlace','freeCast','returnPlace'].includes(o.kind)){projected.slots=placementOptions(p,locate(o.id)?.card).map(z=>({id:z.id,card:state[p][z.id][0]?publicCard(state[p][z.id][0],p,z.id):null}));}
+  if(o&&actor===p){projected=copy(o);if(o.kind==='shieldWindow')projected.candidates=state[p].shields.filter(c=>o.ids.includes(c.id)&&!c.faceUp).map(c=>publicCard(c,p,'shields'));if(['resetShield','inspectShield'].includes(o.kind))projected.candidates=shieldEffectCandidates().map(c=>o.kind==='resetShield'?publicCard(c,p,'shields'):{id:c.id,faceUp:false});if(o.kind==='shieldReveal')projected.card=publicCard(locate(o.id).card,other(p),'shields');if(['payment','freePlace','freeCast','returnPlace'].includes(o.kind)){projected.slots=placementOptions(p,locate(o.id)?.card).map(z=>({id:z.id,card:state[p][z.id][0]?publicCard(state[p][z.id][0],p,z.id):null}));}
    if(o.kind==='effectTarget')projected.candidates=effectTargets().map(c=>{const s=locate(c.id);return publicCard(c,s.p,s.z);});
    if(o.kind==='freeUnit')projected.candidates=freeUnitCandidates().map(c=>publicCard(c,p,'hand'));
    if(o.kind==='combat'){const a=locate(o.id);projected.attacker=a?publicCard(a.card,a.p,a.z):null;projected.blockers=blockers(p).map(c=>publicCard(c,p,locate(c.id).z));}
@@ -423,7 +461,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
    if(o.kind==='fateChoice')projected.candidates=Catalog.fateKeys.map(k=>({...clone(Catalog.cards[k]),id:k}));
    if(o.kind==='untapLands')projected.candidates=state[p].energy.filter(c=>c.type==='土地').map(c=>publicCard(c,p,'energy'));
    if(o.kind==='tokens')projected.slots=placementOptions(p).map(z=>({id:z.id,card:state[p][z.id][0]?publicCard(state[p][z.id][0],p,z.id):null}));
-   if(['payment','freeCast'].includes(o.kind)){const c=locate(o.id)?.card;projected.targets=targetOptions((o.purpose==='set'?c?.foretell?.onSet:c?.foretold?(c.foretell.onUse||c.onUse):c?.onUse)?.find(e=>['bounce','trap','mother'].includes(e.kind))||{kind:'none'},p).map(c=>publicCard(c,locate(c.id).p,locate(c.id).z));}
+   if(['payment','freeCast'].includes(o.kind)){const c=locate(o.id)?.card;projected.targets=targetOptions((o.purpose==='set'?c?.foretell?.onSet:c?.foretold?(c.foretell.onUse||c.onUse):c?.onUse)?.find(e=>['bounce','trap','mother','buffUnit'].includes(e.kind))||{kind:'none'},p).map(c=>publicCard(c,locate(c.id).p,locate(c.id).z));}
 
   }
   const sources=paymentSources(p).map(s=>({id:s.id,colors:[...s.colors],unit:s.card.type==='通常'}));
@@ -433,12 +471,12 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  }
  function dispatch(action,p,expectedEpoch=epoch){
   if(expectedEpoch!==epoch||result)return fail('以前の対戦の操作です。');if(decisionPlayer()!==p)return fail('このプレイヤーの選択待ちではありません。');
-  const handlers={fate:()=>chooseFate(action.key),returnPlace:()=>confirmReturn(),untapSelect:()=>toggleUntapLand(action.id),untap:()=>confirmUntap(),mulligan:()=>completeMulligan(p,action.ids||[],false),play:()=>beginPayment(action.id,action.method||'normal'),freeCast:()=>confirmFreeCast(),foretell:()=>beginForetell(action.id),useTarget:()=>selectUseTarget(action.id),pass:()=>passResponse(),private:()=>resolvePrivate(action.id||null),orderMove:()=>reorderCard(action.id,action.delta),order:()=>confirmOrder(!!action.bottom),token:()=>placeToken(action.slot||null),optional:()=>resolveOptional(action.use!==false),slot:()=>chooseSlot(action.slot),pay:()=>confirmPayment(),cancelPayment,cancelAttackTarget,attack:()=>declareAttack(action.id,action.target),attackTarget:()=>chooseAttackTarget(action.target),block:()=>resolveAttack(action.id||null),target:()=>resolveEffectTarget(action.id),freeUnit:()=>chooseFreeUnit(action.id||null),freePlace:()=>confirmFreePlacement(),skipFree:skipFreePlacement,discard:()=>{const o=operation;if(o?.kind!=='discard')return fail('手札調整ではありません。');if(!Array.isArray(action.ids)||new Set(action.ids).size!==action.ids.length||action.ids.some(id=>!state[p].hand.some(c=>c.id===id)))return fail('手札から選択してください。');o.ids=[...action.ids];return confirmDiscard(o);},advance:()=>advance()};
+  const handlers={shield:()=>resolveShield(action.id||null),shieldEffect:()=>resolveShieldEffect(action.id||null),fate:()=>chooseFate(action.key),returnPlace:()=>confirmReturn(),untapSelect:()=>toggleUntapLand(action.id),untap:()=>confirmUntap(),mulligan:()=>completeMulligan(p,action.ids||[],false),play:()=>beginPayment(action.id,action.method||'normal'),freeCast:()=>confirmFreeCast(),foretell:()=>beginForetell(action.id),useTarget:()=>selectUseTarget(action.id),pass:()=>passResponse(),private:()=>resolvePrivate(action.id||null),orderMove:()=>reorderCard(action.id,action.delta),order:()=>confirmOrder(!!action.bottom),token:()=>placeToken(action.slot||null),optional:()=>resolveOptional(action.use!==false),slot:()=>chooseSlot(action.slot),pay:()=>confirmPayment(),cancelPayment,cancelAttackTarget,attack:()=>declareAttack(action.id,action.target),attackTarget:()=>chooseAttackTarget(action.target),block:()=>resolveAttack(action.id||null),target:()=>resolveEffectTarget(action.id),freeUnit:()=>chooseFreeUnit(action.id||null),freePlace:()=>confirmFreePlacement(),skipFree:skipFreePlacement,discard:()=>{const o=operation;if(o?.kind!=='discard')return fail('手札調整ではありません。');if(!Array.isArray(action.ids)||new Set(action.ids).size!==action.ids.length||action.ids.some(id=>!state[p].hand.some(c=>c.id===id)))return fail('手札から選択してください。');o.ids=[...action.ids];return confirmDiscard(o);},advance:()=>advance()};
   if(action.type==='play'&&locate(action.id)?.p!==p)return fail('自分の手札を選んでください。');
   return handlers[action.type]?handlers[action.type]():fail('操作が見つかりません。');
  }
  reset();
- return {INITIAL_HAND,setDeckLibrary,deckInfo,chooseFate,confirmReturn,toggleUntapLand,confirmUntap,get vanishedIds(){return [...vanishedIds];},get extraTurns(){return [...extraTurns];},ZONES,PLAYERS,SELF,STEPS,confirmFreeCast,foretoldReady,beginForetell,selectUseTarget,targetOptions,counterCards,passResponse,finishPresentation,privateCandidates,reorderCard,confirmOrder,resolvePrivate,placeToken,resolveOptional,observe,dispatch,decisionPlayer,isUnit,isField,label,card,buildDeck,validateDeck,reset,completeMulligan,locate,fromDefinition,buildLandDeck,validateLandDeck,addLands,refreshDeck,freeUnitCandidates,chooseFreeUnit,landCount,fieldCards,attack,healUnit,healLife,symbols,effectiveCost,paymentSources,planPayment,selectedMana,chooseManaColor,effectTargets,resolveEffectTarget,confirmFreePlacement,skipFreePlacement,attackTargets,chooseAttackTarget,cancelAttackTarget,manualMove,addCard,toggle,readyMana,remove,draw,shuffle,availableMana,landError,placeLand,playStatus,unitSlots,placementOptions,beginPayment,chooseSlot,togglePaymentLand,paymentInfo,confirmPayment,cancelPayment,advance,toggleDiscard,confirmDiscard,attackError,declareAttack,blockers,chooseBlocker,resolveAttack,
+ return {loseLife,destroyUnit,resolveShield,shieldEffectCandidates,resolveShieldEffect,INITIAL_HAND,setDeckLibrary,deckInfo,chooseFate,confirmReturn,toggleUntapLand,confirmUntap,get vanishedIds(){return [...vanishedIds];},get extraTurns(){return [...extraTurns];},ZONES,PLAYERS,SELF,STEPS,confirmFreeCast,foretoldReady,beginForetell,selectUseTarget,targetOptions,counterCards,passResponse,finishPresentation,privateCandidates,reorderCard,confirmOrder,resolvePrivate,placeToken,resolveOptional,observe,dispatch,decisionPlayer,isUnit,isField,label,card,buildDeck,validateDeck,reset,completeMulligan,locate,fromDefinition,buildLandDeck,validateLandDeck,addLands,refreshDeck,freeUnitCandidates,chooseFreeUnit,landCount,fieldCards,attack,healUnit,healLife,symbols,effectiveCost,paymentSources,planPayment,selectedMana,chooseManaColor,effectTargets,resolveEffectTarget,confirmFreePlacement,skipFreePlacement,attackTargets,chooseAttackTarget,cancelAttackTarget,manualMove,addCard,toggle,readyMana,remove,draw,shuffle,availableMana,landError,placeLand,playStatus,unitSlots,placementOptions,beginPayment,chooseSlot,togglePaymentLand,paymentInfo,confirmPayment,cancelPayment,advance,toggleDiscard,confirmDiscard,attackError,declareAttack,blockers,chooseBlocker,resolveAttack,
   get deckChoices(){return {...deckChoices};},get events(){return clone(events);},get mode(){return mode;},get firstPlayer(){return firstPlayer;},get epoch(){return epoch;},get life(){return {...life};},get state(){refreshDerived();return state;},get status(){return status;},get turn(){return turn;},get mulligan(){return mulligan;},get operation(){return operation;},get result(){return result;},get supplyStatus(){return supplyStatus;},get log(){return [...log];},get canAdvance(){return status==='ready'&&!result&&!operation&&clock()>=turn.notBefore;}};
 }
 return {create,ZONES,STEPS};
