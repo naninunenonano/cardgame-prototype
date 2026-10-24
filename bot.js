@@ -22,7 +22,10 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
   if(c.key==='dolt'&&enemy.units.some(x=>x.health<=c.attack))score+=18;
   if(c.key==='bahamut'){const gain=wipeGain(v);if(gain<=0&&(me.units.length||me.structures.length))return -100;score+=gain;}
   if(me.units.length>=7){const old=replacement(v);if(unitValue(c,me.landCount)<=unitValue(old,me.landCount)+3)return -100;score-=unitValue(old,me.landCount);}
- }else if(c.key==='themis'){const gain=enemy.units.reduce((n,x)=>n+unitValue(x,enemy.landCount),0)-me.units.reduce((n,x)=>n+unitValue(x,me.landCount),0);score=gain>0?gain+(danger?35:0):-100;}
+ }else if(c.key==='lostSoul')score=enemy.counts.hand*10+(me.character?.level===4?30:0);
+ else if(c.key==='conspiracy')score=enemy.units.length?35:-100;
+ else if(c.key==='technology')score=me.counts.main>3?55:-100;
+ else if(c.key==='themis'){const gain=enemy.units.reduce((n,x)=>n+unitValue(x,enemy.landCount),0)-me.units.reduce((n,x)=>n+unitValue(x,me.landCount),0);score=gain>0?gain+(danger?35:0):-100;}
  else if(c.key==='holyMail')score=me.life<=26?(danger?70:20):-100;
  else if(c.key==='repair')score=(me.life<30?25:0)+(me.shields?.some(c=>c.faceUp)?35:0)-5;
  else if(c.key==='fateWhim')score=canRefill?(me.units.some(c=>c.key==='jil')?55:30):-100;
@@ -79,6 +82,14 @@ function decide(v){
   const counts={};const ids=me.hand.filter(c=>{counts[c.key]=(counts[c.key]||0)+1;return total(c)>4||counts[c.key]>2||(c.key==='repair'&&counts[c.key]>1);}).map(c=>c.id);return {type:'mulligan',ids};
  }
  if(o){
+  if(o.kind==='revolution')return {type:'revolution',use:true};
+  if(o.kind==='sideChoice'){
+   if(o.choice==='viceOffer')return {type:'sideChoice',id:o.candidates[0]?.id||null};
+   if(['technologySearch','awakeSpells'].includes(o.choice)){const limit=o.choice==='awakeSpells'?6:Math.min(8,Math.max(0,o.ids.length-2)),remaining=o.candidates.filter(c=>!o.selected.includes(c.id));if(o.selected.length<limit&&remaining.length)return {type:'sideSelect',id:best(remaining,c=>o.choice==='awakeSpells'?-total(c):keepScore(v,c)).id};return {type:'sideChoice'};}
+   const candidates=o.candidates||[],c=best(candidates,c=>o.choice==='opponentDiscard'?-keepScore(v,c):o.choice==='darkHand'?total(c)*3+unitValue(c,enemy.landCount):o.choice==='destroySame'?unitValue(c,enemy.landCount):c.type==='通常'?unitValue(c,me.landCount):Math.max(0,playScore(v,c))+total(c));return {type:'sideChoice',id:c?.id||null};
+  }
+  if(o.kind==='sideFreePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.landCount):10000);return {type:'slot',slot:slot.id};}return {type:'sideFree'};}
+
   if(o.kind==='shieldWindow'){const c=o.candidates.find(c=>c.shieldRule.effect==='destroyAttacker')||o.candidates.find(c=>c.shieldRule.effect==='draw'&&me.counts.main+me.counts.trash>=2);return {type:'shield',id:c?.id||null};}
   if(o.kind==='resetShield')return {type:'shieldEffect',id:o.candidates[0]?.id||null};
   if(o.kind==='inspectShield')return {type:'shieldEffect',id:o.candidates[0]?.id||null};
@@ -95,7 +106,7 @@ function decide(v){
   if(o.kind==='searchSpell'){const c=best(o.candidates,c=>playScore(v,c));return {type:'private',id:c.id};}
   if(o.kind==='inspectHand'){const c=best(o.candidates.filter(c=>c.cost&&total(c)<=o.max),c=>total(c)+unitValue(c,enemy.landCount));return {type:'private',id:c?.id||null};}
   if(o.kind==='freeCast'){if(!o.targetId){const c=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.landCount));return {type:'useTarget',id:c.id};}return {type:'freeCast'};}
-  if(o.kind==='payment'){const c=[...me.hand,...(v.exile||[])].find(c=>c.id===o.id);if(o.targets?.length&&!o.targetId){const target=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.landCount));return {type:'useTarget',id:target.id};}if(c?.type==='通常'&&o.purpose!=='set'&&!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.landCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'pay'};}
+  if(o.kind==='payment'){const c=[...me.hand,...(v.exile||[]),...(me.sideboard||[])].find(c=>c.id===o.id);if(o.targets?.length&&!o.targetId){const target=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.landCount));return {type:'useTarget',id:target.id};}if(c?.type==='通常'&&o.purpose!=='set'&&!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.landCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'pay'};}
   if(['freePlace','returnPlace'].includes(o.kind)){const c=me.hand.find(x=>x.id===o.id);if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.landCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:o.kind==='returnPlace'?'returnPlace':'freePlace'};}
   if(o.kind==='freeUnit'){const c=best(o.candidates,c=>playScore(v,c));return {type:'freeUnit',id:c&&playScore(v,c)>0?c.id:null};}
   if(o.kind==='effectTarget'){const c=o.effect==='mother'?motherTarget(v,o.candidates):best(o.candidates,c=>(c.owner===p?-100:0)+unitValue(c,enemy.landCount));return {type:'target',id:c.id};}
@@ -107,7 +118,8 @@ function decide(v){
  if(['main1','main2'].includes(v.turn.step)){
   // Preserve an immediate direct win rather than tapping its mana creature to deploy more cards.
   if(v.turn.step==='main1'&&enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))&&!enemy.units.some(c=>c.lure)&&me.units.some(c=>!c.rest&&!c.sick&&!c.cannotAttack))return {type:'advance'};
-  const usable=[...me.hand,...(v.exile||[])].filter(c=>c.canPlay);
+  if(me.growth?.ok)return {type:'grow'};
+  const usable=[...me.hand,...(v.exile||[]),...(me.sideboard||[])].filter(c=>c.canPlay);
   const set=best(me.hand.filter(c=>c.canForetell),c=>c.key==='counter'?35:c.key==='goby'?12:c.key==='snow'&&enemy.units.length?25:-5);
   const c=best(usable,c=>playScore(v,c));
   if(set&&((set.key==='counter'&&(!c||playScore(v,c)<40))||(!c&&set.key!=='gate')))return {type:'foretell',id:set.id};if(c&&playScore(v,c)>0)return {type:'play',id:c.id};
