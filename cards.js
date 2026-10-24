@@ -63,7 +63,28 @@
  {key:'wisdomBlessing',name:'知恵の恵み',shieldRule:{event:'lifeLost',effect:'draw',count:2},triggerCondition:'自分のライフが減少した時。',text:'カードを2枚引く。ライフ0以下で確定した敗北は取り消せない。'}
  ];
  for(const d of shieldDefs)cards[d.key]={color:'無色',type:'シールドカード',deckSection:'shields',cost:null,symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],...d};
+ // 成長コストLv3/Lv4・未記載の覚醒前数値はデータで調整できる試作値。
+ const characterLevels={1:{cost:1,text:'成長時・開始時：1ドロー。',effects:[{kind:'draw',count:1}]},2:{cost:3,text:'成長時・開始時：相手ランダム1捨て。成長直後のみバイス・チャージャーを任意使用。',effects:[{kind:'randomDiscard',count:1}]},3:{cost:5,provisional:true,text:'成長時・開始時：相手の場1枚をバウンス（土地不可）→ランダム1捨て。',effects:[{kind:'enemyBounce'},{kind:'randomDiscard',count:1}]},4:{cost:7,provisional:true,text:'成長時：相手2捨て。常時：自分の効果で相手が実際に1枚捨てるごと1ドロー＋アクア・ガード。サイドの不特定3軽減。',effects:[{kind:'randomDiscard',count:2}]}};
+ const sideDefs=[
+ {key:'piruluk',name:'ピルルク',type:'キャラクター',cost:M.cost(1),level:0,text:'Lv1→Lv4へ順番に成長。成長もサイド使用1ターン1枚に含む。通常の攻撃・ブロックは行わない。'},
+ {key:'gunveet',name:'ブラック・ガンヴィート',type:'通常',cost:M.cost(4,{青:3}),attack:7,maxHealth:7,symbols:{青:1},requiredCharacter:'piruluk',provisional:true,onEnter:[{kind:'destroyTapped'}],awaken:'darkGunveet',text:'登場時：相手の横向き1体を破壊。相手ターン終了時、相手手札0なら覚醒。覚醒前7/7・青1は仮設定。'},
+ {key:'alegre',name:'ルナ・アレグル',type:'通常',cost:M.cost(5,{青:2}),attack:5,maxHealth:5,symbols:{青:1},provisional:true,onEnd:[{kind:'draw',count:1},{kind:'handDiscard',count:1}],awaken:'alegria',text:'終了時1ドロー→自分の手札1捨て。自分の開始時、トラッシュの呪文6枚を山札へ戻して覚醒可能。5/5・青1は仮設定。'},
+ {key:'dogiragon',name:'蒼き覚醒 ドギラゴンX',type:'通常',cost:M.cost(8),attack:13,maxHealth:13,symbols:{},revolution:true,text:'通常支払い不可。自分の元コスト5以上のクリーチャーの攻撃時に革命チェンジ。交換元を除外し同じ枠で攻撃を引き継ぐ。サイド使用1回。'},
+ {key:'viceCharger',name:'バイス・チャージャー',type:'呪文',cost:M.cost(0),requiredCharacter:'piruluk',viceOnly:true,onUse:[{kind:'randomDiscard',count:1},{kind:'basicLand'}],text:'ピルルクLv2へ成長した直後だけ任意使用。相手ランダム1捨て→基本土地1枚追加。成長の追加処理として回数を二重消費しない。'},
+ {key:'lostSoul',name:'ロスト・ソウル',type:'呪文',cost:M.cost(0,{青:8}),requiredCharacter:'piruluk',onUse:[{kind:'randomDiscard',count:999}],text:'相手の手札をすべて捨てさせる。実際の捨て札1枚ごとにピルルクLv4が誘発する。'},
+ {key:'conspiracy',name:'陰謀と計略の手',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'enemyUnitBounce'},{kind:'opponentDiscard'}],text:'相手の1体をバウンス→相手本人が手札1枚を選んで捨てる。'},
+ {key:'technology',name:'インビンシブル・テクノロジー',type:'呪文',cost:M.cost(12,{青:1}),allBlueReduction:3,onUse:[{kind:'technologySearch'},{kind:'technologyCast'}],text:'自分の土地がすべて青なら不特定をさらに3軽減（0まで）。山札から任意枚数を手札へ→現在手札枚数以下の元コストの青カード1枚を任意で無料使用。'},
+ {key:'interstellar',name:'偽りの月 インターステラ',type:'通常',cost:M.cost(4,{青:3}),attack:9,maxHealth:9,symbols:{青:2},requiredCharacter:'piruluk',abilities:['ブロッカー'],cannotBeAttacked:true,onEnter:[{kind:'interstellarEnter'}],onAttack:[{kind:'interstellarAttack'}],text:'攻撃対象にならない。登場時：手札の呪文またはトラッシュの元コスト5以下の呪文を無料使用→除外。攻撃時：除外の元コスト5以下の呪文を無料使用→使用後山札下。'},
+ {key:'vt5000',provisional:true,name:'飛翔龍 5000VT',type:'通常',color:'青',cost:M.cost(8),attack:12,maxHealth:12,symbols:{青:1},creatureReduction:true,onEnter:[{kind:'vtBounceLock'}],text:'青シンボル1は仮設定。両者のクリーチャー数だけ不特定軽減（トークンを含みキャラを除く、Lv4軽減と併用し0まで）。登場時：両者の攻撃力5以下を全バウンス。次の相手ターン中、相手は攻撃力5以下を出せない。'}
+ ];
+ for(const d of sideDefs)cards[d.key]={color:'青',symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],sideboardOnly:true,reduction:{minimum:{青:1}},...d};
+ const awakened={
+ darkGunveet:{name:'ダークネス・ガンヴィート',cost:M.cost(9),attack:9,maxHealth:9,symbols:{青:2},abilities:[],speedAttacker:true,onEnter:[],onStart:[{kind:'darkHand'}],text:'覚醒後のみ。9/9・青2・SA。自分の開始時：相手手札確認→1枚選んで捨てる→同じ元コストの相手1体を破壊。覚醒解除なし。'},
+ alegria:{name:'ルナ・アレグリア',cost:M.cost(14),attack:13,maxHealth:13,symbols:{青:3},abilities:[],onEnd:[],onEnter:[],drawOnUse:true,revertAtFive:true,text:'覚醒後のみ。13/13・青3。自分の召喚・呪文使用時1ドロー。自分の手札5枚以下なら覚醒解除。'}
+ };
+ cards.aquaGuard={key:'aquaGuard',name:'アクア・ガード',type:'通常',color:'青',cost:null,attack:0,maxHealth:1,symbols:{青:1},abilities:['ブロッカー'],cannotAttack:true,token:true,onUse:[],onEnter:[],onDefeat:[],text:'攻撃不可。場を離れれば消滅。'};
+ const sideboardPreset=sideDefs.map(c=>({key:c.key,count:1}));
  const decks={green:defs.map(c=>({key:c.key,count:c.key==='bahamut'?1:3})),blue:blueDefs.map(c=>({key:c.key,count:c.key==='shaper'?1:3}))};
  const landDecks={green:[{key:'greenLand',count:20}],blue:[{key:'blueLand',count:20}]};
- return {COLORS,TYPES,cards,shieldKeys:shieldDefs.map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,landDecks,startDeck:'green',startLandDeck:'green'};
+ return {COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:shieldDefs.map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,landDecks,startDeck:'green',startLandDeck:'green'};
 });
