@@ -1,7 +1,7 @@
 const {JSDOM}=require('jsdom'),fs=require('node:fs'),assert=require('node:assert/strict');
 const dom=new JSDOM(fs.readFileSync(__dirname+'/index.html','utf8'),{runScripts:'outside-only'}),w=dom.window;
 w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};w.confirm=()=>true;
-for(const name of ['mana.js','update-cards.js','starter-cards.js','cards.js','decks.js','packs.js','collection.js','deck-editor.js','game.js','bot.js','bot-runner.js','app.js'])w.eval(fs.readFileSync(__dirname+'/'+name,'utf8')+(name==='app.js'?'\nObject.defineProperty(globalThis,"Game",{get:()=>Game,configurable:true});':''));
+for(const name of ['mana.js','update-cards.js','starter-cards.js','expansion-cards.js','cards.js','decks.js','packs.js','collection.js','deck-editor.js','game.js','bot.js','bot-runner.js','app.js'])w.eval(fs.readFileSync(__dirname+'/'+name,'utf8')+(name==='app.js'?'\nObject.defineProperty(globalThis,"Game",{get:()=>Game,configurable:true});':''));
 const $=s=>w.document.querySelector(s),click=s=>$(s).click(),change=(s,value)=>{$(s).value=value;$(s).dispatchEvent(new w.Event('change'));};
 change('#content-mode-select','debug');click('#start-solo');
 const ids=w.Game.state.p1.hand.map(c=>c.id);for(const id of ids)click(`[data-mulligan="${id}"]`);assert.equal($('#exchange-count').textContent,'選択中：5枚 / 5枚');const stale=$('#exchange');stale.click();stale.click();assert.equal(w.Game.mulligan.p2,'pending');click('#keep');assert.equal(w.Game.turn.step,'charge');click('#next-phase');assert.equal(w.Game.turn.step,'main1');
