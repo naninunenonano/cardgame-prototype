@@ -6,6 +6,8 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const colors=['白','青','黒','赤','緑'],manaColors=[...colors,'無色'];
+  function cardColors(c){return c.civilizations||[c.color||'無色'];}
+  function hasColor(c,color){return cardColors(c).includes(color);}
   function producedColors(c){const a=c.civilizations||c.manaColors||[c.color];return [...new Set(a)].filter(k=>manaColors.includes(k));}
   function cost(generic=0,colored={}) {
     const result={generic,...Object.fromEntries(colors.map(color=>[color,colored[color]||0]))};
@@ -57,5 +59,5 @@
     for(const color of colors)if(required[color])parts.push(`${color}${required[color]}`);
     return parts.join('＋')||'0';
   }
-  return {colors,manaColors,producedColors,cost,total,pool,assess,payment,suggest,describe};
+  return {colors,manaColors,cardColors,hasColor,producedColors,cost,total,pool,assess,payment,suggest,describe};
 });

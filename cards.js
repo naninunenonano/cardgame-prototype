@@ -83,6 +83,7 @@
  const sideboardPreset=sideDefs.map(c=>({key:c.key,count:1}));
  const starter=(typeof module==='object'&&module.exports?require('./starter-cards.js'):globalThis.StarterContent).install(M,cards,awakened);
  (typeof module==='object'&&module.exports?require('./update-cards.js'):globalThis.CardUpdate).install(M,cards,awakened);
+ (typeof module==='object'&&module.exports?require('./expansion-cards.js'):globalThis.ExpansionCards).install(M,cards,awakened);
  const decks={...starter.decks,green:[...defs.map(c=>({key:c.key,count:['bahamut','mother'].includes(c.key)?1:3})),{key:'glennya',count:2}],blue:[...blueDefs.map(c=>({key:c.key,count:['shaper','zwei'].includes(c.key)?1:3})),{key:'glennya',count:2}]};
  return {starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:Object.values(cards).filter(c=>c.type==='シールドカード').map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'};
 });
