@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node missions-test.cjs
       - run: node collection-test.cjs
       - run: node expansion-test.cjs
       - run: node just-diver-test.cjs
@@ -34,6 +35,9 @@ jobs:
           node-version: '22'
       - run: npm install --prefix /tmp/cardgame-browser playwright
       - run: /tmp/cardgame-browser/node_modules/.bin/playwright install --with-deps chromium
+      - run: node missions-browser-test.cjs
+        env:
+          NODE_PATH: /tmp/cardgame-browser/node_modules
       - run: node collection-browser-test.cjs
         env:
           NODE_PATH: /tmp/cardgame-browser/node_modules
