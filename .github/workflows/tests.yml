@@ -27,6 +27,7 @@ jobs:
       - run: node construction-test.cjs
       - run: for f in *.js *.cjs; do node --check "$f"; done
   pack-ui:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +35,8 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --prefix /tmp/cardgame-browser playwright
-      - run: /tmp/cardgame-browser/node_modules/.bin/playwright install --with-deps chromium
+      - run: /tmp/cardgame-browser/node_modules/.bin/playwright install chromium
+        timeout-minutes: 3
       - run: node missions-browser-test.cjs
         env:
           NODE_PATH: /tmp/cardgame-browser/node_modules
