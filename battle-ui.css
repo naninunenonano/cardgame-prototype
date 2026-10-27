@@ -19,3 +19,5 @@ html:has(body.battle-active){height:100%;overflow:hidden;overscroll-behavior:non
 .character-portrait .character-art img{object-position:var(--focus-x,50%) var(--focus-y,25%);transform-origin:var(--focus-x,50%) var(--focus-y,25%);transform:translate(calc(50% - var(--focus-x,50%)),calc(50% - var(--focus-y,25%))) scale(var(--face-zoom,2))}
 
 .zone-hint{font-size:7px;font-style:normal;color:#bbd4dc;line-height:1}.battle-info .zone-counter .zone-hint{flex:none}
+
+.character-center{padding:0}.character-portrait{height:min(calc(var(--info) - 26px),var(--portrait));flex:none}.portrait-grow{min-height:24px;padding:1px;font-size:9px}.portrait-level{font-size:9px;line-height:12px}.portrait-role{line-height:24px}@media(max-height:650px){.portrait-level{font-size:8px;line-height:10px}}
