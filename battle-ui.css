@@ -21,3 +21,4 @@ html:has(body.battle-active){height:100%;overflow:hidden;overscroll-behavior:non
 .zone-hint{font-size:7px;font-style:normal;color:#bbd4dc;line-height:1}.battle-info .zone-counter .zone-hint{flex:none}
 
 .character-center{padding:0}.character-portrait{height:min(calc(var(--info) - 26px),var(--portrait));flex:none}.portrait-grow{min-height:24px;padding:1px;font-size:9px}.portrait-level{font-size:9px;line-height:12px}.portrait-role{line-height:24px}@media(max-height:650px){.portrait-level{font-size:8px;line-height:10px}}
+.battle-active #turn-panel>div:first-child{flex:1;min-width:0;overflow:hidden}.battle-active #turn-panel b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.battle-active #turn-panel .turn-buttons{flex:none;min-width:0}
