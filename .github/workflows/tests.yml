@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node draw-charger-test.cjs
       - run: node deck-exhaustion-test.cjs
       - run: node missions-test.cjs
       - run: node collection-test.cjs
@@ -38,6 +39,9 @@ jobs:
       - run: npm install --prefix /tmp/cardgame-browser playwright
       - run: /tmp/cardgame-browser/node_modules/.bin/playwright install chromium
         timeout-minutes: 3
+      - run: node draw-charger-browser-test.cjs
+        env:
+          NODE_PATH: /tmp/cardgame-browser/node_modules
       - run: node deck-exhaustion-browser-test.cjs
         env:
           NODE_PATH: /tmp/cardgame-browser/node_modules
