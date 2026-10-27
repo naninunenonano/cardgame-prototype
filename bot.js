@@ -104,7 +104,7 @@ function decide(v){
   }
   if(o.kind==='sideFreePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount):10000);return {type:'slot',slot:slot.id};}return {type:'sideFree'};}
 
-  if(o.kind==='shieldWindow'){const c=o.candidates.find(c=>c.shieldRule.effect==='revive')||o.candidates.find(c=>!['draw'].includes(c.shieldRule.effect))||o.candidates.find(c=>c.shieldRule.effect==='destroyAttacker')||o.candidates.find(c=>c.shieldRule.effect==='draw'&&me.counts.main+me.counts.trash>=2);return {type:'shield',id:c?.id||null};}
+  if(o.kind==='shieldWindow'){const c=o.candidates.find(c=>c.shieldRule.effect==='revive')||o.candidates.find(c=>!['draw'].includes(c.shieldRule.effect))||o.candidates.find(c=>c.shieldRule.effect==='destroyAttacker')||o.candidates.find(c=>c.shieldRule.effect==='draw'&&me.counts.main>=2);return {type:'shield',id:c?.id||null};}
   if(o.kind==='resetShield')return {type:'shieldEffect',id:o.candidates[0]?.id||null};
   if(o.kind==='inspectShield')return {type:'shieldEffect',id:o.candidates[0]?.id||null};
   if(o.kind==='shieldReveal')return {type:'shieldEffect'};
@@ -114,7 +114,7 @@ function decide(v){
   if(o.kind==='handPick'){const c=best(o.candidates,c=>-keepScore(v,c));return {type:'private',id:c?.id||null};}
   if(o.kind==='recoverUnit'){const c=best(o.candidates,c=>unitValue(c,me.manaCount));return {type:'private',id:c?.id||null};}
   if(o.kind==='response'){const c=o.candidates.find(c=>c.responseOnly&&o.target?.type==='呪文'&&o.target.owner!==p)||o.candidates.find(c=>!c.responseOnly&&(enemy.units.length>0));return c?{type:'play',id:c.id,method:'instant'}:{type:'pass'};}
-  if(o.kind==='optionalDraw')return {type:'optional',use:me.counts.main+me.counts.trash>0};
+  if(o.kind==='optionalDraw')return {type:'optional',use:me.counts.main>0};
   if(o.kind==='tokens'){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount):10000);return {type:'token',slot:slot&&(!slot.card||unitValue(slot.card,me.manaCount)<10)?slot.id:null};}
   if(['reorder','stackOrder'].includes(o.kind)){if(o.scry)return {type:'order',bottom:keepScore(v,o.candidates[0])<8};const desired=o.candidates.slice().sort((a,b)=>keepScore(v,b)-keepScore(v,a)||a.id.localeCompare(b.id));const i=desired.findIndex((c,i)=>c.id!==o.order[i]);if(i>=0){const index=o.order.indexOf(desired[i].id);return {type:'orderMove',id:desired[i].id,delta:index>i?-1:1};}return {type:'order'};}
   if(o.kind==='searchSpell'){const c=best(o.candidates,c=>playScore(v,c));return {type:'private',id:c.id};}
