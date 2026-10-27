@@ -39,6 +39,9 @@ jobs:
       - run: npm install --prefix /tmp/cardgame-browser playwright @fontsource/noto-sans-jp
       - run: /tmp/cardgame-browser/node_modules/.bin/playwright install chromium
         timeout-minutes: 3
+      - run: node normal-mode-browser-test.cjs
+        env:
+          NODE_PATH: /tmp/cardgame-browser/node_modules
       - run: node battle-ui-browser-test.cjs
         env:
           NODE_PATH: /tmp/cardgame-browser/node_modules
