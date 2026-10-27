@@ -9,7 +9,7 @@ function close(){const d=dialog();if(!d?.open)return;dispose();d.close();d.inner
 function group(cards){if(cards.length===5)return [cards];return Array.from({length:10},(_,i)=>[...cards.slice(i*4,i*4+4),cards[40+i]]);}
 function start({cards,catalog,ownedBefore={},ownedAfter={},acquisition=null,again}){
  if(dialog()?.open)return false;
- const seen={...ownedBefore},batches=group(cards.map((x,i)=>({...x,...(acquisition?.items[i]||{})}))).map(pack=>pack.map(x=>{const c=catalog[x.key];const fresh=x.fresh??!seen[x.key];seen[x.key]=(seen[x.key]||0)+1;return {...x,card:c,fresh,owned:x.owned??ownedAfter[x.key]??seen[x.key]};}));
+ const seen={...ownedBefore},batches=group(cards.map((x,i)=>({...x,...(acquisition?.items[i]||{})}))).map(pack=>pack.map(x=>{const c=catalog[x.key];const fresh=x.fresh??!seen[x.key];seen[x.key]=(seen[x.key]||0)+1;return {...x,card:c,fresh,owned:ownedAfter[x.key]??x.owned??seen[x.key]};}));
  returnFocus=document.activeElement;session={batches,batch:0,shown:new Set(),stage:'sealed',again,total:cards.length,materialGain:acquisition?.materialGain||0,added:acquisition?.added??cards.length,converted:acquisition?.converted||0};render();dialog().showModal();dialog().querySelector('[data-pack-tear]').focus({preventScroll:true});return true;
 }
 function cardMarkup(x,i,summary=false){const c=x.card,revealed=summary||session.shown.has(i),cost=c.type==='シールドカード'?'コスト不要':root.ManaEngine.describe(c.cost),stats=c.attack!==undefined?`${c.attack} / ${c.maxHealth}`:c.type;
