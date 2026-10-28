@@ -45,7 +45,8 @@ function create(x){const M=x.M;let urgent=[],suspended=[],sacrifices=new Map(),s
  function gateEntry(c,p,effects){const gt=units('p1').concat(units('p2')).filter(a=>a.gtDamage&&!a.abilitiesDisabled&&a.id!==c.id);if(!gt.length&&!c.gtDamage)return false;const gates=gt.map(a=>({kind:'graveGTStrike',target:c.id,damage:a.gtDamage,p:x.locate(a.id).p,sourceId:a.id}));if(c.gtDamage&&!c.abilitiesDisabled)gates.push({kind:'graveGTSweep',id:c.id,damage:c.gtDamage});push([...gates,{kind:'graveEntryFinish',id:c.id,generation:c.entryGeneration,effects}],p,c.id);return true;}
  function gtStrike(id,amount,p){const s=x.locate(id);if(!s||!x.isUnit(s.z))return;const before=s.card.health;s.card.health-=amount;x.trace('unitDamage','5000GTの4ダメージ。',{card:x.publicRef(s.card,s.z),beforeHealth:before,afterHealth:s.card.health,sourcePlayer:p},p);if(s.card.health<=0)x.destroyUnit(id,'5000GTの4ダメージ',false,true);}
  function effect(e){const {kind,p,sourceId}=e;
-  if(kind==='graveMill'){if(e.count>0&&x.state[p].main.length){if(e.count>1)push([{...e,count:e.count-1}],p,sourceId);const c=x.state[p].main[0];if(e.batch){const b=batches.get(e.batch);b[p]=(b[p]||0)+(c.cost?M.total(c.cost):0);}x.rawMove(x.locate(c.id),p,'trash');}}
+  if(kind==='graveResumePriority')x.openPriority(e.context,e.priorityPlayer);
+  else if(kind==='graveMill'){if(e.count>0&&x.state[p].main.length){if(e.count>1)push([{...e,count:e.count-1}],p,sourceId);const c=x.state[p].main[0];if(e.batch){const b=batches.get(e.batch);b[p]=(b[p]||0)+(c.cost?M.total(c.cost):0);}x.rawMove(x.locate(c.id),p,'trash');}}
   else if(kind==='graveReanimate')reanimate(p,e,sourceId);
   else if(kind==='graveRecover')choice('recover',p,sourceId);
   else if(kind==='graveLegacyReveal'){const id=e.ids[e.index],s=id&&x.locate(id);if(id){push([{...e,index:e.index+1}],p,sourceId);if(s&&s.z==='holding')x.rawMove(s,p,e.reveal&&M.hasColor(s.card,'青')?'hand':'trash');}else if(e.reveal)x.record('山札の公開と仕分けを完了。');else if(trash(p).length)x.operation={kind:'recoverUnit',p};}
@@ -68,6 +69,6 @@ function create(x){const M=x.M;let urgent=[],suspended=[],sacrifices=new Map(),s
   else if(kind==='graveDelayed'){const s=x.locate(e.id);if(s&&current(s.card,p)&&s.card.entryGeneration===e.generation&&s.card.graveDelayed?.generation===e.generation){delete s.card.graveDelayed;if(e.action==='destroy')x.destroyUnit(e.id,'エレシュティアLv4の遅延破壊');else {x.rawMove(s,p,'main');s.card.faceUp=false;}}}
   else return false;return true;
  }
- return {reset,onTrash,drainUrgent,gZero,purpose,useError,withSacrifice,cost,paymentSources,paymentInfo,fushigiStatus,startFushigi,commitPayment,declared,evolutionCandidates,validateBases,toggleBase,resolveEvolution,canReanimate,candidates,resolve,place,characterAbility,cardcar,gateEntry,effect};
+ return {hasUrgent:()=>urgent.length>0,reset,onTrash,drainUrgent,gZero,purpose,useError,withSacrifice,cost,paymentSources,paymentInfo,fushigiStatus,startFushigi,commitPayment,declared,evolutionCandidates,validateBases,toggleBase,resolveEvolution,canReanimate,candidates,resolve,place,characterAbility,cardcar,gateEntry,effect};
 }
 return {create};});
