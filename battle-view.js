@@ -9,7 +9,7 @@ function info(g,p){const s=g.state[p],c=g.character(p)||s.extra.find(c=>c.type==
 const zone=(z,count,label=names[z])=>`<button class="zone-counter zone-${z}" data-list="${p}/${z}" aria-label="${g.label(p)}・${names[z]} ${z==='shields'?'未使用':''}${count}枚"><small>${label}</small><b>${count}</b>${z==='shields'?'<em class="zone-hint">未使用</em>':''}</button>`;
 const resources=`<button class="zone-counter zone-energy" data-list="${p}/energy" aria-label="${g.label(p)}・リソースゾーン 合計${g.manaCount(p)} 使用可能${g.availableMana(p).total}"><small>リソースゾーン</small><b>${g.availableMana(p).total}<span> / ${g.manaCount(p)}</span></b><span class="resource-colors">${ManaEngine.colors.map(color=>`<span style="--pip:${colors[color]}" title="${color}"><i>${color}</i>${s.energy.filter(c=>ManaEngine.producedColors(c).includes(color)).length}</span>`).join('')}</span></button>`;
 const life=`<button class="zone-counter zone-life" data-life="${p}" aria-label="${g.label(p)}・ライフ ${g.life[p]}"><small>ライフ</small><b class="player-life">${g.life[p]}</b></button>`;
-const shield=zone('shields',s.shields.filter(c=>!c.faceUp).length,'シールド<br>デッキ');
+const shield=zone('shields',s.shields.filter(c=>!c.faceUp&&!c.yellowZoneTriggered).length,'シールド<br>デッキ');
 const simple=`<div class="info-half simple-half">${(p==='p1'?['extra','trash','main']:['main','trash','extra']).map(z=>zone(z,z==='extra'?g.sideboardRoster(p).filter(c=>!c.used&&!c.expired).length:s[z].length,z==='extra'?'サイド<br>ボード':z==='main'?'通常<br>デッキ':names[z])).join('')}</div>`;
 const resourceHalf=`<div class="info-half resource-half ${p==='p2'?'resource-reverse':''}">${p==='p1'?resources+shield+life:life+shield+resources}</div>`;
 const [focusX,focusY,zoom]=portraitFocus[c?.key]?.[c?.level??0]||[50,25,2];

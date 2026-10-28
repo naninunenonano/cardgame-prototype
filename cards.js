@@ -84,6 +84,12 @@
  const starter=(typeof module==='object'&&module.exports?require('./starter-cards.js'):globalThis.StarterContent).install(M,cards,awakened);
  (typeof module==='object'&&module.exports?require('./update-cards.js'):globalThis.CardUpdate).install(M,cards,awakened);
  (typeof module==='object'&&module.exports?require('./expansion-cards.js'):globalThis.ExpansionCards).install(M,cards,awakened);
+ // Black SSR: only the current level is active; growth effects never repeat at turn start.
+ cards.redMoonAvenger={key:'redMoonAvenger',name:'赤月の復讐者',rarity:'SSR',color:'黒',type:'キャラクター',sideboardOnly:true,level:0,deckLimit:1,cost:M.cost(1),symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],growthOnly:true,provisional:true,
+ characterEffects:{1:[{kind:'redMoonSelf',amount:2},{kind:'draw',count:2}],2:[],3:[{kind:'redMoonLife15'}],4:[]},
+ levelTexts:{1:'成長時：自分に2ダメージ（シールド誘発なし）。その後2枚ドロー。',2:'自分のクリーチャー登場時：自分に2ダメージ（シールド誘発なし）。そのクリーチャーはSAを得る。強制・回数制限なし。',3:'成長時：自分のライフを15に変更。変更前が15以上なら2ドロー、15未満なら相手クリーチャー1体を破壊。',4:'復讐（ライフ15以下）なら自軍クリーチャーすべてにドレイン。自軍クリーチャー破壊ごと自分に3ダメージ（シールド誘発なし）。クリーチャーの攻撃以外でライフ0以下にならない（ルールダメージを除く）。共通：サイドの不特定3軽減。'},
+ text:'仮称・男性吸血鬼。Lv0からLv4へ成長。固有能力は現在レベルのみ有効、すべて強制。復讐は現在ライフ15以下。ドレインは戦闘で与えたダメージ分回復（最大ライフまで）。'};
+ cards.yellowZone={key:'yellowZone',name:'イエローゾーン',rarity:'UR',color:'黒',type:'シールドカード',deckSection:'shields',deckLimit:1,requiredCharacter:'redMoonAvenger',cost:null,symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],shieldRule:{event:'lifeThreshold',effect:'yellowZone',maxLife:15},triggerCondition:'ライフ変更後、現在ライフ15以下で自動発動（1試合1回）。赤月の復讐者の固有自傷・ルールダメージでは発動しない。',useCondition:'赤月の復讐者専用。',text:'仮称。発動中は最大ライフ15、受ける3以上のダメージは3、シールドによるライフ回復不可。他の回復は可能。裏向きで効果を失い、再発動しない。'};
  const decks={...starter.decks,green:[...defs.map(c=>({key:c.key,count:['bahamut','mother'].includes(c.key)?1:3})),{key:'glennya',count:2}],blue:[...blueDefs.map(c=>({key:c.key,count:['shaper','zwei'].includes(c.key)?1:3})),{key:'glennya',count:2}]};
  return {starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:Object.values(cards).filter(c=>c.type==='シールドカード').map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'};
 });
