@@ -85,6 +85,7 @@
  (typeof module==='object'&&module.exports?require('./update-cards.js'):globalThis.CardUpdate).install(M,cards,awakened);
  (typeof module==='object'&&module.exports?require('./expansion-cards.js'):globalThis.ExpansionCards).install(M,cards,awakened);
  (typeof module==='object'&&module.exports?require('./black-cards.js'):globalThis.BlackCards).install(M,cards);
+ (typeof module==='object'&&module.exports?require('./graveyard-cards.js'):globalThis.GraveyardCards).install(M,cards);
  // Black SSR: only the current level is active; growth effects never repeat at turn start.
  cards.redMoonAvenger={key:'redMoonAvenger',name:'赤月の復讐者',rarity:'SSR',color:'黒',type:'キャラクター',sideboardOnly:true,level:0,deckLimit:1,cost:M.cost(1),symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],growthOnly:true,provisional:true,
  characterEffects:{1:[{kind:'redMoonSelf',amount:2},{kind:'draw',count:2}],2:[],3:[{kind:'redMoonLife15'}],4:[]},

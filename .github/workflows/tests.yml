@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node graveyard-test.cjs
       - run: node black-cards-test.cjs
       - run: node black-ssr-test.cjs
       - run: node draw-charger-test.cjs
@@ -41,6 +42,9 @@ jobs:
       - run: npm install --prefix /tmp/cardgame-browser playwright @fontsource/noto-sans-jp
       - run: /tmp/cardgame-browser/node_modules/.bin/playwright install chromium
         timeout-minutes: 3
+      - run: node graveyard-browser-test.cjs
+        env:
+          NODE_PATH: /tmp/cardgame-browser/node_modules
       - run: node black-cards-browser-test.cjs
         env:
           NODE_PATH: /tmp/cardgame-browser/node_modules

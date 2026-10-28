@@ -1,0 +1,22 @@
+(function(root,factory){const a=factory();if(typeof module==='object'&&module.exports)module.exports=a;else root.GraveyardCards=a;})(globalThis,function(){
+function install(M,c){
+ const add=(key,name,rarity,black,generic,stats,symbols,extra={})=>{if(c[key])throw Error('Duplicate card '+key);return c[key]={key,name,rarity,color:'黒',civilizations:['黒'],type:stats?'通常':'呪文',cost:M.cost(generic,{黒:black}),deckLimit:rarity==='UR'?1:3,symbols:symbols?{黒:symbols}:{},abilities:[],onUse:[],onEnter:[],onDeath:[],onDefeat:[],reduction:{minimum:{黒:1}},...(stats?{attack:stats[0],maxHealth:stats[1]}:{}),...extra};};
+ add('ereshthiaNox','エレシュティア・ノクス','UR',0,1,null,0,{type:'キャラクター',sideboardOnly:true,level:0,deckLimit:1,growthOnly:true,characterEffects:{1:[{kind:'graveMill',count:2},{kind:'draw',count:1}],2:[{kind:'graveMill',count:3},{kind:'graveReanimate',max:2}],3:[{kind:'graveReanimate',max:5}],4:[]},levelTexts:{1:'成長時：山札上2枚をトラッシュへ。その後1ドロー。',2:'成長時：山札上3枚をトラッシュへ。その後トラッシュのコスト2以下のクリーチャー1体を出す。',3:'成長時：トラッシュのコスト5以下のクリーチャー1体を出す。',4:'自分のターンに1回、①黒の進化ではないクリーチャー1体をトラッシュから無料で出し、このターン終了時に破壊、または②山札上3枚をトラッシュへ、その後トラッシュのクリーチャー1枚を手札へ。共通：サイドの不特定3軽減。'},text:'女性ネクロマンサー。Lv0を1枚所持すればLv4まで使用可。現在レベルの固有能力のみ有効。Lv1〜3は成長時だけ。Lv4の2択は1ターンに合計1回。'});
+ add('burialRitual','堀葬の儀式','SR',1,4,null,0,{flashbackCost:M.cost(3,{黒:1}),onUse:[{kind:'graveReanimate'}],text:'トラッシュのクリーチャー1体を出す。フラッシュバック：黒1＋無色3でトラッシュから使用でき、この方法では解決後に自身を除外。蘇生禁止を優先。'});
+ add('mordecai','永遠の決闘者・モルディカイ','UR',10,0,[5,5],2,{speedAttacker:true,onDeath:[{kind:'tokens',count:1,tokenKey:'mordecaiToken'}],text:'スピードアタッカー。破壊時：5/5・黒シンボル2・ブロッカーのモルディカイトークン1体を出す。トークンは再生成能力・SAを持たず、通常の召喚酔いに従う。'});
+ add('mordecaiToken','モルディカイ','N',1,9,[5,5],2,{token:true,generated:true,deckEligible:false,abilities:['ブロッカー'],text:'モルディカイトークン。黒1＋無色9、5/5、黒シンボル2、ブロッカー。破壊時能力・SAなし。'});
+ add('iwashin','一なる部隊 イワシン','N',1,1,[1,1],0,{trashPriority:true,text:'いずれかのゾーンからトラッシュに置かれたとき、最優先で割り込み1ドロー→手札1枚を捨てる。連鎖を解決してから元の処理を再開。'});
+ add('crossfire','百万超邪 クロスファイア','SR',2,5,[6,6],2,{speedAttacker:true,gZero:{graveCreatures:10},text:'スピードアタッカー。G・ゼロ：自分のトラッシュのクリーチャーが10枚以上なら無料召喚できる。'});
+ add('mors','盗掘人形モールス','R',1,4,[2,2],1,{gZero:{graveCreatures:6},onEnter:[{kind:'graveRecover'}],text:'G・ゼロ：自分のトラッシュのクリーチャーが6枚以上なら無料召喚できる。登場時：トラッシュのクリーチャー1枚を手札へ。'});
+ add('gt5000','暴走龍 5000GT','UR',1,14,[13,13],3,{speedAttacker:true,graveCostReduction:true,gtDamage:4,noReanimate:true,text:'スピードアタッカー。トラッシュのクリーチャー1枚につき無色1軽減、黒1は必ず支払う。登場時、自身以外の全クリーチャーに4ダメージ。他のクリーチャー登場時、その1体に4ダメージ。この4ダメージで破壊されたクリーチャーの登場時・破壊時などの能力は発動しない。トラッシュから直接場に出せない。'});
+ add('undakein','不敵怪人アンダケイン','R',1,5,[4,4],1,{fushigiCost:M.cost(7,{黒:1}),onEnter:[{kind:'graveReanimate',max:4}],text:'フシギバース：トラッシュから、自分の場の1体をマナへ置き、黒1＋無色7を支払い召喚。移動したクリーチャーの元コスト分、無色を軽減。登場時：トラッシュのコスト4以下のクリーチャー1体を出す。'});
+ add('bRomanov','大邪眼B・ロマノフ','SR',1,11,[7,7],3,{evolution:{grave:true,min:3,max:3},graveCostReduction:true,onAttack:[{kind:'graveRomanovAttack'}],onPlayerDamage:[{kind:'graveRomanovHit'}],text:'墓地進化：トラッシュのクリーチャーを正確に3枚進化元にする。トラッシュのクリーチャー1枚につき無色1軽減。攻撃時、進化元3枚をトラッシュへ置き、相手の手札をランダムに最大3枚山札下へ。正のライフダメージを与えたとき、相手は2枚引く。'});
+ add('doomDragelion','超神星DOOM・ドラゲリオン','UR',1,11,[4,4],3,{evolution:{grave:true,min:1},graveCostReduction:true,onAttack:[{kind:'graveDoomDeploy'}],text:'墓地進化：トラッシュのクリーチャーを1枚以上、任意枚数進化元にする。トラッシュのクリーチャー1枚につき無色1軽減。攻撃時、進化元のクリーチャー1体を選んで取り除き、通常のクリーチャーとして場に出す。'});
+ for(const [key,name]of [['otakara','オタカラ・アッタカラ'],['guzari','凶鬼23号 グザリ']])add(key,name,'N',1,1,[2,2],0,{onEnter:[{kind:'graveMill',count:2}],text:'登場時：山札上2枚をトラッシュへ。'});
+ add('mathematician','マスマティシャン','R',1,2,[1,1],0,{onEnter:[{kind:'graveSearchMill'}],combatDeathDraw:true,text:'登場時：山札からクリーチャー1枚を選んでトラッシュへ。その後山札をシャッフル。コスト制限なし。戦闘で破壊されたとき1ドロー。'});
+ add('cardcarD','カードカー・D','N',1,1,[0,1],0,{cardcarAbility:true,text:'自分のターン中に起動：自身を破壊。山札上2枚をトラッシュへ置き、2ドロー。このターン自分の全クリーチャーは攻撃できない。召喚酔い中も起動可。'});
+ add('belGuerre','ベル＝ゲルエール','N',1,1,[1,1],0,{abyssRush:true,onEnter:[{kind:'graveAbyssEntry'}],text:'アビスラッシュ：トラッシュから通常コストを支払い召喚可。この方法なら登場ターンにプレイヤーを攻撃でき、ターン終了時に山札下へ。トラッシュから召喚した場合のみ、登場時に山札上2枚をトラッシュへ。通常召喚・効果による蘇生では墓地送りなし。'});
+ add('netherBalance','冥府の天秤','SR',1,4,[4,5],1,{onEnter:[{kind:'graveBalance'}],text:'登場時：両者の山札上3枚をそれぞれトラッシュへ。今回の効果で送ったカードの元コスト合計を比較し、自分が高ければ相手クリーチャーを最大2体選んで破壊。同点・相手が高い場合は破壊なし。'});
+ add('netherShield','冥府の盾','R',0,0,null,0,{type:'シールドカード',cost:null,deckSection:'shields',deckLimit:4,shieldRule:{event:'damaged',effect:'netherMill'},triggerCondition:'自分がダメージを受けたとき。',useCondition:'通常のシールド選択で任意使用。使用後は再使用不可。',text:'山札上3枚をトラッシュへ。継続効果・自動発動ではない。'});
+}
+return {install};});
