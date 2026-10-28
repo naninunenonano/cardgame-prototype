@@ -383,7 +383,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   let p,extra=false;if(forcedPlayer&&mode==='solo'){p=forcedPlayer;normalNext=other(p);}else if(turn.sequence===0){p=firstPlayer;normalNext=other(p);}else if(extraTurns.length){p=extraTurns.shift();extra=true;}else if(mode==='bot'){p=normalNext;normalNext=other(p);}else p=SELF;
   for(const q of PLAYERS)for(const c of fieldCards(q))if(c.attackZero?.until===p)delete c.attackZero;operation=null;turn.player=p;turn.extra=extra;turn.sequence++;turn.counts[p]++;turn.number=turn.counts[p];turn.key={};turn.step='untap';turn.lastDraw=0;turn.attacks=0;turn.battleWins={p1:0,p2:0};delete turn.scramble;
   for(const c of fieldCards(p))if(c.justDiverUntil&&c.justDiverUntil.owner===p&&c.justDiverUntil.turn<=turn.counts[p]){delete c.justDiverUntil;record(c.name+'のジャストダイバーの期限終了。');}
-  const recoveryCap=manaRecoveryCaps[p]?.at<=turn.counts[p]?manaRecoveryCaps[p]:null,recoveryIds=[];if(recoveryCap)delete manaRecoveryCaps[p];
+  const recoveryCap=manaRecoveryCaps[p]?.at<=turn.counts[p]?manaRecoveryCaps[p]:null,recoveryIds=[];if(recoveryCap)delete manaRecoveryCaps[p];turn.manaRecoveryLimit=recoveryCap?{p,max:recoveryCap.max,used:0}:null;
   for(const z of ZONES)if(isField(z.id)||z.id==='energy')state[p][z.id].forEach(c=>{if(z.id==='energy'){if(c.manaLock&&c.manaLock.skipAt<=turn.counts[p]){c.rest=true;delete c.manaLock;}else if(recoveryCap&&c.rest)recoveryIds.push(c.id);else c.rest=false;}else untapUnit(c,p);if(isField(z.id))c.sick=false;});
   turn.charged=false;trace('turnStart',label(p)+'のターン開始。マナ・場をアンタップ。',{after:auditState().players},p);record(`${label(p)}の第${turn.number}ターン${extra?'（追加ターン）':''}：アンタップ、召喚酔い解除。`);
   const returning=state[p].exile.filter(c=>c.returnReservation?.owner===p&&c.returnReservation.at<=turn.counts[p]);
@@ -439,14 +439,16 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function beginLoot(id){const s=locate(id);if(!s||!isUnit(s.z)||!s.card.lootAbility||s.card.rest||s.card.sick||mainError(s.p)||!state[s.p].hand.length)return fail('召喚酔い・タップ状態・手札の有無を確認してください。');operation={kind:'lootCost',p:s.p,id};return ok('コストとして捨てる手札1枚を選択。');}
  function resolveLoot(id){const o=operation;if(o?.kind!=='lootCost')return fail('起動能力の支払い中ではありません。');const s=locate(o.id),c=state[o.p].hand.find(c=>c.id===id);if(!s||!isUnit(s.z)||s.card.rest||s.card.sick||!c)return fail('起動コストを支払えません。');operation=null;s.card.rest=true;discardBy(id,o.p);enqueue([{kind:'draw',count:1}],o.p,o.id);pump();return ok('タップと手札破棄を支払い1ドロー。');}
  function attackWrap(id,p,defender,hit=false){const c=locate(id)?.card;enqueue([{kind:'attackWrap',id,defender,hit,afterDamage:c&&!c.abilitiesDisabled?c.afterAttackSelfDamage||0:0}],p,id);}
+ function recoveryAllowance(p){return turn.player===p&&turn.manaRecoveryLimit?.p===p?Math.max(0,turn.manaRecoveryLimit.max-turn.manaRecoveryLimit.used):Infinity;}
+ function recoverManaIds(p,ids){for(const id of ids){const c=state[p].energy.find(c=>c.id===id);if(c?.rest&&recoveryAllowance(p)>0){c.rest=false;if(turn.manaRecoveryLimit?.p===p&&turn.player===p)turn.manaRecoveryLimit.used++;}}}
  function blackEffect(e){const {kind,p,sourceId}=e,q=other(p);
   if(kind==='opponentDraw')drawRaw(q,e.count);
   else if(kind==='selfBuff'){const s=locate(sourceId);if(s&&isUnit(s.z))buff(s.card,e.attack,e.health);}
   else if(kind==='vengeanceEntry'){const s=locate(sourceId);if(life[p]<=15&&s&&isUnit(s.z)){if(e.attack)buff(s.card,e.attack,0);if(e.speed){s.card.temporarySA=true;s.card.speedAttacker=true;}}}
   else if(kind==='bothPlayerDamage'){enqueue([{kind:'selfDamage',amount:e.amount},{kind:'damagePlayer',amount:e.amount}],p,sourceId);}
   else if(kind==='halveEnemyLife')setLife(q,Math.floor(life[q]/2));
-  else if(kind==='limitEnemyRecovery'){manaRecoveryCaps[q]={at:turn.counts[q]+1,max:3};record(label(q)+'の次のターン開始時、マナ回復は最大3枚。');}
-  else if(kind==='cappedRecovery'){const ids=e.ids.filter(id=>state[p].energy.some(c=>c.id===id&&c.rest));if(ids.length<=e.max)for(const id of ids)locate(id).card.rest=false;else operation={kind:'untapMana',p,max:e.max,ids:[],eligibleIds:ids};}
+  else if(kind==='limitEnemyRecovery'){manaRecoveryCaps[q]={at:turn.counts[q]+1,max:3};record(label(q)+'の次のターン中、マナ回復は合計最大3枚。');}
+  else if(kind==='cappedRecovery'){const ids=e.ids.filter(id=>state[p].energy.some(c=>c.id===id&&c.rest));const max=Math.min(e.max,recoveryAllowance(p));if(ids.length<=max)recoverManaIds(p,ids);else if(max>0)operation={kind:'untapMana',p,max,ids:[],eligibleIds:ids};}
   else if(kind==='destroyTwoEnemies'){starterChoice('destroyUnitTarget',p,sourceId,{remaining:e.remaining||2,excluded:e.excluded||[]});}
   else if(kind==='stealEnemyLife')enqueue([{kind:'damagePlayer',amount:4},{kind:'healLife',count:4}],p,sourceId);
   else if(kind==='sealEnemyHand'){for(const c of [...state[q].hand]){const owner=c.origin||q;rawMove(locate(c.id),owner,'exile');c.handReturn={owner,at:turn.counts[owner]+1};}record(label(q)+'の手札を一時除外。次の持ち主のターン終了時に復帰。');}
@@ -543,7 +545,7 @@ if(kind==='scryMany'){const ids=state[p].main.slice(0,e.count).map(c=>c.id);if(i
    else if(effect.kind==='wipeUnits'){for(const owner of PLAYERS)for(const c of fieldCards(owner).filter(c=>c.type==='通常'))destroyUnit(c.id,'全体除去');record('両者のユニットをすべてトラッシュへ。設置物・マナは残ります。');}
    else if(effect.kind==='handDiscard'){if(state[p].hand.length){operation={kind:'handPick',p,effect:effect.kind};break;}record('手札に選べるカードがないため省略。');}
    else if(effect.kind==='optionalEffect'){operation={kind:'optionalEffect',p,label:effect.label,effects:effect.effects,sourceId};break;}
-   else if(effect.kind==='untapMana'){if(state[p].energy.length>0){operation={kind:'untapMana',p,max:effect.count,ids:[]};break;}}
+   else if(effect.kind==='untapMana'){const capped=Number.isFinite(recoveryAllowance(p)),max=Math.min(effect.count,recoveryAllowance(p)),eligible=state[p].energy.filter(c=>!capped||c.rest);if(eligible.length&&max>0){operation={kind:'untapMana',p,max,ids:[],...(capped?{eligibleIds:eligible.map(c=>c.id)}:{})};break;}}
    else if(effect.kind==='attackContinue'){continueAttack(effect.id,effect.target,effect.combatId);}
    else if(effect.kind==='drawIfManaMax'){if(manaCount(p)<=effect.max)enqueue([{kind:'draw',count:effect.count}],p,sourceId);}
    else if(['trap','mother','bounce','topUnit','buffUnit'].includes(effect.kind)){
@@ -665,7 +667,7 @@ if(kind==='scryMany'){const ids=state[p].main.slice(0,e.count).map(c=>c.id);if(i
  function finish(winner,reason,extra={}){if(result)return;trace('result',label(winner)+'の勝利：'+reason+'。',{winner,loser:other(winner),reason});result={winner,loser:other(winner),reason,type:'normal',turnNumber:turn.number,gameId,...extra};operation=null;queue=[];stack=[];turn.key={};epoch++;record(`${label(winner)}の勝利：${reason}。`);}
  function chooseFate(key,expected=operation){const o=operation;if(o!==expected||o?.kind!=='fateChoice'||!Catalog.fateKeys.includes(key))return fail('3種類の運命から1枚を選んでください。');const c=fromDefinition(key,o.p);state[o.p].hand.push(c);operation=null;record(`${label(o.p)}が${c.name}を手札に生成しました。`);pump();return ok('運命を選びました。');}
  function toggleUntapMana(id){const o=operation;if(o?.kind!=='untapMana'||!state[o.p].energy.some(c=>c.id===id)||o.eligibleIds&&!o.eligibleIds.includes(id))return fail('自分のマナを選んでください。');if(!o.ids.includes(id)&&o.ids.length>=o.max)return fail(`最大${o.max}枚です。`);o.ids=o.ids.includes(id)?o.ids.filter(x=>x!==id):[...o.ids,id];return ok('未使用に戻すマナを選択しました。');}
- function confirmUntap(expected=operation){const o=operation;if(o!==expected||o?.kind!=='untapMana'||o.ids.length>o.max||new Set(o.ids).size!==o.ids.length||o.ids.some(id=>!state[o.p].energy.some(c=>c.id===id)||o.eligibleIds&&!o.eligibleIds.includes(id)))return fail('マナの選択が不正です。');o.ids.forEach(id=>locate(id).card.rest=false);operation=null;record(`${label(o.p)}がマナ${o.ids.length}枚を未使用へ。`);pump();return ok('マナの回復を確定しました。');}
+ function confirmUntap(expected=operation){const o=operation;if(o!==expected||o?.kind!=='untapMana'||o.ids.length>o.max||new Set(o.ids).size!==o.ids.length||o.ids.some(id=>!state[o.p].energy.some(c=>c.id===id)||o.eligibleIds&&!o.eligibleIds.includes(id)))return fail('マナの選択が不正です。');if(o.ids.filter(id=>locate(id)?.card.rest).length>recoveryAllowance(o.p))return fail('このターンに回復できるマナの上限を超えています。');recoverManaIds(o.p,o.ids);operation=null;record(`${label(o.p)}がマナ${o.ids.length}枚を未使用へ。`);pump();return ok('マナの回復を確定しました。');}
  function setDeckLibrary(records){if(!Array.isArray(records))return fail('デッキ一覧が不正です。');deckRecords=clone(records);return {ok:true};}
  function deckInfo(p){return clone(chosenSpecs[p]);}
  function decisionPlayer(){if(result)return null;if(status==='mulligan')return mulligan.p2==='pending'&&mode==='bot'?'p2':PLAYERS.find(p=>mulligan[p]==='pending')||null;return operation?(operation.kind==='presentation'?null:operation.kind==='combat'?operation.defender:(operation.selector||operation.p)):turn.player;}
