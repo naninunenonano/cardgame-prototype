@@ -22,7 +22,7 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
   if(c.key==='dolt'&&enemy.units.some(x=>x.health<=c.attack))score+=18;
   if(c.key==='bahamut'){const gain=wipeGain(v);if(gain<=0&&(me.units.length||me.structures.length))return -100;score+=gain;}
   if(me.units.length>=7){const old=replacement(v);if(unitValue(c,me.manaCount)<=unitValue(old,me.manaCount)+3)return -100;score-=unitValue(old,me.manaCount);}
- }else if(['c7','r6','s8'].includes(c.key))score=enemy.life<=(c.key==='s8'?7:3)?10000:40;
+ }else if(c.key==='apocalypse'){const loss=units=>units.reduce((n,x)=>n+(x.health<=8?unitValue(x):2),0);score=loss(enemy.units)-loss(me.units);if(score>0)score+=danger?30:10;}else if(['c7','r6','s8'].includes(c.key))score=enemy.life<=(c.key==='s8'?7:3)?10000:40;
  else if(c.key==='s4')score=me.life<=24?35:-100;
  else if(c.key==='s6')score=enemy.units.length||enemy.structures.length?45:-100;
  else if(c.key==='s7')score=50;
