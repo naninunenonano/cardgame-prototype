@@ -2,7 +2,7 @@
 (function(root){'use strict';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const names={energy:'リソースゾーン',trash:'トラッシュ',lrig:'キャラクター',main:'通常デッキ',extra:'サイドボード',shields:'シールドデッキ',hand:'手札',exile:'除外ゾーン',structures:'設置カード',check:'解決中のカード'};
-const portraitFocus={piruluk:[[55,29,2],[63,25,2],[65,25,2.1],[52,22,3.6],[38,27,2.1]]};
+const portraitFocus={almar:[[55,29,2],[63,25,2],[65,25,2.1],[52,22,3.6],[38,27,2.1]]};
 const colors={白:'#ede4ac',青:'#60b5ee',黒:'#b193cc',赤:'#ec8589',緑:'#66d3a0',無色:'#b3c1cc'};
 function tile(g,c,{p,z,selected,hide=false}={}){const status=c.rest?'横・使用済み':'縦・未使用',sick=c.sick?'召喚酔い':'';return `<button class="battle-card card ${hide?'back':''} ${c.rest?'rest':''} ${c.sick?'sick':''} ${selected===c.id?'selected':''}" data-card="${esc(c.id)}" style="--color:${colors[c.color]||colors.無色}" aria-label="${hide?'非公開カード':esc(c.name)} ${status} ${sick}">${hide?'<strong>非公開</strong>':`<strong>${esc(c.name)}</strong>${CardImages.html(c)}<span class="tile-stats">${c.type==='通常'?`<b>${g.attack(c,p)} / ${c.health??c.maxHealth}</b>`:`<b>${c.cost?ManaEngine.total(c.cost):'—'}</b>`}<small>${c.rest?'横':c.sick?'酔':'縦'}</small></span>`}</button>`;}
 function info(g,p){const s=g.state[p],c=g.character(p)||s.extra.find(c=>c.type==='キャラクター'),growth=g.growStatus(p),own=g.mode==='solo'||p==='p1';

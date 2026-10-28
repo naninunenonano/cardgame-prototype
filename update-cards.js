@@ -1,6 +1,6 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.CardUpdate=api;})(globalThis,function(){
 function install(M,c,a){
- const groups={UR:'r1 otohime kuraki b1 shaper zwei bahamut mother jil peridot s5 s9 dogiragon vt5000 piruluk',SSR:'redCaptain blueSage s8 alegre technology gunveet interstellar',SR:'r3 r4 b6 b7 cosmo amaterasu dragon trap repair dolt themis walsura s6 lostSoul',R:'r2 r7 counter brain vice inquiry vegas fortune touki bird kaiser honenbee s2 s3 s4 s7 conspiracy viceCharger reactiveArmor wisdomBlessing',N:'imperialGuard r5 r6 gate b5 goby emeral corile snow life bronze elf panzer glennya c1 c2 c3 c4 c5 c6 c7 s1'};
+ const groups={UR:'r1 otohime kuraki b1 shaper zwei bahamut mother jil peridot s5 s9 dogiragon vt5000 almar',SSR:'redCaptain blueSage s8 alegre technology gunveet interstellar',SR:'r3 r4 b6 b7 cosmo amaterasu dragon trap repair dolt themis walsura s6 lostSoul',R:'r2 r7 counter brain vice inquiry vegas fortune touki bird kaiser honenbee s2 s3 s4 s7 conspiracy viceCharger reactiveArmor wisdomBlessing',N:'imperialGuard r5 r6 gate b5 goby emeral corile snow life bronze elf panzer glennya c1 c2 c3 c4 c5 c6 c7 s1'};
  c.repair.cost=M.cost(0,{緑:5});c.repair.instant=c.trap.instant=c.brain.instant=c.mother.instant=true;
  c.mother.text='インスタント。両者いずれかのクリーチャー1体を持ち主のマナへ。その持ち主のマナから移動後のマナ枚数以下の元コストのクリーチャー1体を必ず無料登場。全選択は発動者が行う。';
  c.panzer.text='タップして登場。攻撃を引き付ける。自分のシールドを表にした時、自分のマナに緑のカードが5枚以上あれば手札から任意で無料登場。';c.panzer.shieldEntry=true;
@@ -13,7 +13,7 @@ function install(M,c,a){
  for(const [key,name,rarity,event,effect,text,maxLife]of shields)c[key]={key,name,rarity,type:'シールドカード',color:'無色',cost:null,symbols:{},deckSection:'shields',abilities:[],onUse:[],onEnter:[],shieldRule:{event,effect,...(maxLife===undefined?{}:{maxLife})},triggerCondition:event==='attackDeclared'?'相手クリーチャーが攻撃した時。':event==='lethal'?'自分のライフが0以下になった時。':'自分がダメージを受けた時。',text,deckLimit:rarity==='UR'?1:4};
  for(const [rarity,keys]of Object.entries(groups))for(const k of keys.split(' '))if(c[k]){c[k].rarity=rarity;c[k].rarityProvisional=false;c[k].deckLimit=rarity==='UR'?1:3;}
  for(const k of ['alegre','dogiragon','technology','vt5000','conspiracy'])delete c[k].requiredCharacter;
- for(const k of ['gunveet','interstellar','lostSoul','viceCharger'])c[k].requiredCharacter='piruluk';
+ for(const k of ['gunveet','interstellar','lostSoul','viceCharger'])c[k].requiredCharacter='almar';
  c.holyMail.packExcluded=true;for(const x of Object.values(c))if(x.token||x.generated||x.deckEligible===false)x.packExcluded=true;
 }
 return {install};});
