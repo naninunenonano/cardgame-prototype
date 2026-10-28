@@ -2,7 +2,7 @@
 (function(root){
 'use strict';
 const images={
- piruluk:{0:'assets/characters/piruluk/lv0.webp',1:null,2:null,3:null,4:null},
+ almar:{0:'assets/characters/almar/lv0.webp',1:null,2:null,3:null,4:null},
  redCaptain:{0:null,1:null,2:null,3:null,4:null},
  blueSage:{0:null,1:null,2:null,3:null,4:null},
  celestia:{0:null,1:null,2:null,3:null,4:null}

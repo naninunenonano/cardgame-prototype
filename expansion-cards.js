@@ -26,7 +26,7 @@ make('crystalFusion','クリスタル・フュージョン','SSR',8,1,'緑','呪
 make('royalDogiragon','王道の革命 ドギラゴン','SSR',7,2,'緑','通常',[7,7],{sideboardOnly:true,symbols:{緑:2},machFighter:{duration:'entryTurn'},onEnter:[{kind:'manaAdd',count:3},{kind:'recoverMana',count:1}],text:'マッハファイター。登場時山札上3枚をマナへ→マナ1枚を手札へ。革命能力なし。'});
 for(const k of ['dravita','ancientWyvern','fairyBeast']){delete c[k].requiredCharacter;c[k].requiredCharacterColor='緑';c[k].sideboardScope='緑専用';}c.zundoko.rarity='R';c.zundoko.rarityProvisional=false;for(let i=1;i<=7;i++)c['c'+i].packExcluded=true;
 // Cost defines civilization; character identities and costless tokens remain explicit.
-for(const x of Object.values(c)){if(x.cost&&x.type!=='キャラクター'){x.civilizations=M.colors.filter(k=>x.cost[k]>0);if(!x.civilizations.length)x.civilizations=['無色'];x.color=x.civilizations[0];}if(x.sideboardOnly&&!x.requiredCharacter&&!x.requiredCharacterColor)x.sideboardScope='汎用';else if(x.requiredCharacter)x.sideboardScope=x.requiredCharacter==='celestia'?'緑専用（セレスティア）':'ピルルク専用';}
+for(const x of Object.values(c)){if(x.cost&&x.type!=='キャラクター'){x.civilizations=M.colors.filter(k=>x.cost[k]>0);if(!x.civilizations.length)x.civilizations=['無色'];x.color=x.civilizations[0];}if(x.sideboardOnly&&!x.requiredCharacter&&!x.requiredCharacterColor)x.sideboardScope='汎用';else if(x.requiredCharacter)x.sideboardScope=x.requiredCharacter==='celestia'?'緑専用（セレスティア）':'アルマー専用';}
 for(const x of Object.values(a)){x.rarity=x.rarity||'SSR';x.deckEligible=false;}
 }
 return {install};});
