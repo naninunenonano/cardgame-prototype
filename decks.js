@@ -1,20 +1,21 @@
 // Shared catalog-based construction validation and local persistence.
 (function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./cards.js'):root.CardCatalog);if(typeof module==='object'&&module.exports)module.exports=api;else root.DeckLibrary=api;})(globalThis,function(C){
 'use strict';
-const canonicalKey=key=>key==='piruluk'?'almar':key;
-function migrateDeck(d){if(!d||typeof d!=='object'||Array.isArray(d))return d;let changed=false;const next={...d};for(const section of ['main','sideboard','shields','lands'])if(Array.isArray(d[section])){const entries=d[section].map(e=>{if(e&&typeof e==='object'&&canonicalKey(e.key)!==e.key){changed=true;return {...e,key:canonicalKey(e.key)};}return e;});next[section]=entries;}return changed?next:d;}
-function migrateOwned(owned){if(!owned||typeof owned!=='object'||!Object.hasOwn(owned,'piruluk'))return owned;const next={...owned};next.almar=Object.hasOwn(owned,'almar')?Math.max(owned.almar,owned.piruluk):owned.piruluk;delete next.piruluk;return next;}
-function migrateProfile(p){if(!p||typeof p!=='object')return p;const owned=migrateOwned(p.owned),characters=Array.isArray(p.characters)&&p.characters.includes('piruluk')?p.characters.map(canonicalKey).filter((key,i,a)=>key!=='almar'||a.indexOf(key)===i):p.characters,decks=Array.isArray(p.decks)?p.decks.map(migrateDeck):p.decks;return {...p,owned,characters,decks};}
-const VERSION=1,STORAGE_KEY='cardgame-prototype.decks.v1',MAIN_SIZE=40,SIDE_SIZE=10,SHIELD_SIZE=4,defaultShields=()=>[{key:'reactiveArmor',count:2},{key:'wisdomBlessing',count:2}],copy=x=>JSON.parse(JSON.stringify(x)),trusted=new WeakSet();
+const Identity=typeof module==='object'&&module.exports?require('./identity.js'):globalThis.CardIdentity;
+const canonicalKey=Identity.canonicalKey;
+function migrateDeck(d){if(!d||typeof d!=='object'||Array.isArray(d))return d;const next={...d};for(const section of ['main','sideboard','shields','lands'])if(Array.isArray(d[section]))next[section]=d[section].map(e=>e&&typeof e==='object'?{...e,key:canonicalKey(e.key)}:e);return next;}
+const migrateOwned=Identity.migrateOwned;
+function migrateProfile(p){if(!p||typeof p!=='object')return p;const owned=migrateOwned(p.owned),characters=Array.isArray(p.characters)&&p.characters.some(k=>canonicalKey(k)!==k)?p.characters.map(canonicalKey).filter((key,i,a)=>key!=='almar'||a.indexOf(key)===i):p.characters,decks=Array.isArray(p.decks)?p.decks.map(migrateDeck):p.decks;const unknownIds=[...new Set([...Object.keys(owned||{}),...(decks||[]).flatMap(d=>['main','sideboard','shields'].flatMap(s=>(d[s]||[]).map(e=>e.key)))].filter(k=>!Object.hasOwn(C.cards,k)))];return {...p,owned,characters,decks,identityVersion:1,...(unknownIds.length?{migrationUnknownIds:unknownIds}:{})};}
+const VERSION=1,STORAGE_KEY='cardgame-prototype.decks.v1',MAIN_SIZE=40,SIDE_SIZE=10,SHIELD_SIZE=4,defaultShields=()=>[{key:'shnr1',count:2},{key:'shnr2',count:2}],copy=x=>JSON.parse(JSON.stringify(x)),trusted=new WeakSet();
 // Only the existing official definitions are grandfathered. Returned objects are
 // recognized by identity AND their exact composition, never a user-controlled flag/name.
-const official=Object.fromEntries(['green','blue','redStarter','blueStarter'].map(id=>[id,{id,name:id==='redStarter'?'赤・初期デッキ':id==='blueStarter'?'青・初期デッキ':id==='green'?'緑プリセット':'青プリセット',preset:true,main:copy(C.decks[id]),sideboard:id.endsWith('Starter')?[{key:id==='redStarter'?'redCaptain':'blueSage',count:1},...C.starter.sideKeys.map(key=>({key,count:1}))]:[],shields:defaultShields()}]));
+const official=Object.fromEntries(['green','blue','redStarter','blueStarter'].map(id=>[id,{id,name:id==='redStarter'?'赤・初期デッキ':id==='blueStarter'?'青・初期デッキ':id==='green'?'緑プリセット':'青プリセット',preset:true,main:copy(C.decks[id]),sideboard:id.endsWith('Starter')?[{key:id==='redStarter'?'redcaptain':'bluesage',count:1},...C.starter.sideKeys.map(key=>({key,count:1}))]:[],shields:defaultShields()}]));
 const hasPreset=id=>Object.hasOwn(official,id);
 const composition=d=>JSON.stringify([d.main,d.sideboard||[],d.shields||defaultShields()]);
 function preset(id){if(!hasPreset(id))return null;const d=copy(official[id]);trusted.add(d);return d;}
 function isOfficialPreset(d){return !!d&&trusted.has(d)&&hasPreset(d.id)&&composition(d)===composition(official[d.id]);}
 function sectionOf(c){return c.type==='土地'?'legacy':c.sideboardOnly?'sideboard':c.deckSection||'main';}
-function limit(c){if(c.type==='キャラクター'||c.deckLimit===1||c.rarity==='UR')return 1;if(sectionOf(c)==='shields')return 4;return Number.isInteger(c.deckLimit)&&c.deckLimit>0?Math.min(3,c.deckLimit):3;}
+function limit(c){if(c.type==='キャラクター'||c.deckLimit===1||c.rarity==='LEGEND')return 1;if(sectionOf(c)==='shields')return 4;return Number.isInteger(c.deckLimit)&&c.deckLimit>0?Math.min(3,c.deckLimit):3;}
 function available(section=null){return Object.values(C.cards).filter(c=>c&&c.deckEligible!==false&&!c.generated&&!c.token&&sectionOf(c)!=='legacy'&&(!section||(section==='sideboard'?!['legacy','shields'].includes(sectionOf(c)):sectionOf(c)===section)));}
 function adoptionError(c,d){if(!c?.requiredCharacter)return '';const chars=(d.sideboard||[]).filter(e=>e.count>0&&C.cards[e.key]?.type==='キャラクター');return chars.length===1&&chars[0].count===1&&chars[0].key===c.requiredCharacter?'':(C.cards[c.requiredCharacter]?.name||c.requiredCharacter)+'専用：対応キャラクターをサイドボードに1枚採用してください。';}
 function validate(d){d=migrateDeck(d);const errors=[],allow=new Map(available().map(c=>[c.key,c]));if(!d||typeof d!=='object')return ['デッキデータが不正です。'];const exempt=isOfficialPreset(d);

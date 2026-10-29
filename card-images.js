@@ -1,9 +1,8 @@
-/* Optional PNG art. No catalog, rules, or collection mutations. */
+/* Optional PNG artwork: identity metadata determines the directory and face. */
 (function(root){'use strict';
 const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const valid=v=>typeof v==='string'&&/^[a-zA-Z0-9_-]+$/.test(v);
-const path=(key,level)=>valid(key)?(level===undefined?'images/cards/'+key+'.png':'images/characters/'+key+'/lv'+Number(level)+'.png'):null;
-function html(card){const key=card?.key;if(!valid(key))return '';const url=path(key,card.type==='キャラクター'?(card.level??0):undefined);return '<span class="optional-art"><img loading="lazy" decoding="async" src="'+escape(url)+'" alt="" onerror="this.parentElement.remove()" ></span>';}
-root.CardImages={path,html};
-if(typeof module==='object'&&module.exports)module.exports=root.CardImages;
+const valid=v=>typeof v==='string'&&/^[a-z0-9_-]+$/.test(v);
+function path(key,level,ownerCharacterId=null){if(!valid(key))return null;if(level!==undefined)return 'images/characters/'+key+'/lv'+Number(level)+'.png';if(ownerCharacterId&&!key.startsWith(ownerCharacterId+'_'))return null;const split=ownerCharacterId?ownerCharacterId.length:key.indexOf('_');return split<0?'images/cards/'+key+'.png':'images/characters/'+key.slice(0,split)+'/cards/'+key.slice(split+1)+'.png';}
+function html(card){const key=card?.faceId||card?.key,url=path(key,card?.type==='キャラクター'?(card.level??0):undefined,card?.ownerCharacterId);if(!url)return '';return '<span class="optional-art"><img loading="lazy" decoding="async" src="'+escape(url)+'" alt="" onerror="this.parentElement.remove()" ></span>';}
+root.CardImages={path,html};if(typeof module==='object'&&module.exports)module.exports=root.CardImages;
 })(globalThis);
