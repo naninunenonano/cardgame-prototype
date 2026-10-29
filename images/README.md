@@ -1,15 +1,18 @@
-# Optional PNG artwork
+# PNG画像の登録先（Ver.0.33以降）
 
-Character: `images/characters/<internal-character-key>/lv0.png` through `lv4.png`.
-Example: `images/characters/almar/lv0.png`.
-Regular card: `images/cards/<internal-card-key>.png` (e.g. `images/cards/life.png`).
+| 種類 | 登録先 |
+|---|---|
+| キャラクター | images/characters/キャラクターID/lv0.png〜lv4.png |
+| 一般カード・トークン | images/cards/内部ID.png |
+| キャラクター専用カード | images/characters/キャラクターID/cards/キャラクター接頭辞を除いた内部ID.png |
+| 複数面 | 上記の内部IDに-1、-2、-3などの面番号を含める |
 
-Use `key` from CardCatalog, never a localized display name or runtime instance `id`. Images are optional, loaded only when rendered; failed loads leave text in place. Prefer 2:3 PNG. Case-sensitive on GitHub Pages.
+例：`almar_sbbu1-2` → `images/characters/almar/cards/sbbu1-2.png`。
 
-## アルマーとアストレアの登録先
+アルマーは従来どおり `images/characters/almar/lv0.png`、`lv1.png`、`lv2.png`、`lv3.png`、`lv4.png` です。
 
-アルマーは `images/characters/almar/lv0.png`、`lv1.png`、`lv2.png`、`lv3.png`、`lv4.png`。旧フォルダの既存5画像は内容を変えず移動済みです。
+アストレアは **images/cards/rl1.png**、オーレリアは **images/cards/bl1.png** です。旧ファイル名r1.png・b1.pngは使用しません。
 
-白銀の戦乙女 アストレアの内部IDは旧名称由来ではない既存の `r1` を維持します。PNGは **`images/cards/r1.png`**。`astrea.png` ではありません。1024×1536px（2:3）のPNGを推奨します。
+通常の1面カードには枝番号を付けません。トークンはt1〜t6。カードリストのID、または [全カードの対応表](../docs/id-migration.csv) を確認してください。台帳・採番方法は [説明](../docs/id-unification-status.md) を参照してください。
 
-GitHubの対象フォルダで **Add file → Upload files** を選び、上記の名前のPNGをアップロードしてコミットしてください。Pagesのデプロイ完了後にゲームを再読み込みすると、コード変更なしで表示されます。同名の画像を置き換えた後に古い画像が残る場合は、ブラウザのキャッシュを更新して再読み込みしてください。ファイル名は大文字・小文字を区別します。
+推奨PNG：1024×1536px（2:3）。GitHubの登録先で **Add file → Upload files** を選び、正しい名前でアップロードしてコミットします。Pagesデプロイ完了後に再読み込みするとコード変更なしで表示されます。未登録・読み込みエラー時は文字表示に戻ります。ファイル名は大文字・小文字を区別します。
