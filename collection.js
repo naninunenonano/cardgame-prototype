@@ -5,7 +5,7 @@ const starterKeys=new Set(['redStarter','blueStarter'].flatMap(id=>{const d=D.pr
 const collectible=c=>!!c&&c.deckEligible!==false&&!c.token&&!c.generated&&!c.awakened&&c.type!=='土地'&&c.cost!==undefined&&!!ECONOMY[c.rarity]&&(c.type!=='キャラクター'||(c.level??0)===0)&&(!c.packExcluded||starterKeys.has(c.key));
 const craftable=c=>collectible(c)&&!c.packExcluded;
 const catalog=()=>Object.values(C.cards).filter(collectible);
-const fresh=(id,name)=>({id,name,starterChoice:null,granted:false,owned:{},materials:0,characters:[],decks:[]});
+const fresh=(id,name)=>({id,name,identityVersion:1,starterChoice:null,granted:false,owned:{},materials:0,characters:[],decks:[]});
 // Persist the entire profile transaction; old inventories and material balances are not recalculated.
 function create({storage=null,clock=()=>Date.now()}={}){let data={version:VERSION,active:'local',profiles:[fresh('local','プレイヤー1')],processed:[]},warning='',busy=false,profileSerial=0,blocked=false,baselineRaw=null,identityMigrated=false;let idSerial=0;
 function operationId(prefix='operation'){return prefix+'-'+(globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+(++idSerial));}

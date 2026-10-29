@@ -34,6 +34,10 @@ jobs:
       - run: node construction-test.cjs
       - run: for f in *.js *.cjs; do node --check "$f"; done
   pack-ui:
+    strategy:
+      fail-fast: false
+      matrix:
+        test: [rename-browser-test.cjs, graveyard-browser-test.cjs, black-cards-browser-test.cjs, black-ssr-browser-test.cjs, normal-mode-browser-test.cjs, battle-ui-browser-test.cjs, draw-charger-browser-test.cjs, deck-exhaustion-browser-test.cjs, missions-browser-test.cjs, collection-browser-test.cjs, character-art-browser-test.cjs, pack-opening-browser-test.cjs]
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -44,39 +48,6 @@ jobs:
       - run: npm install --prefix /tmp/cardgame-browser playwright @fontsource/noto-sans-jp
       - run: /tmp/cardgame-browser/node_modules/.bin/playwright install chromium
         timeout-minutes: 3
-      - run: node rename-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node graveyard-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node black-cards-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node black-ssr-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node normal-mode-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node battle-ui-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node draw-charger-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node deck-exhaustion-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node missions-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node collection-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node character-art-browser-test.cjs
-        env:
-          NODE_PATH: /tmp/cardgame-browser/node_modules
-      - run: node pack-opening-browser-test.cjs
+      - run: node "${{ matrix.test }}"
         env:
           NODE_PATH: /tmp/cardgame-browser/node_modules
