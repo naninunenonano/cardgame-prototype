@@ -1,0 +1,3179 @@
+{
+  "baseCommit": "e220f6d914ad29ca78d2a7c07f80148a052c65cc",
+  "status": "audit-only-not-applied",
+  "order": "Object.entries(CardCatalog.cards) at base commit; unresolved generated/token definitions not numbered",
+  "counts": {
+    "definitions": 164,
+    "oldSSR": 13,
+    "oldUR": 28
+  },
+  "proposedHighWaterMarks": {
+    "gn": 4,
+    "gr": 4,
+    "gs": 5,
+    "gl": 2,
+    "rn": 20,
+    "br": 5,
+    "bl": 3,
+    "bs": 4,
+    "bn": 6,
+    "nl": 2,
+    "ns": 2,
+    "nr": 3,
+    "nn": 8,
+    "shnr": 6,
+    "almar_sbbu": 2,
+    "sbbu": 2,
+    "sbnl": 4,
+    "almar_sbnr": 1,
+    "almar_sbbs": 1,
+    "sbbr": 1,
+    "rl": 4,
+    "rr": 3,
+    "rs": 3,
+    "sbnn": 1,
+    "sbnr": 4,
+    "sbns": 1,
+    "sbnu": 1,
+    "shnl": 2,
+    "shns": 2,
+    "sbrl": 1,
+    "sbru": 1,
+    "sbrs": 1,
+    "sbgu": 4,
+    "sbgs": 1,
+    "celestia_sbnr": 1,
+    "sbgl": 1,
+    "kn": 8,
+    "kr": 6,
+    "kl": 5,
+    "ks": 12,
+    "shkr": 1,
+    "redMoonAvenger_shkl": 1
+  },
+  "cards": [
+    {
+      "name": "フェアリー・ライフ",
+      "oldId": "life",
+      "newId": "gn1",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/life.png",
+      "newImage": "images/cards/gn1.png"
+    },
+    {
+      "name": "豊潤フォージュン",
+      "oldId": "fortune",
+      "newId": "gr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/fortune.png",
+      "newImage": "images/cards/gr1.png"
+    },
+    {
+      "name": "竜の闘気",
+      "oldId": "touki",
+      "newId": "gr2",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/touki.png",
+      "newImage": "images/cards/gr2.png"
+    },
+    {
+      "name": "青銅の鎧",
+      "oldId": "bronze",
+      "newId": "gn2",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bronze.png",
+      "newImage": "images/cards/gn2.png"
+    },
+    {
+      "name": "グラディアン・レッド・ドラゴン",
+      "oldId": "dragon",
+      "newId": "gs1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/dragon.png",
+      "newImage": "images/cards/gs1.png"
+    },
+    {
+      "name": "ナチュラル・トラップ",
+      "oldId": "trap",
+      "newId": "gs2",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/trap.png",
+      "newImage": "images/cards/gs2.png"
+    },
+    {
+      "name": "修復",
+      "oldId": "repair",
+      "newId": "gs3",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/repair.png",
+      "newImage": "images/cards/gs3.png"
+    },
+    {
+      "name": "バハムート",
+      "oldId": "bahamut",
+      "newId": "gl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bahamut.png",
+      "newImage": "images/cards/gl1.png"
+    },
+    {
+      "name": "極楽鳥",
+      "oldId": "bird",
+      "newId": "gr3",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bird.png",
+      "newImage": "images/cards/gr3.png"
+    },
+    {
+      "name": "ラノワールのエルフ",
+      "oldId": "elf",
+      "newId": "gn3",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/elf.png",
+      "newImage": "images/cards/gn3.png"
+    },
+    {
+      "name": "タマタンゴ・パンツァー",
+      "oldId": "panzer",
+      "newId": "gn4",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/panzer.png",
+      "newImage": "images/cards/gn4.png"
+    },
+    {
+      "name": "ドルツヴァイ・アステリオ",
+      "oldId": "dolt",
+      "newId": "gs4",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/dolt.png",
+      "newImage": "images/cards/gs4.png"
+    },
+    {
+      "name": "母なる大地",
+      "oldId": "mother",
+      "newId": "gl2",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/mother.png",
+      "newImage": "images/cards/gl2.png"
+    },
+    {
+      "name": "Dの花道 ズンドコ晴れ舞台",
+      "oldId": "zundoko",
+      "newId": "gr4",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/zundoko.png",
+      "newImage": "images/cards/gr4.png"
+    },
+    {
+      "name": "赤・1コスト",
+      "oldId": "red1",
+      "newId": "rn1",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red1.png",
+      "newImage": "images/cards/rn1.png"
+    },
+    {
+      "name": "赤・2コスト",
+      "oldId": "red2",
+      "newId": "rn2",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red2.png",
+      "newImage": "images/cards/rn2.png"
+    },
+    {
+      "name": "赤・3コスト",
+      "oldId": "red3",
+      "newId": "rn3",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red3.png",
+      "newImage": "images/cards/rn3.png"
+    },
+    {
+      "name": "赤・4コスト",
+      "oldId": "red4",
+      "newId": "rn4",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red4.png",
+      "newImage": "images/cards/rn4.png"
+    },
+    {
+      "name": "赤・5コスト",
+      "oldId": "red5",
+      "newId": "rn5",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red5.png",
+      "newImage": "images/cards/rn5.png"
+    },
+    {
+      "name": "赤・6コスト",
+      "oldId": "red6",
+      "newId": "rn6",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red6.png",
+      "newImage": "images/cards/rn6.png"
+    },
+    {
+      "name": "赤・7コスト",
+      "oldId": "red7",
+      "newId": "rn7",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red7.png",
+      "newImage": "images/cards/rn7.png"
+    },
+    {
+      "name": "赤・8コスト",
+      "oldId": "red8",
+      "newId": "rn8",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red8.png",
+      "newImage": "images/cards/rn8.png"
+    },
+    {
+      "name": "赤・9コスト",
+      "oldId": "red9",
+      "newId": "rn9",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red9.png",
+      "newImage": "images/cards/rn9.png"
+    },
+    {
+      "name": "赤・10コスト",
+      "oldId": "red10",
+      "newId": "rn10",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red10.png",
+      "newImage": "images/cards/rn10.png"
+    },
+    {
+      "name": "赤・11コスト",
+      "oldId": "red11",
+      "newId": "rn11",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red11.png",
+      "newImage": "images/cards/rn11.png"
+    },
+    {
+      "name": "赤・12コスト",
+      "oldId": "red12",
+      "newId": "rn12",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/red12.png",
+      "newImage": "images/cards/rn12.png"
+    },
+    {
+      "name": "サイバー・ブレイン",
+      "oldId": "brain",
+      "newId": "br1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/brain.png",
+      "newImage": "images/cards/br1.png"
+    },
+    {
+      "name": "ストリーミング・シェイパー",
+      "oldId": "shaper",
+      "newId": "bl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/shaper.png",
+      "newImage": "images/cards/bl1.png"
+    },
+    {
+      "name": "Dの博才 サイバーダイス・ベガス",
+      "oldId": "vegas",
+      "newId": "br2",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/vegas.png",
+      "newImage": "images/cards/br2.png"
+    },
+    {
+      "name": "ルナ・コスモビュー",
+      "oldId": "cosmo",
+      "newId": "bs1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/cosmo.png",
+      "newImage": "images/cards/bs1.png"
+    },
+    {
+      "name": "対抗呪文",
+      "oldId": "counter",
+      "newId": "br3",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/counter.png",
+      "newImage": "images/cards/br3.png"
+    },
+    {
+      "name": "スパイラル・ゲート",
+      "oldId": "gate",
+      "newId": "bn1",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/gate.png",
+      "newImage": "images/cards/bn1.png"
+    },
+    {
+      "name": "パルピィ・ゴービー",
+      "oldId": "goby",
+      "newId": "bn2",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/goby.png",
+      "newImage": "images/cards/bn2.png"
+    },
+    {
+      "name": "クリスタル・ツヴァイランサー",
+      "oldId": "zwei",
+      "newId": "bl2",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/zwei.png",
+      "newImage": "images/cards/bl2.png"
+    },
+    {
+      "name": "蒼狼の始祖アマテラス",
+      "oldId": "amaterasu",
+      "newId": "bs2",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/amaterasu.png",
+      "newImage": "images/cards/bs2.png"
+    },
+    {
+      "name": "エメラル",
+      "oldId": "emeral",
+      "newId": "bn3",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/emeral.png",
+      "newImage": "images/cards/bn3.png"
+    },
+    {
+      "name": "コーライル",
+      "oldId": "corile",
+      "newId": "bn4",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/corile.png",
+      "newImage": "images/cards/bn4.png"
+    },
+    {
+      "name": "スノーマン召喚",
+      "oldId": "snow",
+      "newId": "bn5",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/snow.png",
+      "newImage": "images/cards/bn5.png"
+    },
+    {
+      "name": "ウォズレックの審問",
+      "oldId": "inquiry",
+      "newId": "br4",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/inquiry.png",
+      "newImage": "images/cards/br4.png"
+    },
+    {
+      "name": "スケルトン・バイス",
+      "oldId": "vice",
+      "newId": "br5",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/vice.png",
+      "newImage": "images/cards/br5.png"
+    },
+    {
+      "name": "スノーマン",
+      "oldId": "snowToken",
+      "newId": null,
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "青",
+      "civilizations": null,
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": true,
+      "generated": false,
+      "status": "classification-required",
+      "oldImage": "images/cards/snowToken.png",
+      "newImage": null
+    },
+    {
+      "name": "慟哭のジル・クライハート",
+      "oldId": "jil",
+      "newId": "nl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/jil.png",
+      "newImage": "images/cards/nl1.png"
+    },
+    {
+      "name": "永遠の蜃気楼 ペリドット",
+      "oldId": "peridot",
+      "newId": "nl2",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/peridot.png",
+      "newImage": "images/cards/nl2.png"
+    },
+    {
+      "name": "テミスの審判",
+      "oldId": "themis",
+      "newId": "ns1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/themis.png",
+      "newImage": "images/cards/ns1.png"
+    },
+    {
+      "name": "ホーリー・メール",
+      "oldId": "holyMail",
+      "newId": "nr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/holyMail.png",
+      "newImage": "images/cards/nr1.png"
+    },
+    {
+      "name": "ショットガン・カイザー",
+      "oldId": "kaiser",
+      "newId": "nr2",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/kaiser.png",
+      "newImage": "images/cards/nr2.png"
+    },
+    {
+      "name": "グレンニャー",
+      "oldId": "glennya",
+      "newId": "nn1",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/glennya.png",
+      "newImage": "images/cards/nn1.png"
+    },
+    {
+      "name": "プラチナ・ワルスラS",
+      "oldId": "walsura",
+      "newId": "ns2",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/walsura.png",
+      "newImage": "images/cards/ns2.png"
+    },
+    {
+      "name": "白骨の守護者ホネンビー",
+      "oldId": "honenbee",
+      "newId": "nr3",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/honenbee.png",
+      "newImage": "images/cards/nr3.png"
+    },
+    {
+      "name": "運命の気まぐれ",
+      "oldId": "fateWhim",
+      "newId": null,
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": true,
+      "status": "classification-required",
+      "oldImage": "images/cards/fateWhim.png",
+      "newImage": null
+    },
+    {
+      "name": "運命の翼",
+      "oldId": "fateWings",
+      "newId": null,
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": true,
+      "status": "classification-required",
+      "oldImage": "images/cards/fateWings.png",
+      "newImage": null
+    },
+    {
+      "name": "運命の逆転",
+      "oldId": "fateReversal",
+      "newId": null,
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": true,
+      "status": "classification-required",
+      "oldImage": "images/cards/fateReversal.png",
+      "newImage": null
+    },
+    {
+      "name": "リアクティブアーマー",
+      "oldId": "reactiveArmor",
+      "newId": "shnr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/reactiveArmor.png",
+      "newImage": "images/cards/shnr1.png"
+    },
+    {
+      "name": "知恵の恵み",
+      "oldId": "wisdomBlessing",
+      "newId": "shnr2",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/wisdomBlessing.png",
+      "newImage": "images/cards/shnr2.png"
+    },
+    {
+      "name": "アルマー",
+      "oldId": "almar",
+      "newId": "almar",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "青",
+      "civilizations": null,
+      "section": "character",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "preserve-character",
+      "oldImage": "images/characters/almar/lv0.png",
+      "newImage": "images/characters/almar/lv0.png"
+    },
+    {
+      "name": "ブラック・ガンヴィート",
+      "oldId": "gunveet",
+      "newId": "almar_sbbu1",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": "almar",
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/gunveet.png",
+      "newImage": "images/characters/almar/cards/sbbu1.png"
+    },
+    {
+      "name": "ルナ・アレグル",
+      "oldId": "alegre",
+      "newId": "sbbu1",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/alegre.png",
+      "newImage": "images/cards/sbbu1.png"
+    },
+    {
+      "name": "蒼き覚醒 ドギラゴンX",
+      "oldId": "dogiragon",
+      "newId": "sbnl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/dogiragon.png",
+      "newImage": "images/cards/sbnl1.png"
+    },
+    {
+      "name": "バイス・チャージャー",
+      "oldId": "viceCharger",
+      "newId": "almar_sbnr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": "almar",
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/viceCharger.png",
+      "newImage": "images/characters/almar/cards/sbnr1.png"
+    },
+    {
+      "name": "ロスト・ソウル",
+      "oldId": "lostSoul",
+      "newId": "almar_sbbs1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": "almar",
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/lostSoul.png",
+      "newImage": "images/characters/almar/cards/sbbs1.png"
+    },
+    {
+      "name": "陰謀と計略の手",
+      "oldId": "conspiracy",
+      "newId": "sbbr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/conspiracy.png",
+      "newImage": "images/cards/sbbr1.png"
+    },
+    {
+      "name": "インビンシブル・テクノロジー",
+      "oldId": "technology",
+      "newId": "sbbu2",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/technology.png",
+      "newImage": "images/cards/sbbu2.png"
+    },
+    {
+      "name": "偽りの月 インターステラ",
+      "oldId": "interstellar",
+      "newId": "almar_sbbu2",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": "almar",
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/interstellar.png",
+      "newImage": "images/characters/almar/cards/sbbu2.png"
+    },
+    {
+      "name": "飛翔龍 5000VT",
+      "oldId": "vt5000",
+      "newId": "sbnl2",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/vt5000.png",
+      "newImage": "images/cards/sbnl2.png"
+    },
+    {
+      "name": "アクア・ガード",
+      "oldId": "aquaGuard",
+      "newId": null,
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "青",
+      "civilizations": null,
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": true,
+      "generated": false,
+      "status": "classification-required",
+      "oldImage": "images/cards/aquaGuard.png",
+      "newImage": null
+    },
+    {
+      "name": "守備兵",
+      "oldId": "c1",
+      "newId": "nn2",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/c1.png",
+      "newImage": "images/cards/nn2.png"
+    },
+    {
+      "name": "傭兵",
+      "oldId": "c2",
+      "newId": "nn3",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/c2.png",
+      "newImage": "images/cards/nn3.png"
+    },
+    {
+      "name": "重装兵",
+      "oldId": "c3",
+      "newId": "nn4",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/c3.png",
+      "newImage": "images/cards/nn4.png"
+    },
+    {
+      "name": "歴戦の戦士",
+      "oldId": "c4",
+      "newId": "nn5",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/c4.png",
+      "newImage": "images/cards/nn5.png"
+    },
+    {
+      "name": "見習い学者",
+      "oldId": "c5",
+      "newId": "nn6",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/c5.png",
+      "newImage": "images/cards/nn6.png"
+    },
+    {
+      "name": "流浪の研究者",
+      "oldId": "c6",
+      "newId": "nn7",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/c6.png",
+      "newImage": "images/cards/nn7.png"
+    },
+    {
+      "name": "魔力弾",
+      "oldId": "c7",
+      "newId": "nn8",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/c7.png",
+      "newImage": "images/cards/nn8.png"
+    },
+    {
+      "name": "白銀の戦乙女 アストレア",
+      "oldId": "r1",
+      "newId": "rl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/r1.png",
+      "newImage": "images/cards/rl1.png"
+    },
+    {
+      "name": "ストームジャベリン・ワイバーン",
+      "oldId": "r2",
+      "newId": "rr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/r2.png",
+      "newImage": "images/cards/rr1.png"
+    },
+    {
+      "name": "クリムゾン・ワイバーン",
+      "oldId": "r3",
+      "newId": "rs1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/r3.png",
+      "newImage": "images/cards/rs1.png"
+    },
+    {
+      "name": "襲撃者エグゼドライブ",
+      "oldId": "r4",
+      "newId": "rs2",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/r4.png",
+      "newImage": "images/cards/rs2.png"
+    },
+    {
+      "name": "王家の御旗",
+      "oldId": "r5",
+      "newId": "rn13",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/r5.png",
+      "newImage": "images/cards/rn13.png"
+    },
+    {
+      "name": "溶岩の撃ち込み",
+      "oldId": "r6",
+      "newId": "rn14",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/r6.png",
+      "newImage": "images/cards/rn14.png"
+    },
+    {
+      "name": "セージコマンダー",
+      "oldId": "r7",
+      "newId": "rr2",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/r7.png",
+      "newImage": "images/cards/rr2.png"
+    },
+    {
+      "name": "ロイヤルセイバー・オーレリア",
+      "oldId": "b1",
+      "newId": "bl3",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/b1.png",
+      "newImage": "images/cards/bl3.png"
+    },
+    {
+      "name": "蒼海の番兵",
+      "oldId": "b5",
+      "newId": "bn6",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/b5.png",
+      "newImage": "images/cards/bn6.png"
+    },
+    {
+      "name": "根源への回帰",
+      "oldId": "b6",
+      "newId": "bs3",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/b6.png",
+      "newImage": "images/cards/bs3.png"
+    },
+    {
+      "name": "深淵の守護者",
+      "oldId": "b7",
+      "newId": "bs4",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "青",
+      "civilizations": [
+        "青"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/b7.png",
+      "newImage": "images/cards/bs4.png"
+    },
+    {
+      "name": "紅蓮の指揮官",
+      "oldId": "redCaptain",
+      "newId": "redCaptain",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "赤",
+      "civilizations": null,
+      "section": "character",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "preserve-character",
+      "oldImage": "images/characters/redCaptain/lv0.png",
+      "newImage": "images/characters/redCaptain/lv0.png"
+    },
+    {
+      "name": "蒼海の賢者",
+      "oldId": "blueSage",
+      "newId": "blueSage",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "青",
+      "civilizations": null,
+      "section": "character",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "preserve-character",
+      "oldImage": "images/characters/blueSage/lv0.png",
+      "newImage": "images/characters/blueSage/lv0.png"
+    },
+    {
+      "name": "鋼鉄の巨兵",
+      "oldId": "s1",
+      "newId": "sbnn1",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/s1.png",
+      "newImage": "images/cards/sbnn1.png"
+    },
+    {
+      "name": "疾風の戦士",
+      "oldId": "s2",
+      "newId": "sbnr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/s2.png",
+      "newImage": "images/cards/sbnr1.png"
+    },
+    {
+      "name": "知識の使者",
+      "oldId": "s3",
+      "newId": "sbnr2",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/s3.png",
+      "newImage": "images/cards/sbnr2.png"
+    },
+    {
+      "name": "生命の泉",
+      "oldId": "s4",
+      "newId": "sbnr3",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/s4.png",
+      "newImage": "images/cards/sbnr3.png"
+    },
+    {
+      "name": "時空の火焔ボルシャック・ドラゴン",
+      "oldId": "s5",
+      "newId": "sbnl3",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/s5.png",
+      "newImage": "images/cards/sbnl3.png"
+    },
+    {
+      "name": "滅びの宣告",
+      "oldId": "s6",
+      "newId": "sbns1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/s6.png",
+      "newImage": "images/cards/sbns1.png"
+    },
+    {
+      "name": "ドローチャージャー",
+      "oldId": "s7",
+      "newId": "sbnr4",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/s7.png",
+      "newImage": "images/cards/sbnr4.png"
+    },
+    {
+      "name": "灼熱の一撃",
+      "oldId": "s8",
+      "newId": "sbnu1",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/s8.png",
+      "newImage": "images/cards/sbnu1.png"
+    },
+    {
+      "name": "轟く覚醒 レッドゾーン・バスター",
+      "oldId": "s9",
+      "newId": "sbnl4",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/s9.png",
+      "newImage": "images/cards/sbnl4.png"
+    },
+    {
+      "name": "オーレリアの残影",
+      "oldId": "aureliaToken",
+      "newId": null,
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "青",
+      "civilizations": null,
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": true,
+      "generated": false,
+      "status": "classification-required",
+      "oldImage": "images/cards/aureliaToken.png",
+      "newImage": null
+    },
+    {
+      "name": "憤怒の竜帝・乙姫",
+      "oldId": "otohime",
+      "newId": "rl2",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/otohime.png",
+      "newImage": "images/cards/rl2.png"
+    },
+    {
+      "name": "竜帝の近衛兵",
+      "oldId": "imperialGuard",
+      "newId": null,
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": null,
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": true,
+      "generated": false,
+      "status": "classification-required",
+      "oldImage": "images/cards/imperialGuard.png",
+      "newImage": null
+    },
+    {
+      "name": "昏き底より出でる者",
+      "oldId": "kuraki",
+      "newId": "rl3",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/kuraki.png",
+      "newImage": "images/cards/rl3.png"
+    },
+    {
+      "name": "起死回生",
+      "oldId": "revival",
+      "newId": "shnl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/revival.png",
+      "newImage": "images/cards/shnl1.png"
+    },
+    {
+      "name": "攻撃の無力化",
+      "oldId": "negateAttack",
+      "newId": "shnl2",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/negateAttack.png",
+      "newImage": "images/cards/shnl2.png"
+    },
+    {
+      "name": "応急処置",
+      "oldId": "firstAid",
+      "newId": "shnr3",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/firstAid.png",
+      "newImage": "images/cards/shnr3.png"
+    },
+    {
+      "name": "束縛の鎖",
+      "oldId": "bindingChain",
+      "newId": "shnr4",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bindingChain.png",
+      "newImage": "images/cards/shnr4.png"
+    },
+    {
+      "name": "緊急撤退",
+      "oldId": "evacuation",
+      "newId": "shnr5",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/evacuation.png",
+      "newImage": "images/cards/shnr5.png"
+    },
+    {
+      "name": "弱体化の呪い",
+      "oldId": "weakCurse",
+      "newId": "shns1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/weakCurse.png",
+      "newImage": "images/cards/shns1.png"
+    },
+    {
+      "name": "反撃の一矢",
+      "oldId": "counterArrow",
+      "newId": "shnr6",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/counterArrow.png",
+      "newImage": "images/cards/shnr6.png"
+    },
+    {
+      "name": "決死の反撃",
+      "oldId": "desperate",
+      "newId": "shns2",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "無色",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/desperate.png",
+      "newImage": "images/cards/shns2.png"
+    },
+    {
+      "name": "メガ・マナロック・ドラゴン",
+      "oldId": "manarock",
+      "newId": "rl4",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/manarock.png",
+      "newImage": "images/cards/rl4.png"
+    },
+    {
+      "name": "ダチッコ・チュリス",
+      "oldId": "churis",
+      "newId": "rs3",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/churis.png",
+      "newImage": "images/cards/rs3.png"
+    },
+    {
+      "name": "ドリル・スコール",
+      "oldId": "drillSquall",
+      "newId": "rr3",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/drillSquall.png",
+      "newImage": "images/cards/rr3.png"
+    },
+    {
+      "name": "ブレイズクロー",
+      "oldId": "blazeClaw",
+      "newId": "rn15",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/blazeClaw.png",
+      "newImage": "images/cards/rn15.png"
+    },
+    {
+      "name": "レイジアーム",
+      "oldId": "rageArm",
+      "newId": "rn16",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/rageArm.png",
+      "newImage": "images/cards/rn16.png"
+    },
+    {
+      "name": "狂葬者 アパッチ",
+      "oldId": "apache",
+      "newId": "rn17",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/apache.png",
+      "newImage": "images/cards/rn17.png"
+    },
+    {
+      "name": "アリアンロッド",
+      "oldId": "arianrhod",
+      "newId": "rn18",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/arianrhod.png",
+      "newImage": "images/cards/rn18.png"
+    },
+    {
+      "name": "野蛮な侵略者",
+      "oldId": "redManaBreaker",
+      "newId": "rn19",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/redManaBreaker.png",
+      "newImage": "images/cards/rn19.png"
+    },
+    {
+      "name": "地獄スクラッパー",
+      "oldId": "scrapper",
+      "newId": "rn20",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/scrapper.png",
+      "newImage": "images/cards/rn20.png"
+    },
+    {
+      "name": "ボルメテウス・ホワイト・ドラゴン",
+      "oldId": "bolmeteus",
+      "newId": "sbrl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bolmeteus.png",
+      "newImage": "images/cards/sbrl1.png"
+    },
+    {
+      "name": "超戦龍覇 モルトNEXT",
+      "oldId": "moltNext",
+      "newId": "sbru1",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/moltNext.png",
+      "newImage": "images/cards/sbru1.png"
+    },
+    {
+      "name": "スクランブル・チェンジ",
+      "oldId": "scrambleChange",
+      "newId": "sbrs1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "赤",
+      "civilizations": [
+        "赤"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/scrambleChange.png",
+      "newImage": "images/cards/sbrs1.png"
+    },
+    {
+      "name": "大地の巨神 ガイアロード",
+      "oldId": "gaiaLord",
+      "newId": "gs5",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/gaiaLord.png",
+      "newImage": "images/cards/gs5.png"
+    },
+    {
+      "name": "セレスティア",
+      "oldId": "celestia",
+      "newId": "celestia",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "character",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "preserve-character",
+      "oldImage": "images/characters/celestia/lv0.png",
+      "newImage": "images/characters/celestia/lv0.png"
+    },
+    {
+      "name": "時空の精圧ドラヴィタ",
+      "oldId": "dravita",
+      "newId": "sbgu1",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": "緑",
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/dravita.png",
+      "newImage": "images/cards/sbgu1.png"
+    },
+    {
+      "name": "エンシェント・ホーリー・ワイバーン",
+      "oldId": "ancientWyvern",
+      "newId": "sbgu2",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": "緑",
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/ancientWyvern.png",
+      "newImage": "images/cards/sbgu2.png"
+    },
+    {
+      "name": "フェアリービースト",
+      "oldId": "fairyBeast",
+      "newId": "sbgs1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": "緑",
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/fairyBeast.png",
+      "newImage": "images/cards/sbgs1.png"
+    },
+    {
+      "name": "ランプチャージャー",
+      "oldId": "rampCharger",
+      "newId": "celestia_sbnr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "無色",
+      "civilizations": [
+        "無色"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": "celestia",
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/rampCharger.png",
+      "newImage": "images/characters/celestia/cards/sbnr1.png"
+    },
+    {
+      "name": "大樹王 ギガンディダノス",
+      "oldId": "gigandidanos",
+      "newId": "sbgl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/gigandidanos.png",
+      "newImage": "images/cards/sbgl1.png"
+    },
+    {
+      "name": "クリスタル・フュージョン",
+      "oldId": "crystalFusion",
+      "newId": "sbgu3",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/crystalFusion.png",
+      "newImage": "images/cards/sbgu3.png"
+    },
+    {
+      "name": "王道の革命 ドギラゴン",
+      "oldId": "royalDogiragon",
+      "newId": "sbgu4",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "緑",
+      "civilizations": [
+        "緑"
+      ],
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/royalDogiragon.png",
+      "newImage": "images/cards/sbgu4.png"
+    },
+    {
+      "name": "黒神龍ザルバ",
+      "oldId": "zalba",
+      "newId": "kn1",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/zalba.png",
+      "newImage": "images/cards/kn1.png"
+    },
+    {
+      "name": "血契の従者",
+      "oldId": "bloodPactServant",
+      "newId": "kn2",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bloodPactServant.png",
+      "newImage": "images/cards/kn2.png"
+    },
+    {
+      "name": "宵闇の番兵",
+      "oldId": "duskSentry",
+      "newId": "kn3",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/duskSentry.png",
+      "newImage": "images/cards/kn3.png"
+    },
+    {
+      "name": "血刃の追跡者",
+      "oldId": "bloodbladeTracker",
+      "newId": "kr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bloodbladeTracker.png",
+      "newImage": "images/cards/kr1.png"
+    },
+    {
+      "name": "破滅を喰らう者",
+      "oldId": "doomDevourer",
+      "newId": "kl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/doomDevourer.png",
+      "newImage": "images/cards/kl1.png"
+    },
+    {
+      "name": "双撃の血獣",
+      "oldId": "twinBloodBeast",
+      "newId": "ks1",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/twinBloodBeast.png",
+      "newImage": "images/cards/ks1.png"
+    },
+    {
+      "name": "夜宴の眷属",
+      "oldId": "nightBanquetKin",
+      "newId": "kr2",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/nightBanquetKin.png",
+      "newImage": "images/cards/kr2.png"
+    },
+    {
+      "name": "夜宴の眷属トークン",
+      "oldId": "blackKinToken",
+      "newId": null,
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": true,
+      "generated": true,
+      "status": "classification-required",
+      "oldImage": "images/cards/blackKinToken.png",
+      "newImage": null
+    },
+    {
+      "name": "セレス",
+      "oldId": "ceres",
+      "newId": "ks2",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/ceres.png",
+      "newImage": "images/cards/ks2.png"
+    },
+    {
+      "name": "血月の戦鬼",
+      "oldId": "bloodmoonWarrior",
+      "newId": "kr3",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bloodmoonWarrior.png",
+      "newImage": "images/cards/kr3.png"
+    },
+    {
+      "name": "終焉の宣告者",
+      "oldId": "endHerald",
+      "newId": "ks3",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/endHerald.png",
+      "newImage": "images/cards/ks3.png"
+    },
+    {
+      "name": "魔力封鎖の宣告者",
+      "oldId": "manaSealHerald",
+      "newId": "ks4",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/manaSealHerald.png",
+      "newImage": "images/cards/ks4.png"
+    },
+    {
+      "name": "断罪の宣告者",
+      "oldId": "judgmentHerald",
+      "newId": "ks5",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/judgmentHerald.png",
+      "newImage": "images/cards/ks5.png"
+    },
+    {
+      "name": "生命収奪の宣告者",
+      "oldId": "lifeTheftHerald",
+      "newId": "ks6",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/lifeTheftHerald.png",
+      "newImage": "images/cards/ks6.png"
+    },
+    {
+      "name": "記憶封印の宣告者",
+      "oldId": "memorySealHerald",
+      "newId": "ks7",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/memorySealHerald.png",
+      "newImage": "images/cards/ks7.png"
+    },
+    {
+      "name": "滅界の血王",
+      "oldId": "bloodKing",
+      "newId": "kl2",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bloodKing.png",
+      "newImage": "images/cards/kl2.png"
+    },
+    {
+      "name": "黙示録",
+      "oldId": "apocalypse",
+      "newId": "ks8",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/apocalypse.png",
+      "newImage": "images/cards/ks8.png"
+    },
+    {
+      "name": "エレシュティア・ノクス",
+      "oldId": "ereshthiaNox",
+      "newId": "ereshthiaNox",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "character",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "preserve-character",
+      "oldImage": "images/characters/ereshthiaNox/lv0.png",
+      "newImage": "images/characters/ereshthiaNox/lv0.png"
+    },
+    {
+      "name": "堀葬の儀式",
+      "oldId": "burialRitual",
+      "newId": "ks9",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/burialRitual.png",
+      "newImage": "images/cards/ks9.png"
+    },
+    {
+      "name": "永遠の決闘者・モルディカイ",
+      "oldId": "mordecai",
+      "newId": "kl3",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/mordecai.png",
+      "newImage": "images/cards/kl3.png"
+    },
+    {
+      "name": "モルディカイ",
+      "oldId": "mordecaiToken",
+      "newId": null,
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": true,
+      "generated": true,
+      "status": "classification-required",
+      "oldImage": "images/cards/mordecaiToken.png",
+      "newImage": null
+    },
+    {
+      "name": "一なる部隊 イワシン",
+      "oldId": "iwashin",
+      "newId": "kn4",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/iwashin.png",
+      "newImage": "images/cards/kn4.png"
+    },
+    {
+      "name": "百万超邪 クロスファイア",
+      "oldId": "crossfire",
+      "newId": "ks10",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/crossfire.png",
+      "newImage": "images/cards/ks10.png"
+    },
+    {
+      "name": "盗掘人形モールス",
+      "oldId": "mors",
+      "newId": "kr4",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/mors.png",
+      "newImage": "images/cards/kr4.png"
+    },
+    {
+      "name": "暴走龍 5000GT",
+      "oldId": "gt5000",
+      "newId": "kl4",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/gt5000.png",
+      "newImage": "images/cards/kl4.png"
+    },
+    {
+      "name": "不敵怪人アンダケイン",
+      "oldId": "undakein",
+      "newId": "kr5",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/undakein.png",
+      "newImage": "images/cards/kr5.png"
+    },
+    {
+      "name": "大邪眼B・ロマノフ",
+      "oldId": "bRomanov",
+      "newId": "ks11",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/bRomanov.png",
+      "newImage": "images/cards/ks11.png"
+    },
+    {
+      "name": "超神星DOOM・ドラゲリオン",
+      "oldId": "doomDragelion",
+      "newId": "kl5",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/doomDragelion.png",
+      "newImage": "images/cards/kl5.png"
+    },
+    {
+      "name": "オタカラ・アッタカラ",
+      "oldId": "otakara",
+      "newId": "kn5",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/otakara.png",
+      "newImage": "images/cards/kn5.png"
+    },
+    {
+      "name": "凶鬼23号 グザリ",
+      "oldId": "guzari",
+      "newId": "kn6",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/guzari.png",
+      "newImage": "images/cards/kn6.png"
+    },
+    {
+      "name": "マスマティシャン",
+      "oldId": "mathematician",
+      "newId": "kr6",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/mathematician.png",
+      "newImage": "images/cards/kr6.png"
+    },
+    {
+      "name": "カードカー・D",
+      "oldId": "cardcarD",
+      "newId": "kn7",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/cardcarD.png",
+      "newImage": "images/cards/kn7.png"
+    },
+    {
+      "name": "ベル＝ゲルエール",
+      "oldId": "belGuerre",
+      "newId": "kn8",
+      "oldRarity": "N",
+      "newRarity": "N",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/belGuerre.png",
+      "newImage": "images/cards/kn8.png"
+    },
+    {
+      "name": "冥府の天秤",
+      "oldId": "netherBalance",
+      "newId": "ks12",
+      "oldRarity": "SR",
+      "newRarity": "SR",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "main",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/netherBalance.png",
+      "newImage": "images/cards/ks12.png"
+    },
+    {
+      "name": "冥府の盾",
+      "oldId": "netherShield",
+      "newId": "shkr1",
+      "oldRarity": "R",
+      "newRarity": "R",
+      "color": "黒",
+      "civilizations": [
+        "黒"
+      ],
+      "section": "shield",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/netherShield.png",
+      "newImage": "images/cards/shkr1.png"
+    },
+    {
+      "name": "赤月の復讐者",
+      "oldId": "redMoonAvenger",
+      "newId": "redMoonAvenger",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "color": "黒",
+      "civilizations": null,
+      "section": "character",
+      "ownerCharacterId": null,
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "preserve-character",
+      "oldImage": "images/characters/redMoonAvenger/lv0.png",
+      "newImage": "images/characters/redMoonAvenger/lv0.png"
+    },
+    {
+      "name": "イエローゾーン",
+      "oldId": "yellowZone",
+      "newId": "redMoonAvenger_shkl1",
+      "oldRarity": "UR",
+      "newRarity": "LEGEND",
+      "color": "黒",
+      "civilizations": null,
+      "section": "shield",
+      "ownerCharacterId": "redMoonAvenger",
+      "requiredCharacterColor": null,
+      "token": false,
+      "generated": false,
+      "status": "proposed",
+      "oldImage": "images/cards/yellowZone.png",
+      "newImage": "images/characters/redMoonAvenger/cards/shkl1.png"
+    }
+  ],
+  "awakenedForms": [
+    {
+      "formId": "darkGunveet",
+      "name": "ダークネス・ガンヴィート",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "note": "not a standalone card definition; no independent key"
+    },
+    {
+      "formId": "alegria",
+      "name": "ルナ・アレグリア",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "note": "not a standalone card definition; no independent key"
+    },
+    {
+      "formId": "giantAwake",
+      "name": "勝利の覚醒者ボルシャック・メビウス",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "note": "not a standalone card definition; no independent key"
+    },
+    {
+      "formId": "gaiNext",
+      "name": "超戦覇龍 ガイNEXT",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "note": "not a standalone card definition; no independent key"
+    },
+    {
+      "formId": "vermillion",
+      "name": "龍圧の覚醒者ヴァーミリオン・ドラヴィタ",
+      "oldRarity": "SSR",
+      "newRarity": "UR",
+      "note": "not a standalone card definition; no independent key"
+    }
+  ],
+  "existingPngFiles": [
+    "images/cards/r1.png",
+    "images/characters/almar/lv3.png",
+    "images/characters/almar/lv2.png",
+    "images/characters/almar/lv0.png",
+    "images/characters/almar/lv1.png",
+    "images/characters/almar/lv4.png"
+  ]
+}
