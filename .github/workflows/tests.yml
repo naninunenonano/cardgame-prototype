@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node identity-test.cjs
       - run: node rename-test.cjs
       - run: node graveyard-test.cjs
       - run: node black-cards-test.cjs

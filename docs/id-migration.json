@@ -1073,7 +1073,8 @@
       "serial": 1,
       "retired": false,
       "oldImage": "images/cards/gunveet.png",
-      "newImage": "images/characters/almar/cards/sbbu1-1.png"
+      "newImage": "images/characters/almar/cards/sbbu1-1.png",
+      "faceNumber": 1
     },
     {
       "oldId": "darkGunveet",
@@ -1118,7 +1119,8 @@
       "serial": 1,
       "retired": false,
       "oldImage": "images/cards/alegre.png",
-      "newImage": "images/cards/sbbu1-1.png"
+      "newImage": "images/cards/sbbu1-1.png",
+      "faceNumber": 1
     },
     {
       "oldId": "alegria",
@@ -1771,7 +1773,8 @@
       "serial": 3,
       "retired": false,
       "oldImage": "images/cards/s5.png",
-      "newImage": "images/cards/sbnl3-1.png"
+      "newImage": "images/cards/sbnl3-1.png",
+      "faceNumber": 1
     },
     {
       "oldId": "giantAwake",
@@ -2310,7 +2313,8 @@
       "serial": 1,
       "retired": false,
       "oldImage": "images/cards/moltNext.png",
-      "newImage": "images/cards/sbru1-1.png"
+      "newImage": "images/cards/sbru1-1.png",
+      "faceNumber": 1
     },
     {
       "oldId": "gaiNext",
@@ -2412,7 +2416,8 @@
       "serial": 1,
       "retired": false,
       "oldImage": "images/cards/dravita.png",
-      "newImage": "images/cards/sbgu1-1.png"
+      "newImage": "images/cards/sbgu1-1.png",
+      "faceNumber": 1
     },
     {
       "oldId": "vermillion",
