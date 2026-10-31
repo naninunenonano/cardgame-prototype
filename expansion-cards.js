@@ -10,7 +10,7 @@ make('arianrhod','アリアンロッド','N',1,1,'赤','通常',[1,1],{symbols:{
 make('redManaBreaker','野蛮な侵略者','N',1,1,'赤','通常',[3,2],{onEnter:[{kind:'ownDestroyMana'}],text:'登場時、自分のマナ1枚を選び破壊。'});
 make('scrapper','地獄スクラッパー','N',3,1,'赤','呪文',null,{instant:true,onUse:[{kind:'scrapper',remaining:5}],text:'インスタント。敵の盤面のカード1枚に1ダメージを5回順番に処理。毎回対象を選び直す。相手プレイヤーは対象外。'});
 
-make('bolmeteus','ボルメテウス・ホワイト・ドラゴン','UR',6,1,'赤','通常',[7,7],{sideboardOnly:true,symbols:{赤:2},shieldSilence:true,text:'攻撃中、相手はシールドを使用できない。本体のライフを減らした攻撃の終了時、相手の裏向きシールド1枚を発動させず表へ。ブロック可能。'});
+make('bolmeteus','エンシェント・シルバー・ドラゴン','UR',6,1,'赤','通常',[7,7],{sideboardOnly:true,symbols:{赤:2},shieldSilence:true,text:'攻撃中、相手はシールドを使用できない。本体のライフを減らした攻撃の終了時、相手の裏向きシールド1枚を発動させず表へ。ブロック可能。'});
 make('moltNext','超戦龍覇 モルトNEXT','SSR',2,5,'赤','通常',[5,6],{sideboardOnly:true,symbols:{赤:2},redUntap:true,awakenOnUntap:'gaiNext',text:'マナがすべて赤なら攻撃終了時アンタップ。アンタップした時ガイNEXTへ覚醒。状態を引き継ぐ。'});
 a.gaiNext={name:'超戦覇龍 ガイNEXT',cost:M.cost(14),attack:8,maxHealth:10,symbols:{赤:3},redUntap:false,awakenOnUntap:null,speedAura:true,release:true,onEnter:[],onAttack:[],onDeath:[],text:'自分の全クリーチャーにSA。解除：離場の代わりにモルトNEXTへ戻る。ダメージ・状態を維持。'};
 make('scrambleChange','スクランブル・チェンジ','SR',2,1,'赤','呪文',null,{sideboardOnly:true,onUse:[{kind:'scramble'}],text:'このターン次の赤クリーチャー召喚を5軽減（色指定を優先して最低1残し、残りを無色から軽減）。その個体にこのターンSA。サイド1ターン1枚制限を消費。'});
