@@ -1,4 +1,4 @@
-# PNG画像の登録先（Ver.0.33以降）
+# PNG画像の登録先（Ver.0.34以降）
 
 | 種類 | 登録先 |
 |---|---|
@@ -11,7 +11,7 @@
 
 アルマーは従来どおり `images/characters/almar/lv0.png`、`lv1.png`、`lv2.png`、`lv3.png`、`lv4.png` です。
 
-アストレアは **images/cards/rl1.png**、オーレリアは **images/cards/bl1.png** です。旧ファイル名r1.png・b1.pngは使用しません。
+アストレアは **images/cards/rl1.png**、千変万化 ヴェルミナは **images/cards/bl3.png** です。旧ファイル名r1.png・b1.pngは使用しません。
 
 通常の1面カードには枝番号を付けません。トークンはt1〜t6。カードリストのID、または [全カードの対応表](../docs/id-migration.csv) を確認してください。台帳・採番方法は [説明](../docs/id-unification-status.md) を参照してください。
 

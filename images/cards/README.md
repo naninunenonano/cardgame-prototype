@@ -1,13 +1,13 @@
-# カードPNG（Ver.0.33以降）
+# カードPNG（Ver.0.34以降）
 
 一般カードは、新内部IDをファイル名にします。旧IDのファイル名は使用しません。画像未登録の場合は文字表示になります。
 
 | カード | 内部ID | PNG登録先 |
 |---|---|---|
 | 白銀の戦乙女 アストレア | rl1 | images/cards/rl1.png |
-| ロイヤルセイバー・オーレリア | bl1 | images/cards/bl1.png |
+| 千変万化 ヴェルミナ | bl3 | images/cards/bl3.png |
 | フェアリー・ライフ | gn1 | images/cards/gn1.png |
-| 偽りの月 インターステラ（UR） | almar_sbbu2 | images/characters/almar/cards/sbbu2.png |
+| 星界の門番 デウス・エクス・マキナ（UR） | almar_sbbu2 | images/characters/almar/cards/sbbu2.png |
 
 トークンは `images/cards/t1.png` など。専用カードはこのフォルダではなく、所有キャラクターの `cards/` フォルダへ登録します。複数面は基本IDではなく `-1` / `-2` などの面IDを使用します。
 
