@@ -8,7 +8,7 @@ make('r4','襲撃者エグゼドライブ','赤','SR',2,1,'通常',[3,3],{symbol
 make('r5','王家の御旗','赤','N',2,2,'設置物',null,{redBanner:true,onEnter:[{kind:'bannerAll'}],text:'登場時、自分の赤クリーチャーすべての攻撃力+1。以降、自分の赤クリーチャー登場時、その攻撃力+1。'});
 make('r6','溶岩の撃ち込み','赤','N',0,1,'呪文',null,{onUse:[{kind:'damagePlayer',amount:3}],text:'相手プレイヤーに3ダメージ。'});
 make('r7','セージコマンダー','赤','R',5,1,'通常',[4,6],{onEnter:[{kind:'sageBuff'}],text:'登場時、自分のほかの全クリーチャーに永続+2/+2。退場後も維持、累積。'});
-make('b1','ロイヤルセイバー・オーレリア','青','UR',4,3,'通常',[3,5],{symbols:{青:2},abilities:['ブロッカー'],aurelia:true,onDeath:[{kind:'tokens',count:1,tokenKey:'aureliaToken'}],text:'敵1体につき攻撃力+1、ほかの味方1体につき最大体力+1。合計10以上なら相手効果で選ばれない。破壊時、死亡時能力なしの自身のトークンを生成。'});
+make('b1','千変万化 ヴェルミナ','青','UR',4,3,'通常',[3,5],{symbols:{青:2},abilities:['ブロッカー'],aurelia:true,onDeath:[{kind:'tokens',count:1,tokenKey:'aureliaToken'}],text:'敵1体につき攻撃力+1、ほかの味方1体につき最大体力+1。合計10以上なら相手効果で選ばれない。破壊時、死亡時能力なしの自身のトークンを生成。'});
 make('gate','スパイラル・ゲート','青','N',1,1,'呪文',null,{instant:true,onUse:[{kind:'unitBounce'}],text:'インスタント。クリーチャー1体を持ち主の手札へ。'});
 make('counter','対抗呪文','青','R',2,1,'呪文',null,{instant:true,responseOnly:true,spellCounter:true,text:'インスタント。呪文1つを打ち消す。'});
 cards.brain.rarity='R';cards.brain.deckLimit=3;cards.brain.starter=true;

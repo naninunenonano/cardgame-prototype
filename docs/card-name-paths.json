@@ -1,0 +1,74 @@
+[
+  {
+    "oldName": "クリスタル・ツヴァイランサー",
+    "newName": "万象の水霊 ネレイア",
+    "baseId": "bl2",
+    "id": "bl2",
+    "rarity": "LEGEND",
+    "path": "images/cards/bl2.png",
+    "exists": true
+  },
+  {
+    "oldName": "ブラック・ガンヴィート",
+    "newName": "記憶の管理者 リゼット",
+    "baseId": "almar_sbbu1",
+    "id": "almar_sbbu1-1",
+    "rarity": "UR",
+    "path": "images/characters/almar/cards/sbbu1-1.png",
+    "exists": true
+  },
+  {
+    "oldName": "バイス・チャージャー",
+    "newName": "メモリー・フラスコ",
+    "baseId": "almar_sbnr1",
+    "id": "almar_sbnr1",
+    "rarity": "R",
+    "path": "images/characters/almar/cards/sbnr1.png",
+    "exists": false
+  },
+  {
+    "oldName": "ロスト・ソウル",
+    "newName": "記憶の簒奪",
+    "baseId": "almar_sbbs1",
+    "id": "almar_sbbs1",
+    "rarity": "SR",
+    "path": "images/characters/almar/cards/sbbs1.png",
+    "exists": true
+  },
+  {
+    "oldName": "偽りの月 インターステラ",
+    "newName": "星界の門番 デウス・エクス・マキナ",
+    "baseId": "almar_sbbu2",
+    "id": "almar_sbbu2",
+    "rarity": "UR",
+    "path": "images/characters/almar/cards/sbbu2.png",
+    "exists": false
+  },
+  {
+    "oldName": "ロイヤルセイバー・オーレリア",
+    "newName": "千変万化 ヴェルミナ",
+    "baseId": "bl3",
+    "id": "bl3",
+    "rarity": "LEGEND",
+    "path": "images/cards/bl3.png",
+    "exists": true
+  },
+  {
+    "oldName": "ボルメテウス・ホワイト・ドラゴン",
+    "newName": "エンシェント・シルバー・ドラゴン",
+    "baseId": "sbrl1",
+    "id": "sbrl1",
+    "rarity": "LEGEND",
+    "path": "images/cards/sbrl1.png",
+    "exists": false
+  },
+  {
+    "oldName": "ダークネス・ガンヴィート",
+    "newName": "記憶の管理者 リゼット・エンゲージ",
+    "baseId": "almar_sbbu1",
+    "id": "almar_sbbu1-2",
+    "rarity": "UR",
+    "path": "images/characters/almar/cards/sbbu1-2.png",
+    "exists": true
+  }
+]
