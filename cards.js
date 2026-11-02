@@ -19,7 +19,6 @@
  ,{key:'zundoko',name:'Dの花道 ズンドコ晴れ舞台',type:'設置物',cost:M.cost(4,{緑:1}),symbols:{緑:1},onUnitEnter:[manaBoost],text:'自分のユニットが登場するたび、通常デッキ上1枚を未使用でマナへ。複数枚はそれぞれ誘発。Dスイッチなし。'}
  ];
  const cards=Object.fromEntries(defs.map(d=>[d.key,{color:'緑',symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:{minimum:{緑:1}},...d}]));
- const redKeys=[];for(let n=1;n<=12;n++){const key='red'+n;redKeys.push(key);cards[key]={key,deckEligible:false,name:`赤・${n}コスト`,type:'通常',color:'赤',cost:M.cost(n-1,{赤:1}),attack:n,maxHealth:n,symbols:{赤:1},abilities:[],onUse:[],onEnter:[],onDefeat:[],text:'再利用用の旧仮デッキ定義。'};}
  const blueDefs=[
  {key:'brain',name:'サイバー・ブレイン',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'draw',count:3}],text:'カードを3枚引く。'},
  {key:'shaper',name:'ストリーミング・シェイパー',type:'呪文',cost:M.cost(0,{青:3}),deckLimit:1,onUse:[{kind:'revealBlue',count:4}],text:'上から4枚を公開。青をすべて手札へ、残りをトラッシュへ。ドローではない。'},
