@@ -256,7 +256,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 1,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red2",
@@ -273,7 +273,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 2,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red3",
@@ -290,7 +290,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 3,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red4",
@@ -307,7 +307,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 4,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red5",
@@ -324,7 +324,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 5,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red6",
@@ -341,7 +341,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 6,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red7",
@@ -358,7 +358,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 7,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red8",
@@ -375,7 +375,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 8,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red9",
@@ -392,7 +392,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 9,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red10",
@@ -409,7 +409,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 10,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red11",
@@ -426,7 +426,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 11,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "red12",
@@ -443,7 +443,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 12,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "brain",
@@ -3194,7 +3194,19 @@
     "alegria",
     "giantAwake",
     "gaiNext",
-    "vermillion"
+    "vermillion",
+    "rn1",
+    "rn2",
+    "rn3",
+    "rn4",
+    "rn5",
+    "rn6",
+    "rn7",
+    "rn8",
+    "rn9",
+    "rn10",
+    "rn11",
+    "rn12"
   ],
   "reservedSections": [
     "exf",
