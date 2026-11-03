@@ -92,5 +92,17 @@
  text:'仮称・男性吸血鬼。Lv0からLv4へ成長。固有能力は現在レベルのみ有効、すべて強制。復讐は現在ライフ15以下。ドレインは戦闘で与えたダメージ分回復（最大ライフまで）。'};
  cards.yellowZone={key:'yellowZone',name:'イエローゾーン',rarity:'UR',color:'黒',type:'シールドカード',deckSection:'shields',deckLimit:1,requiredCharacter:'redMoonAvenger',cost:null,symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],shieldRule:{event:'lifeThreshold',effect:'yellowZone',maxLife:15},triggerCondition:'ライフ変更後、現在ライフ15以下で自動発動（1試合1回）。赤月の復讐者の固有自傷・ルールダメージでは発動しない。',useCondition:'赤月の復讐者専用。',text:'仮称。発動中は最大ライフ15、受ける3以上のダメージは3、シールドによるライフ回復不可。他の回復は可能。裏向きで効果を失い、再発動しない。'};
  const decks={...starter.decks,green:[...defs.map(c=>({key:c.key,count:['bahamut','mother'].includes(c.key)?1:3})),{key:'glennya',count:2}],blue:[...blueDefs.map(c=>({key:c.key,count:['shaper','zwei'].includes(c.key)?1:3})),{key:'glennya',count:2}]};
+
+ // Sheet batch 2026-11-04: only Lv1 changes; Lv2–4 remain as defined above.
+ characterLevels[1].text='成長時：カードを1枚引く。';
+ for(const key of ['almar','redCaptain','blueSage','celestia','ereshthiaNox','redMoonAvenger']){
+  const c=cards[key];if(!c)throw Error('Missing character '+key);
+  if(c.characterEffects)c.characterEffects[1]=[{kind:'draw',count:1}];
+  if(c.levelTexts)c.levelTexts[1]='成長時：カードを1枚引く。';
+  if(key==='redCaptain')c.text=c.text.replace('Lv1：手札1捨て→相手1点。','Lv1：成長時に1ドロー。');
+  if(key==='celestia')c.text=c.text.replace('Lv1〜3：成長時と自分開始時に現在レベルの能力。','Lv1：成長時に1ドロー。Lv2〜3：成長時と自分開始時に現在レベルの能力。');
+ }
+ cards.ws1={key:'ws1',name:'光神龍スペル・デル・フィン',color:'白',rarity:'SR',rarityProvisional:false,type:'通常',cost:M.cost(6,{白:3}),attack:3,maxHealth:8,symbols:{白:2},abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:3,civilizations:['白'],spellLock:true,revealEnemyHand:true,spellHandBonus:true,text:'相手は呪文を唱えられない。相手は手札を公開してプレイする。相手の手札の呪文1枚につき攻撃力+1。'};
+ cards.wl1={key:'wl1',name:'断罪の執行者',color:'白',rarity:'LEGEND',rarityProvisional:false,type:'通常',cost:M.cost(5,{白:2}),attack:0,maxHealth:1,symbols:{白:1},abilities:['ブロッカー'],onUse:[],onEnter:[{kind:'executorSelect'}],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:1,civilizations:['白'],spellImmune:true,text:'ブロッカー。自分・相手双方の呪文効果を受けない。登場時、相手クリーチャーを最大2体選ぶ。選択時の攻撃力合計を自身の攻撃力に、現在体力合計を最大体力に加算。その後選んだクリーチャーを破壊。場に残った対象は次の自分のターン終了時まで攻撃・ブロック不可。'};
  return (typeof module==='object'&&module.exports?require('./identity.js'):globalThis.CardIdentity).install({starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:Object.values(cards).filter(c=>c.type==='シールドカード').map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'});
 });
