@@ -2805,6 +2805,40 @@
       "oldForm": null,
       "serial": 1,
       "retired": false
+    },
+    {
+      "oldId": "ws1",
+      "baseId": "ws1",
+      "id": "ws1",
+      "name": "光神龍スペル・デル・フィン",
+      "oldRarity": "SR",
+      "rarity": "SR",
+      "color": "白",
+      "section": "main",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 1,
+      "retired": false
+    },
+    {
+      "oldId": "wl1",
+      "baseId": "wl1",
+      "id": "wl1",
+      "name": "断罪の執行者",
+      "oldRarity": "LEGEND",
+      "rarity": "LEGEND",
+      "color": "白",
+      "section": "main",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 1,
+      "retired": false
     }
   ],
   "aliases": {
@@ -2972,7 +3006,9 @@
     "netherBalance": "ks12",
     "netherShield": "shkr1",
     "redMoonAvenger": "redmoonavenger",
-    "yellowZone": "redmoonavenger_shkl1"
+    "yellowZone": "redmoonavenger_shkl1",
+    "ws1": "ws1",
+    "wl1": "wl1"
   },
   "forms": {
     "darkGunveet": "almar_sbbu1-2",
@@ -3024,7 +3060,9 @@
     "ks": 12,
     "shkr": 1,
     "redmoonavenger_shkl": 1,
-    "t": 6
+    "t": 6,
+    "ws": 1,
+    "wl": 1
   },
   "retiredIds": [
     "piruluk",
