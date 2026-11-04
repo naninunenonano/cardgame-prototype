@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node over-rare-test.cjs
       - run: node lumiere-test.cjs
       - run: node shield-link-test.cjs
       - run: node next-batch-test.cjs
@@ -42,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [lumiere-browser-test.cjs, shield-link-browser-test.cjs, next-batch-browser-test.cjs, rename-browser-test.cjs, graveyard-browser-test.cjs, black-cards-browser-test.cjs, black-ssr-browser-test.cjs, normal-mode-browser-test.cjs, battle-ui-browser-test.cjs, draw-charger-browser-test.cjs, deck-exhaustion-browser-test.cjs, missions-browser-test.cjs, collection-browser-test.cjs, character-art-browser-test.cjs, pack-opening-browser-test.cjs]
+        test: [over-rare-browser-test.cjs, lumiere-browser-test.cjs, shield-link-browser-test.cjs, next-batch-browser-test.cjs, rename-browser-test.cjs, graveyard-browser-test.cjs, black-cards-browser-test.cjs, black-ssr-browser-test.cjs, normal-mode-browser-test.cjs, battle-ui-browser-test.cjs, draw-charger-browser-test.cjs, deck-exhaustion-browser-test.cjs, missions-browser-test.cjs, collection-browser-test.cjs, character-art-browser-test.cjs, pack-opening-browser-test.cjs]
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -56,3 +57,10 @@ jobs:
       - run: node "${{ matrix.test }}"
         env:
           NODE_PATH: /tmp/cardgame-browser/node_modules
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.test == 'over-rare-browser-test.cjs'
+        with:
+          name: over-rare-visual-check
+          path: /tmp/or-*.png
+          if-no-files-found: ignore
+          retention-days: 7
