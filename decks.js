@@ -15,7 +15,7 @@ const composition=d=>JSON.stringify([d.main,d.sideboard||[],d.shields||defaultSh
 function preset(id){if(!hasPreset(id))return null;const d=copy(official[id]);trusted.add(d);return d;}
 function isOfficialPreset(d){return !!d&&trusted.has(d)&&hasPreset(d.id)&&composition(d)===composition(official[d.id]);}
 function sectionOf(c){return c.type==='土地'?'legacy':c.sideboardOnly?'sideboard':c.deckSection||'main';}
-function limit(c){if(c.type==='キャラクター'||c.deckLimit===1||['LEGEND','OR'].includes(c.rarity))return 1;if(sectionOf(c)==='shields')return 4;return Number.isInteger(c.deckLimit)&&c.deckLimit>0?Math.min(3,c.deckLimit):3;}
+function limit(c){if(c.type==='キャラクター'||c.deckLimit===1||c.rarity==='LEGEND')return 1;if(sectionOf(c)==='shields')return 4;return Number.isInteger(c.deckLimit)&&c.deckLimit>0?Math.min(3,c.deckLimit):3;}
 function available(section=null){return Object.values(C.cards).filter(c=>c&&c.deckEligible!==false&&!c.generated&&!c.token&&sectionOf(c)!=='legacy'&&(!section||(section==='sideboard'?!c.mainDeckOnly&&!['legacy','shields'].includes(sectionOf(c)):sectionOf(c)===section)));}
 function adoptionError(c,d){if(!c?.requiredCharacter)return '';const chars=(d.sideboard||[]).filter(e=>e.count>0&&C.cards[e.key]?.type==='キャラクター');return chars.length===1&&chars[0].count===1&&chars[0].key===c.requiredCharacter?'':(C.cards[c.requiredCharacter]?.name||c.requiredCharacter)+'専用：対応キャラクターをサイドボードに1枚採用してください。';}
 function validate(d){d=migrateDeck(d);const errors=[],allow=new Map(available().map(c=>[c.key,c]));if(!d||typeof d!=='object')return ['デッキデータが不正です。'];const exempt=isOfficialPreset(d);
