@@ -1,0 +1,2 @@
+/* OR presentation hooks; no card art or acquisition state is changed here. */
+(function(root){'use strict';const is=c=>c?.rarity==='OR';const api={is,className:c=>is(c)?'or-card':'',badge:c=>is(c)?'<span class="or-badge" aria-label="OVER RARE・最高レアリティ"><span>OR</span><small>OVER RARE</small></span>':''};root.OverRare=api;if(typeof module==='object'&&module.exports)module.exports=api;})(globalThis);

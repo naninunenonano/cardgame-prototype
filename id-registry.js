@@ -1095,7 +1095,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 2,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "aquaGuard",
@@ -2600,7 +2600,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 4,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "undakein",
@@ -3044,6 +3044,42 @@
       "oldForm": null,
       "serial": 9,
       "retired": false
+    },
+    {
+      "oldId": "gt5000",
+      "baseId": "ko1",
+      "id": "ko1",
+      "name": "暴走龍 5000GT",
+      "oldRarity": "LEGEND",
+      "rarity": "OR",
+      "color": "黒",
+      "section": "main",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 1,
+      "retired": false,
+      "migrationFrom": "kl4"
+    },
+    {
+      "oldId": "vt5000",
+      "baseId": "sbno1",
+      "id": "sbno1",
+      "name": "飛翔龍 5000VT",
+      "oldRarity": "LEGEND",
+      "rarity": "OR",
+      "color": "無色",
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 1,
+      "retired": false,
+      "migrationFrom": "sbnl2"
     }
   ],
   "aliases": {
@@ -3111,7 +3147,7 @@
     "conspiracy": "sbbr1",
     "technology": "sbbu2",
     "interstellar": "almar_sbbu2",
-    "vt5000": "sbnl2",
+    "vt5000": "sbno1",
     "aquaGuard": "t2",
     "c1": "nn2",
     "c2": "nn3",
@@ -3199,7 +3235,7 @@
     "iwashin": "kn4",
     "crossfire": "ks10",
     "mors": "kr4",
-    "gt5000": "kl4",
+    "gt5000": "ko1",
     "undakein": "kr5",
     "bRomanov": "ks11",
     "doomDragelion": "kl5",
@@ -3225,7 +3261,11 @@
     "wl2": "wl2",
     "lumiere": "lumiere",
     "t8": "t8",
-    "t9": "t9"
+    "t9": "t9",
+    "ko1": "ko1",
+    "kl4": "ko1",
+    "sbno1": "sbno1",
+    "sbnl2": "sbno1"
   },
   "forms": {
     "darkGunveet": "almar_sbbu1-2",
@@ -3282,7 +3322,9 @@
     "wl": 2,
     "wn": 2,
     "wu": 1,
-    "wr": 1
+    "wr": 1,
+    "ko": 1,
+    "sbno": 1
   },
   "retiredIds": [
     "piruluk",
@@ -3465,7 +3507,9 @@
     "rn10",
     "rn11",
     "rn12",
-    "wu1"
+    "wu1",
+    "kl4",
+    "sbnl2"
   ],
   "reservedSections": [
     "exf",

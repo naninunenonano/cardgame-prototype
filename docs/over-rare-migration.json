@@ -1,0 +1,27 @@
+{
+  "base": "27986be3d682a3e3c9232b76c0f247e726e1471d",
+  "rows": [
+    {
+      "name": "暴走龍 5000GT",
+      "oldId": "kl4",
+      "newId": "ko1",
+      "oldRarity": "LEGEND",
+      "newRarity": "OR",
+      "section": "main",
+      "color": "黒",
+      "oldImage": "images/cards/kl4.png",
+      "newImage": "images/cards/ko1.png"
+    },
+    {
+      "name": "飛翔龍 5000VT",
+      "oldId": "sbnl2",
+      "newId": "sbno1",
+      "oldRarity": "LEGEND",
+      "newRarity": "OR",
+      "section": "sideboard",
+      "color": "無色",
+      "oldImage": "images/cards/sbnl2.png",
+      "newImage": "images/cards/sbno1.png"
+    }
+  ]
+}

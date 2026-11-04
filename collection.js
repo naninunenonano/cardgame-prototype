@@ -1,6 +1,6 @@
 (function(root,factory){const a=factory(typeof module==='object'&&module.exports?require('./decks.js'):root.DeckLibrary,typeof module==='object'&&module.exports?require('./cards.js'):root.CardCatalog,typeof module==='object'&&module.exports?require('./missions.js'):root.MissionRules);if(typeof module==='object'&&module.exports)module.exports=a;else root.PlayerCollection=a;})(globalThis,function(D,C,M){
 const KEY='cardgame-prototype.collection.v1',VERSION=2,copy=x=>JSON.parse(JSON.stringify(x));
-const ECONOMY=Object.freeze(Object.fromEntries(Object.entries({N:[1,10],R:[2,30],SR:[5,50],UR:[10,100],LEGEND:[5,150]}).map(([r,[recycle,cost]])=>[r,Object.freeze({recycle,cost})])));
+const ECONOMY=Object.freeze(Object.fromEntries(Object.entries({N:[1,10],R:[2,30],SR:[5,50],UR:[10,100],LEGEND:[5,150],OR:[10,200]}).map(([r,[recycle,cost]])=>[r,Object.freeze({recycle,cost})])));
 const starterKeys=new Set(['redStarter','blueStarter'].flatMap(id=>{const d=D.preset(id);return [...d.main,...d.sideboard,...d.shields].map(e=>e.key);}));
 const collectible=c=>!!c&&c.deckEligible!==false&&!c.token&&!c.generated&&!c.awakened&&c.type!=='土地'&&c.cost!==undefined&&!!ECONOMY[c.rarity]&&(c.type!=='キャラクター'||(c.level??0)===0)&&(!c.packExcluded||starterKeys.has(c.key));
 const craftable=c=>collectible(c)&&!c.packExcluded;
