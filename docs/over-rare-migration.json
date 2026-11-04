@@ -15,13 +15,14 @@
     {
       "name": "飛翔龍 5000VT",
       "oldId": "sbnl2",
-      "newId": "sbno1",
+      "newId": "no1",
       "oldRarity": "LEGEND",
       "newRarity": "OR",
-      "section": "sideboard",
+      "section": "main",
       "color": "無色",
       "oldImage": "images/cards/sbnl2.png",
-      "newImage": "images/cards/sbno1.png"
+      "newImage": "images/cards/no1.png",
+      "intermediateId": "sbno1"
     }
   ]
 }
