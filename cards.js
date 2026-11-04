@@ -94,6 +94,7 @@
  const decks={...starter.decks,green:[...defs.map(c=>({key:c.key,count:['bahamut','mother'].includes(c.key)?1:3})),{key:'glennya',count:2}],blue:[...blueDefs.map(c=>({key:c.key,count:['shaper','zwei'].includes(c.key)?1:3})),{key:'glennya',count:2}]};
 
  (typeof module==='object'&&module.exports?require('./shield-link-cards.js'):globalThis.ShieldLinkCards).install(M,cards);
+ (typeof module==='object'&&module.exports?require('./lumiere-cards.js'):globalThis.LumiereCards).install(M,cards);
  // Sheet batch 2026-11-04: only Lv1 changes; Lv2–4 remain as defined above.
  characterLevels[1].text='成長時：カードを1枚引く。';
  for(const key of ['almar','redCaptain','blueSage','celestia','ereshthiaNox','redMoonAvenger']){

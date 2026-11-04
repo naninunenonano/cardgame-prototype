@@ -92,7 +92,8 @@ function decide(v){
   if(o.kind==='graveChoice'){if(o.choice==='ereshMode')return {type:'graveChoice',id:me.trash.some(c=>c.type==='通常'&&c.color==='黒'&&!c.evolution&&!c.noReanimate)?'revive':'recover'};const c=best(o.candidates,c=>o.choice==='iwashinDiscard'?-keepScore(v,c):o.choice==='fushigi'?-unitValue(c)+total(c):unitValue(c));return {type:'graveChoice',id:c?.id??null};}
   if(o.kind==='gravePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card):10000);return {type:'slot',slot:slot.id};}return {type:'gravePlace'};}
 
-  if(o.kind==='expansionChoice'){if(o.choice==='zazeMode')return {type:'expansion',id:'draw'};if(o.choice==='lifeSave')return {type:'expansion',id:me.life>5?'use':'decline'};const c=best(o.candidates,c=>o.choice==='burnShield'?0:o.choice==='lockMana'?total(c):o.choice==='destroyMana'?-(total(c))+(c.manaToken?10:0):o.choice==='gigaMana'?-(unitValue(c,me.manaCount))+(c.zone==='hand'?15:0):o.choice==='celestiaHeal'?(c.maxHealth-c.health)*5+unitValue(c,me.manaCount):unitValue(c,me.manaCount));return {type:'expansion',id:c?.id||(o.choice==='executorSelect'?'done':undefined)};}
+  if(o.kind==='rulePayment')return {type:'rulePay'};
+  if(o.kind==='expansionChoice'){if(o.choice==='lumiereMode'){const a=o.candidates.filter(c=>!c.disabled),order=['free',...(me.life<me.maxLife?['heal']:[]),'draw','seal','recover','heal','skip'];return {type:'expansion',id:order.find(id=>a.some(c=>c.id===id))};}if(o.choice==='zazeMode')return {type:'expansion',id:'draw'};if(o.choice==='lifeSave')return {type:'expansion',id:me.life>5?'use':'decline'};const c=best(o.candidates,c=>o.choice==='burnShield'?0:o.choice==='lockMana'?total(c):o.choice==='destroyMana'?-(total(c))+(c.manaToken?10:0):o.choice==='gigaMana'?-(unitValue(c,me.manaCount))+(c.zone==='hand'?15:0):o.choice==='celestiaHeal'?(c.maxHealth-c.health)*5+unitValue(c,me.manaCount):unitValue(c,me.manaCount));return {type:'expansion',id:c?.id||(o.choice==='executorSelect'?'done':undefined)};}
   if(o.kind==='lootCost')return {type:'lootCost',id:best(o.candidates,c=>-keepScore(v,c))?.id};
 
   if(o.kind==='scryMany'){const c=o.candidates.find(c=>o.top.includes(c.id)&&keepScore(v,c)<8);return c?{type:'scryMove',id:c.id,destination:'bottom'}:{type:'scry'};}
@@ -137,6 +138,8 @@ function decide(v){
  if(['main1','main2'].includes(v.turn.step)){
   // Preserve an immediate direct win rather than tapping its mana creature to deploy more cards.
   if(v.turn.step==='main1'&&enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))&&!enemy.units.some(c=>c.lure)&&me.units.some(c=>!c.rest&&!c.sick&&!c.cannotAttack))return {type:'advance'};
+  const destroy=me.linkDestroyTargets?.find(t=>t.canPay);if(destroy)return {type:'linkDestroy',id:destroy.id};
+  if(me.character?.key==='lumiere'&&me.shieldLinkCount<5){if(me.character.level===3&&me.character.activeTurn!==v.turn.counts[p]&&me.hand.some(c=>c.shieldLink))return {type:'characterAbility'};if(me.character.level===4&&v.sources.length&&me.lumiereUsed.length<5)return {type:'characterAbility'};}
   if(me.character?.key==='ereshthianox'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
   if(me.units.some(c=>c.cardcarAbility)&&me.hand.length<3&&me.counts.main>=4){const c=me.units.find(c=>c.cardcarAbility);return {type:'cardcar',id:c.id};}
   if(me.character?.key==='redcaptain'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p]&&me.units.length<7&&me.hand.some(c=>c.canFreeSummon))return {type:'characterAbility'};
