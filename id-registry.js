@@ -3078,8 +3078,26 @@
       "faces": [],
       "oldForm": null,
       "serial": 1,
-      "retired": false,
+      "retired": true,
       "migrationFrom": "sbnl2"
+    },
+    {
+      "oldId": "vt5000",
+      "baseId": "no1",
+      "id": "no1",
+      "name": "飛翔龍 5000VT",
+      "oldRarity": "OR",
+      "rarity": "OR",
+      "color": "無色",
+      "section": "main",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 1,
+      "retired": false,
+      "migrationFrom": "sbno1"
     }
   ],
   "aliases": {
@@ -3147,7 +3165,7 @@
     "conspiracy": "sbbr1",
     "technology": "sbbu2",
     "interstellar": "almar_sbbu2",
-    "vt5000": "sbno1",
+    "vt5000": "no1",
     "aquaGuard": "t2",
     "c1": "nn2",
     "c2": "nn3",
@@ -3264,8 +3282,9 @@
     "t9": "t9",
     "ko1": "ko1",
     "kl4": "ko1",
-    "sbno1": "sbno1",
-    "sbnl2": "sbno1"
+    "sbno1": "no1",
+    "sbnl2": "no1",
+    "no1": "no1"
   },
   "forms": {
     "darkGunveet": "almar_sbbu1-2",
@@ -3324,7 +3343,8 @@
     "wu": 1,
     "wr": 1,
     "ko": 1,
-    "sbno": 1
+    "sbno": 1,
+    "no": 1
   },
   "retiredIds": [
     "piruluk",
@@ -3509,7 +3529,8 @@
     "rn12",
     "wu1",
     "kl4",
-    "sbnl2"
+    "sbnl2",
+    "sbno1"
   ],
   "reservedSections": [
     "exf",
