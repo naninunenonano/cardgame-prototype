@@ -93,6 +93,7 @@
  cards.yellowZone={key:'yellowZone',name:'イエローゾーン',rarity:'UR',color:'黒',type:'シールドカード',deckSection:'shields',deckLimit:1,requiredCharacter:'redMoonAvenger',cost:null,symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],shieldRule:{event:'lifeThreshold',effect:'yellowZone',maxLife:15},triggerCondition:'ライフ変更後、現在ライフ15以下で自動発動（1試合1回）。赤月の復讐者の固有自傷・ルールダメージでは発動しない。',useCondition:'赤月の復讐者専用。',text:'仮称。発動中は最大ライフ15、受ける3以上のダメージは3、シールドによるライフ回復不可。他の回復は可能。裏向きで効果を失い、再発動しない。'};
  const decks={...starter.decks,green:[...defs.map(c=>({key:c.key,count:['bahamut','mother'].includes(c.key)?1:3})),{key:'glennya',count:2}],blue:[...blueDefs.map(c=>({key:c.key,count:['shaper','zwei'].includes(c.key)?1:3})),{key:'glennya',count:2}]};
 
+ (typeof module==='object'&&module.exports?require('./shield-link-cards.js'):globalThis.ShieldLinkCards).install(M,cards);
  // Sheet batch 2026-11-04: only Lv1 changes; Lv2–4 remain as defined above.
  characterLevels[1].text='成長時：カードを1枚引く。';
  for(const key of ['almar','redCaptain','blueSage','celestia','ereshthiaNox','redMoonAvenger']){
