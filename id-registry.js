@@ -2923,7 +2923,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 1,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "wn2",
@@ -2974,6 +2974,75 @@
       "faces": [],
       "oldForm": null,
       "serial": 7,
+      "retired": false
+    },
+    {
+      "oldId": "wu1",
+      "baseId": "wl2",
+      "id": "wl2",
+      "name": "無敵城 シルヴァー・グローリー",
+      "oldRarity": "UR",
+      "rarity": "LEGEND",
+      "color": "白",
+      "section": "main",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 2,
+      "retired": false,
+      "migrationFrom": "wu1"
+    },
+    {
+      "oldId": "lumiere",
+      "baseId": "lumiere",
+      "id": "lumiere",
+      "name": "リュミエール",
+      "oldRarity": "LEGEND",
+      "rarity": "LEGEND",
+      "color": "白",
+      "section": "character",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": null,
+      "retired": false
+    },
+    {
+      "oldId": "t8",
+      "baseId": "t8",
+      "id": "t8",
+      "name": "黎明の紋章",
+      "oldRarity": null,
+      "rarity": null,
+      "color": "白",
+      "section": "token",
+      "ownerCharacterId": null,
+      "token": true,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 8,
+      "retired": false
+    },
+    {
+      "oldId": "t9",
+      "baseId": "t9",
+      "id": "t9",
+      "name": "断罪の紋章",
+      "oldRarity": null,
+      "rarity": null,
+      "color": "白",
+      "section": "token",
+      "ownerCharacterId": null,
+      "token": true,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 9,
       "retired": false
     }
   ],
@@ -3149,10 +3218,14 @@
     "ws2": "ws2",
     "ws3": "ws3",
     "ws4": "ws4",
-    "wu1": "wu1",
+    "wu1": "wl2",
     "wn2": "wn2",
     "wr1": "wr1",
-    "t7": "t7"
+    "t7": "t7",
+    "wl2": "wl2",
+    "lumiere": "lumiere",
+    "t8": "t8",
+    "t9": "t9"
   },
   "forms": {
     "darkGunveet": "almar_sbbu1-2",
@@ -3204,9 +3277,9 @@
     "ks": 12,
     "shkr": 1,
     "redmoonavenger_shkl": 1,
-    "t": 7,
+    "t": 9,
     "ws": 4,
-    "wl": 1,
+    "wl": 2,
     "wn": 2,
     "wu": 1,
     "wr": 1
@@ -3391,7 +3464,8 @@
     "rn9",
     "rn10",
     "rn11",
-    "rn12"
+    "rn12",
+    "wu1"
   ],
   "reservedSections": [
     "exf",

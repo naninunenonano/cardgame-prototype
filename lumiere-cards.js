@@ -1,0 +1,7 @@
+(function(root){'use strict';function install(M,cards){
+ cards.lumiere={key:'lumiere',name:'リュミエール',color:'白',civilizations:['白'],type:'キャラクター',rarity:'LEGEND',rarityProvisional:false,cost:M.cost(1),sideboardOnly:true,level:0,deckLimit:1,growthOnly:true,symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],characterEffects:{1:[{kind:'draw',count:1}],2:[{kind:'lumiereSearch'}],3:[],4:[]},levelTexts:{1:'成長時：カードを1枚引く。',2:'成長時：通常デッキからランダムなシールドリンク1枚を手札へ。対象がなければ何もしない。',3:'自分のターンに1回、手札のシールドリンク1枚を無料設置する。',4:'自分のターン中、無色1を支払い黎明の紋章を設置（回数制限なし）。自分がシールドリンクを設置したとき、①2回復、②1ドロー、③断罪の紋章を手札へ、④手札から無料設置、⑤トラッシュから回収、から任意で1つ選ぶ。各選択肢それぞれ1ターン1回。共通：サイドの無色3軽減。'},text:'白LEGEND。Lv0の1枚所持でLv4まで使用可。現在レベルの能力のみ有効。Lv1〜2は成長時のみ。シールドリンクは最大5枚、上書き不可。'};
+ const token=(key,name,white,generic,onEnter,text)=>cards[key]={key,name,color:'白',civilizations:['白'],rarity:null,rarityProvisional:false,type:'設置物',cost:M.cost(generic,{白:white}),symbols:{},abilities:[],onUse:[],onEnter,onDefeat:[],token:true,deckEligible:false,deckLimit:0,shieldLink:true,ephemeralShieldLink:true,tokenCharacterId:'lumiere',reduction:white?{minimum:{白:1}}:null,text};
+ token('t8','黎明の紋章',0,1,[],'シールドリンク。固有効果なし。場を離れた場合と、自分のターン終了時に消滅する。');
+ token('t9','断罪の紋章',1,2,[{kind:'lumiereExile'}],'シールドリンク。設置時、相手クリーチャー1体を除外する。場を離れた場合と、自分のターン終了時に消滅する。');
+ cards.wu1.rarity='LEGEND';cards.wu1.deckLimit=1;
+ }root.LumiereCards={install};if(typeof module==='object'&&module.exports)module.exports=root.LumiereCards;})(globalThis);
