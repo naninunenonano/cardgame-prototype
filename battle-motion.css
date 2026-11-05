@@ -1,0 +1,8 @@
+#battle-motion{position:fixed;inset:0;z-index:1000;overflow:hidden;pointer-events:none;contain:strict}
+.motion-piece{position:absolute;left:0;top:0;display:grid;justify-items:center;gap:.2rem;color:#fff;font-weight:800;text-shadow:0 2px 3px #000;text-align:center}
+.motion-card{box-sizing:border-box;width:min(45vw,10rem);min-height:5rem;max-height:46dvh;overflow:hidden;padding:.48rem;background:#171e2d;border:2px solid var(--motion-color);border-radius:.65rem;box-shadow:0 0 1.2rem var(--motion-color);font-size:clamp(.8rem,3vw,1rem)}
+.motion-card img{width:100%;height:min(21dvh,8rem);object-fit:contain}
+.motion-back{width:4rem;min-height:5.5rem;background:repeating-linear-gradient(45deg,#132338 0 6px,#293f64 6px 12px)}
+.motion-piece[data-motion="damage"]{font-size:clamp(1.5rem,6vw,2.8rem);color:var(--motion-color);-webkit-text-stroke:.6px #101524}
+.motion-piece small{font-size:.75rem;line-height:1.18}
+.motion-impact{position:absolute;width:4.5rem;height:4.5rem;translate:-50% -50%;border:2px solid var(--motion-color);border-radius:50%;background:radial-gradient(circle,#fff 4%,transparent 62%);box-shadow:0 0 1.1rem var(--motion-color)}
