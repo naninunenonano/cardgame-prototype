@@ -143,7 +143,7 @@ function decide(v){
   if(me.character?.key==='ereshthianox'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
   if(me.units.some(c=>c.cardcarAbility)&&me.hand.length<3&&me.counts.main>=4){const c=me.units.find(c=>c.cardcarAbility);return {type:'cardcar',id:c.id};}
   if(me.character?.key==='redcaptain'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p]&&me.units.length<7&&me.hand.some(c=>c.canFreeSummon))return {type:'characterAbility'};
-  if(me.growth?.ok)return {type:'grow'};
+  if(me.growth?.ok&&!me.holdBeginnerGrowth)return {type:'grow'};
   const usable=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].filter(c=>c.canPlay);
   const c=best(usable,c=>playScore(v,c));
   if(c&&playScore(v,c)>0)return {type:'play',id:c.id};

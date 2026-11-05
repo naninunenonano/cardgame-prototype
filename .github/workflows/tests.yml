@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node v044-test.cjs
       - run: node integrated-test.cjs
       - run: node vt-main-test.cjs
       - run: node over-rare-test.cjs
@@ -45,7 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [integrated-browser-test.cjs, vt-main-browser-test.cjs, over-rare-browser-test.cjs, lumiere-browser-test.cjs, shield-link-browser-test.cjs, next-batch-browser-test.cjs, rename-browser-test.cjs, graveyard-browser-test.cjs, black-cards-browser-test.cjs, black-ssr-browser-test.cjs, normal-mode-browser-test.cjs, battle-ui-browser-test.cjs, draw-charger-browser-test.cjs, deck-exhaustion-browser-test.cjs, missions-browser-test.cjs, collection-browser-test.cjs, character-art-browser-test.cjs, pack-opening-browser-test.cjs]
+        test: [v044-browser-test.cjs, integrated-browser-test.cjs, vt-main-browser-test.cjs, over-rare-browser-test.cjs, lumiere-browser-test.cjs, shield-link-browser-test.cjs, next-batch-browser-test.cjs, rename-browser-test.cjs, graveyard-browser-test.cjs, black-cards-browser-test.cjs, black-ssr-browser-test.cjs, normal-mode-browser-test.cjs, battle-ui-browser-test.cjs, draw-charger-browser-test.cjs, deck-exhaustion-browser-test.cjs, missions-browser-test.cjs, collection-browser-test.cjs, character-art-browser-test.cjs, pack-opening-browser-test.cjs]
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
