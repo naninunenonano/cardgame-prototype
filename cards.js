@@ -41,7 +41,7 @@
  {key:'jil',name:'慟哭のジル・クライハート',type:'通常',cost:M.cost(8),attack:5,maxHealth:5,symbols:{},deckLimit:1,genericReduction:{maximum:4,minimum:4},onEnter:[{kind:'chooseFate'}],provisional:true,text:'運命を選ぶ。有色シンボル1つにつき1軽減、最大4・最低4。攻撃力・最大体力5は暫定。'},
  {key:'peridot',name:'永遠の蜃気楼 ペリドット',type:'通常',cost:M.cost(4),attack:4,maxHealth:4,symbols:{},deckLimit:1,onEnter:[{kind:'blinkSelf'}],onBodySuccess:[{kind:'blinkSelf'}],provisional:true,text:'登場時・本体への攻撃成功時に自身を除外。次の自分のターン開始時、スピードアタッカーを持って帰還。攻撃力・最大体力4は暫定。'},
  {key:'themis',name:'テミスの審判',type:'呪文',cost:M.cost(6),onUse:[{kind:'wipeUnits'}],text:'お互いの場のユニットをすべてトラッシュへ。設置物・マナは対象外。'},
- {key:'holyMail',name:'ホーリー・メール',type:'呪文',cost:M.cost(4),onUse:[{kind:'healLife',count:4}],text:'自分のライフを4回復する（最大30）。'},
+ {key:'holyMail',name:'ホーリー・メール',type:'呪文',cost:M.cost(3),onUse:[{kind:'healLife',count:4}],text:'自分のライフを4回復する（最大30）。'},
  {key:'kaiser',name:'ショットガン・カイザー',type:'通常',cost:M.cost(7),attack:9,maxHealth:9,symbols:{},onEnd:[{kind:'untapMana',count:4}],text:'自分のターン終了時、自分のマナを最大4枚選んで未使用に戻す。複数体はそれぞれ誘発。'},
  {key:'glennya',name:'グレンニャー',type:'通常',cost:M.cost(2),attack:1,maxHealth:1,symbols:{},onEnter:[{kind:'draw',count:1}],text:'登場時：カードを1枚引く。'},
  {key:'walsura',name:'プラチナ・ワルスラS',type:'通常',cost:M.cost(4),attack:6,maxHealth:6,symbols:{},evolution:{any:true},onAttack:[{kind:'optionalEffect',label:'3枚引いて手札1枚を捨てますか？',effects:[{kind:'draw',count:3},{kind:'handDiscard',count:1}]}],text:'自分のユニット1体の上に進化（文明不問）。攻撃時、3枚引いてもよい。そうしたら手札1枚を選びトラッシュへ。'},
@@ -90,7 +90,7 @@
  characterEffects:{1:[{kind:'redMoonSelf',amount:2},{kind:'draw',count:2}],2:[],3:[{kind:'redMoonLife15'}],4:[]},
  levelTexts:{1:'成長時：自分に2ダメージ（シールド誘発なし）。その後2枚ドロー。',2:'自分のクリーチャー登場時：自分に2ダメージ（シールド誘発なし）。そのクリーチャーはSAを得る。強制・回数制限なし。',3:'成長時：自分のライフを15に変更。変更前が15以上なら2ドロー、15未満なら相手クリーチャー1体を破壊。',4:'復讐（ライフ15以下）なら自軍クリーチャーすべてにドレイン。自軍クリーチャー破壊ごと自分に3ダメージ（シールド誘発なし）。クリーチャーの攻撃以外でライフ0以下にならない（ルールダメージを除く）。共通：サイドの不特定3軽減。'},
  text:'仮称・男性吸血鬼。Lv0からLv4へ成長。固有能力は現在レベルのみ有効、すべて強制。復讐は現在ライフ15以下。ドレインは戦闘で与えたダメージ分回復（最大ライフまで）。'};
- cards.yellowZone={key:'yellowZone',name:'イエローゾーン',rarity:'UR',color:'黒',type:'シールドカード',deckSection:'shields',deckLimit:1,requiredCharacter:'redMoonAvenger',cost:null,symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],shieldRule:{event:'lifeThreshold',effect:'yellowZone',maxLife:15},triggerCondition:'ライフ変更後、現在ライフ15以下で自動発動（1試合1回）。赤月の復讐者の固有自傷・ルールダメージでは発動しない。',useCondition:'赤月の復讐者専用。',text:'仮称。発動中は最大ライフ15、受ける3以上のダメージは3、シールドによるライフ回復不可。他の回復は可能。裏向きで効果を失い、再発動しない。'};
+ cards.yellowZone={key:'yellowZone',name:'イエローゾーン',rarity:'UR',color:'黒',type:'シールドカード',deckSection:'shields',deckLimit:1,requiredCharacter:'redMoonAvenger',cost:null,symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],shieldRule:{event:'lifeThreshold',effect:'yellowZone',maxLife:15},triggerCondition:'ライフ変更後、現在ライフ15以下で自動発動（1試合1回）。赤月の復讐者の固有自傷・ルールダメージでは発動しない。',useCondition:'赤月の復讐者専用。',text:'仮称。発動中は最大ライフ15、相手から受ける3以上のダメージは3、シールドによるライフ回復不可。他の回復は可能。裏向きで効果を失い、再発動しない。'};
  const decks={...starter.decks,green:[...defs.map(c=>({key:c.key,count:['bahamut','mother'].includes(c.key)?1:3})),{key:'glennya',count:2}],blue:[...blueDefs.map(c=>({key:c.key,count:['shaper','zwei'].includes(c.key)?1:3})),{key:'glennya',count:2}]};
 
  (typeof module==='object'&&module.exports?require('./shield-link-cards.js'):globalThis.ShieldLinkCards).install(M,cards);

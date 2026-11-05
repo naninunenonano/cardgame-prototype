@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node beginner-matchup-test.cjs
       - run: node v044-test.cjs
       - run: node integrated-test.cjs
       - run: node vt-main-test.cjs
