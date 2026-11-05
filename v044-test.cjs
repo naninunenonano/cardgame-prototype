@@ -38,6 +38,7 @@ function use(g,c,slot,target){
 }
 assert.equal(cards.sbwl1.cost.白,4);
 assert.equal(awakened['sbwl1-2'].attack,7);
+assert.deepEqual(awakened['sbwl1-2'].symbols,{白:1});
 assert(!Packs.pool().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
 assert(!Decks.available().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
 {
@@ -54,6 +55,7 @@ assert(!Decks.available().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
  for(const key of ['wn1','wn2','ws5','wl2'])use(g,put(g,key));
  assert.equal(g.locate(crest.id).card.faceId,'sbwl1-2');
  assert.equal(g.shieldLinkCount('p1'),0);
+ assert.equal(g.symbols('p1').白,1);
  assert.equal(crest.health,7);
  const link=put(g,'wn2','p1','structures');
  crest.health=1;
