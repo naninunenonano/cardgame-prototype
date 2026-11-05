@@ -3353,6 +3353,77 @@
       "oldForm": null,
       "serial": 1,
       "retired": false
+    },
+    {
+      "oldId": "nn9",
+      "baseId": "nn9",
+      "id": "nn9",
+      "name": "初級ゴーレム",
+      "oldRarity": "N",
+      "rarity": "N",
+      "color": "無色",
+      "section": "main",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 9,
+      "retired": false
+    },
+    {
+      "oldId": "rn21",
+      "baseId": "rn21",
+      "id": "rn21",
+      "name": "先陣のアパッチ",
+      "oldRarity": "N",
+      "rarity": "N",
+      "color": "赤",
+      "section": "main",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 21,
+      "retired": false
+    },
+    {
+      "oldId": "sbwl1",
+      "baseId": "sbwl1",
+      "id": "sbwl1-1",
+      "name": "始まりの紋章",
+      "oldRarity": "LEGEND",
+      "rarity": "LEGEND",
+      "color": "白",
+      "section": "sideboard",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [
+        "sbwl1-1",
+        "sbwl1-2"
+      ],
+      "oldForm": null,
+      "serial": 1,
+      "retired": false
+    },
+    {
+      "oldId": "t10",
+      "baseId": "t10",
+      "id": "t10",
+      "name": "ラ・ウラ・ギガ",
+      "oldRarity": null,
+      "rarity": null,
+      "color": "白",
+      "section": "token",
+      "ownerCharacterId": null,
+      "token": true,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 10,
+      "retired": false
     }
   ],
   "aliases": {
@@ -3554,21 +3625,26 @@
     "wr6": "wr6",
     "lumiere_sbwl1": "lumiere_sbwl1",
     "sbwu1": "sbwu1",
-    "lumiere_sbwr1": "lumiere_sbwr1"
+    "lumiere_sbwr1": "lumiere_sbwr1",
+    "nn9": "nn9",
+    "rn21": "rn21",
+    "sbwl1": "sbwl1",
+    "t10": "t10"
   },
   "forms": {
     "darkGunveet": "almar_sbbu1-2",
     "alegria": "sbbu1-2",
     "giantAwake": "sbnl3-2",
     "gaiNext": "sbru1-2",
-    "vermillion": "sbgu1-2"
+    "vermillion": "sbgu1-2",
+    "sbwl1-2": "sbwl1-2"
   },
   "highWaterMarks": {
     "gn": 4,
     "gr": 4,
     "gs": 5,
     "gl": 2,
-    "rn": 20,
+    "rn": 21,
     "br": 5,
     "bl": 3,
     "bs": 4,
@@ -3576,7 +3652,7 @@
     "nl": 2,
     "ns": 2,
     "nr": 6,
-    "nn": 8,
+    "nn": 9,
     "shnr": 6,
     "almar_sbbu": 2,
     "sbbu": 2,
@@ -3606,7 +3682,7 @@
     "ks": 12,
     "shkr": 1,
     "redmoonavenger_shkl": 1,
-    "t": 9,
+    "t": 10,
     "ws": 6,
     "wl": 2,
     "wn": 5,
@@ -3618,7 +3694,8 @@
     "wo": 1,
     "lumiere_sbwl": 1,
     "sbwu": 1,
-    "lumiere_sbwr": 1
+    "lumiere_sbwr": 1,
+    "sbwl": 1
   },
   "retiredIds": [
     "piruluk",

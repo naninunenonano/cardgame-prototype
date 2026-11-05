@@ -106,7 +106,7 @@
  }
  cards.ws1={key:'ws1',name:'光神龍スペル・デル・フィン',color:'白',rarity:'SR',rarityProvisional:false,type:'通常',cost:M.cost(6,{白:3}),attack:3,maxHealth:8,symbols:{白:2},abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:3,civilizations:['白'],spellLock:true,revealEnemyHand:true,spellHandBonus:true,text:'相手は呪文を唱えられない。相手は手札を公開してプレイする。相手の手札の呪文1枚につき攻撃力+1。'};
  cards.wl1={key:'wl1',name:'断罪の執行者',color:'白',rarity:'LEGEND',rarityProvisional:false,type:'通常',cost:M.cost(5,{白:2}),attack:0,maxHealth:1,symbols:{白:1},abilities:['ブロッカー'],onUse:[],onEnter:[{kind:'executorSelect'}],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:1,civilizations:['白'],spellImmune:true,text:'ブロッカー。自分・相手双方の呪文効果を受けない。登場時、相手クリーチャーを最大2体選ぶ。選択時の攻撃力合計を自身の攻撃力に、現在体力合計を最大体力に加算。その後選んだクリーチャーを破壊。場に残った対象は次の自分のターン終了時まで攻撃・ブロック不可。'};
- (typeof module==='object'&&module.exports?require('./white-cards.js'):globalThis.WhiteCards).install(M,cards);
+ (typeof module==='object'&&module.exports?require('./white-cards.js'):globalThis.WhiteCards).install(M,cards,awakened);
  cards.gt5000.deckLimit=3;cards.vt5000.deckLimit=3;
  cards.vt5000.sideboardOnly=false;cards.vt5000.mainDeckOnly=true;delete cards.vt5000.sideboardScope;cards.vt5000.text=cards.vt5000.text.replace('、Lv4軽減と併用し0まで','、0まで');
  const catalog=(typeof module==='object'&&module.exports?require('./identity.js'):globalThis.CardIdentity).install({starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:Object.values(cards).filter(c=>c.type==='シールドカード').map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'});

@@ -5,7 +5,9 @@ make('churis','ダチッコ・チュリス','SR',1,1,'赤','通常',[2,2],{symbo
 make('drillSquall','ドリル・スコール','R',0,1,'赤','呪文',null,{onUse:[{kind:'eachDestroyMana'}],text:'各プレイヤーが自分のマナ1枚を選び破壊。マナトークンは消滅。'});
 make('blazeClaw','ブレイズクロー','N',0,1,'赤','通常',[2,2],{symbols:{},mustAttack:true,text:'攻撃可能なら毎ターン必ず攻撃。召喚酔いは通常どおり。'});
 make('rageArm','レイジアーム','N',1,1,'赤','通常',[1,2],{symbols:{},rageArm:true,text:'他のクリーチャーが場に出るたび、このターン攻撃力+1。自身では誘発しない。'});
-make('apache','狂葬者 アパッチ','N',2,1,'赤','通常',[4,3],{onEnter:[{kind:'selfDamage',amount:3}],text:'登場時、自分のライフに3ダメージ。'});
+make('apache','狂葬者 アパッチ','N',2,1,'赤','通常',[3,4],{onEnter:[{kind:'selfDamage',amount:3}],text:'登場時、自分のライフに3ダメージ。'});
+make('nn9','初級ゴーレム','N',4,0,'無色','通常',[3,4]);
+make('rn21','先陣のアパッチ','N',1,1,'赤','通常',[3,2],{symbols:{},onEnter:[{kind:'selfDamage',amount:3}],text:'登場時、自分のライフに3ダメージ。'});
 make('arianrhod','アリアンロッド','N',1,1,'赤','通常',[1,1],{symbols:{},lootAbility:true,nameProvisional:true,text:'タップ＋手札1枚を捨てることをコストに1ドロー。召喚酔い中不可。名称は仮登録。'});
 make('redManaBreaker','野蛮な侵略者','N',1,1,'赤','通常',[3,2],{onEnter:[{kind:'ownDestroyMana'}],text:'登場時、自分のマナ1枚を選び破壊。'});
 make('scrapper','地獄スクラッパー','N',3,1,'赤','呪文',null,{instant:true,onUse:[{kind:'scrapper',remaining:5}],text:'インスタント。敵の盤面のカード1枚に1ダメージを5回順番に処理。毎回対象を選び直す。相手プレイヤーは対象外。'});

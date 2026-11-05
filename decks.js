@@ -22,6 +22,17 @@ const VERSION=1,STORAGE_KEY='cardgame-prototype.decks.v1',MAIN_SIZE=40,SIDE_SIZE
 // Only the existing official definitions are grandfathered. Returned objects are
 // recognized by identity AND their exact composition, never a user-controlled flag/name.
 const official=Object.fromEntries(['green','blue','redStarter','blueStarter'].map(id=>[id,{id,name:id==='redStarter'?'赤・初期デッキ':id==='blueStarter'?'青・初期デッキ':id==='green'?'緑プリセット':'青プリセット',preset:true,main:copy(C.decks[id]),sideboard:id.endsWith('Starter')?[{key:id==='redStarter'?'redcaptain':'bluesage',count:1},...C.starter.sideKeys.map(key=>({key,count:1}))]:[],shields:defaultShields()}]));
+const beginnerBotIds=['blueBeginner','redBeginner'];
+const counts=(entries)=>entries.map(([key,count=3])=>({key,count}));
+const beginnerSide=key=>counts([[key,1],['sbnn1'],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
+Object.assign(official,{
+ blueBeginner:{id:'blueBeginner',name:'青・初級Bot',preset:true,
+  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn1'],['nn6'],['nn7'],['bn2'],['bn6'],['bn1'],['br1'],['nn8'],['nn9'],['bl2',1]]),
+  sideboard:beginnerSide('bluesage'),shields:counts([['shnr4',1],['shnr5',1],['shns1',1],['shnr6',1]])},
+ redBeginner:{id:'redBeginner',name:'アパッチ最強伝説',preset:true,
+  main:counts([['rn15'],['rn16'],['rn21'],['rn17'],['rn18'],['nn2'],['nn3'],['nn4'],['nn5'],['nn7'],['nn1'],['nn6',1],['rn14'],['rn20',2],['rl1',1]]),
+  sideboard:beginnerSide('redcaptain'),shields:counts([['shnr6'],['shnr2',1]])}
+});
 const hasPreset=id=>Object.hasOwn(official,id);
 const composition=d=>JSON.stringify([d.main,d.sideboard||[],d.shields||defaultShields()]);
 function preset(id){if(!hasPreset(id))return null;const d=copy(official[id]);trusted.add(d);return d;}
@@ -44,5 +55,5 @@ function create({storage=null}={}){let records=[],warning='',migrationRaw=null,l
  const id=()=>`custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
  return {list:()=>copy(records),get:id=>hasPreset(id)?preset(id):copy(records.find(d=>d.id===id)||null),save(d){d=migrateDeck(d);if(!d||hasPreset(d.id))return {ok:false,message:'プリセットは複製して編集してください。'};const item={id:d.id||id(),name:String(d.name||'自作デッキ').trim().slice(0,80)||'自作デッキ',main:copy(d.main||[]),sideboard:copy(d.sideboard||[]),shields:copy(d.shields??defaultShields()),...(d.evolution?{evolution:copy(d.evolution)}:{})};const errors=validate(item),next=records.filter(x=>x.id!==item.id).concat(item),r=persist(next);return {...r,id:item.id,errors};},duplicate(source){const d=preset(source)||records.find(d=>d.id===source);return d?this.save({...copy(d),id:id(),name:d.name+' コピー'}):{ok:false,message:'複製元がありません。'};},remove(source){return hasPreset(source)?{ok:false,message:'プリセットは削除できません。'}:persist(records.filter(d=>d.id!==source));},get warning(){return warning;}};
 }
-return {evolutionErrors,canonicalKey,migrateDeck,migrateOwned,migrateProfile,adoptionError,VERSION,STORAGE_KEY,MAIN_SIZE,SIDE_SIZE,SHIELD_SIZE,defaultShields,available,sectionOf,limit,preset,isOfficialPreset,validate,resolve,create};
+return {beginnerBotIds,evolutionErrors,canonicalKey,migrateDeck,migrateOwned,migrateProfile,adoptionError,VERSION,STORAGE_KEY,MAIN_SIZE,SIDE_SIZE,SHIELD_SIZE,defaultShields,available,sectionOf,limit,preset,isOfficialPreset,validate,resolve,create};
 });

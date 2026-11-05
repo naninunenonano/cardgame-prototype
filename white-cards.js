@@ -1,6 +1,6 @@
 (function(root){
 'use strict';
-function install(M,cards){
+function install(M,cards,awakened){
  cards.wu2={
   key:"wu2", name:"天命の大号令", rarity:"UR", color:"白", type:"呪文",
   civilizations:["白"], deckLimit:3, symbols:{},
@@ -188,6 +188,21 @@ function install(M,cards){
   text:"リュミエールLv2への成長直後のみ任意使用。黎明の紋章を1枚設置し、マナを1回復して白マナトークン1つを生成。",
   cost:M.cost(0,{白:0})
  };
+ const crest={
+  key:'sbwl1',name:'始まりの紋章',color:'白',civilizations:['白'],rarity:'LEGEND',
+  type:'設置物',sideboardOnly:true,shieldLink:true,neverendCrest:true,deckLimit:1,
+  cost:M.cost(0,{白:4}),symbols:{},abilities:[],onUse:[],
+  onEnter:[{kind:'tokens',tokenKey:'t10',count:2}],
+  text:'設置時、ラ・ウラ・ギガを2体出す。自分のシールドリンクが5枚になった時、他のリンクをすべて破壊し覚醒する。場を離れたらサイドボードへ戻る。'
+ };
+ cards.sbwl1=crest;
+ awakened['sbwl1-2']={...crest,name:'真・天命王 ネバーエンド',type:'通常',
+  shieldLink:false,neverendCrest:false,escapeLink:true,cost:null,attack:7,maxHealth:7,onEnter:[],
+  text:'エスケープ：破壊される時、代わりに自分のシールドリンク1枚を破壊してもよい。そうした場合、破壊を防ぎ、体力を全回復する。場を離れたらサイドボードへ戻る。'};
+ cards.t10={key:'t10',name:'ラ・ウラ・ギガ',type:'通常',color:'白',civilizations:['白'],
+  cost:null,attack:0,maxHealth:1,symbols:{},abilities:['ブロッカー'],cannotAttack:true,
+  token:true,onEnter:[],text:'攻撃不可。場を離れれば消滅。'};
+
 }
 root.WhiteCards={install};
 if(typeof module==='object'&&module.exports)module.exports=root.WhiteCards;

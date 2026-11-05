@@ -2,7 +2,7 @@
 function install(M,c,a){
  const groups={UR:'r1 otohime kuraki b1 shaper zwei bahamut mother jil peridot s5 s9 dogiragon vt5000 almar',SSR:'redCaptain blueSage s8 alegre technology gunveet interstellar',SR:'r3 r4 b6 b7 cosmo amaterasu dragon trap repair dolt themis walsura s6 lostSoul',R:'r2 r7 counter brain vice inquiry vegas fortune touki bird kaiser honenbee s2 s3 s4 s7 conspiracy viceCharger reactiveArmor wisdomBlessing',N:'imperialGuard r5 r6 gate b5 goby emeral corile snow life bronze elf panzer glennya c1 c2 c3 c4 c5 c6 c7 s1'};
  c.repair.cost=M.cost(0,{緑:5});c.repair.instant=c.trap.instant=c.brain.instant=c.mother.instant=true;
- c.mother.text='インスタント。両者いずれかのクリーチャー1体を持ち主のマナへ。その持ち主のマナから移動後のマナ枚数以下の元コストのクリーチャー1体を必ず無料登場。全選択は発動者が行う。';
+ c.mother.text='インスタント。クリーチャー1体を持ち主のマナへ。その持ち主のマナから、移動後のマナ枚数以下の元コストの非進化クリーチャー1体を必ず無料で出す。選択はすべて発動者が行う。';
  c.panzer.text='タップして登場。攻撃を引き付ける。自分のシールドを表にした時、自分のマナに緑のカードが5枚以上あれば手札から任意で無料登場。';c.panzer.shieldEntry=true;
  c.s5.name='時空の火焔ボルシャック・ドラゴン';a.giantAwake.name='勝利の覚醒者ボルシャック・メビウス';c.s9.name='轟く覚醒 レッドゾーン・バスター';
  const unit=(key,name,cost,attack,maxHealth,symbols,extra)=>c[key]={key,name,cost,type:'通常',color:'赤',attack,maxHealth,symbols,abilities:[],onEnter:[],onDeath:[],onUse:[],reduction:{minimum:{赤:1}},...extra};
