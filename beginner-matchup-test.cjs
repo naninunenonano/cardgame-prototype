@@ -29,7 +29,7 @@ for(const [i,p1] of Decks.beginnerBotIds.entries()){
    for(let step=0;step<12000&&!g.result;step++){
     g.turn.notBefore=0;
     const player=g.decisionPlayer(),view=g.observe(player);
-    if(baseline)view.players[player].blackBeginner=false;
+    if(baseline){view.players[player].blackBeginner=false;view.players[player].blueBeginner=false;}
     const action=Bot.decide(view),r=g.dispatch(action,player);
     assert(r.ok,JSON.stringify({p1,p2,seed,step,player,action,error:r.message,operation:g.operation?.kind}));
    }

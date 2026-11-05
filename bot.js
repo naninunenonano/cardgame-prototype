@@ -54,6 +54,13 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
  else if(c.key==='gr2')score=(supply?12:0)+(canRefill?18:0);
  else if(c.key==='gs2'){const threat=best(enemy.units,c=>unitValue(c,enemy.manaCount));score=threat?unitValue(threat,enemy.manaCount)+(danger?50:0)-8-(enemy.manaCount<6?5:0):-100;}
  else if(c.key==='gl2')score=motherGain(v)+(danger?20:0);
+ if(me.blueBeginner){
+  if(c.key==='br1'&&me.counts.main<=6)score=-100;
+  if(c.key==='bn1'&&enemy.units.length){
+   const threat=Math.max(...enemy.units.map(unit=>unit.attack||0));
+   if(danger||threat>=5)score=Math.max(score,28+threat*6);
+  }
+ }
  // An untapped mana creature may be a winning attacker; otherwise reserve it when feasible.
  const usedUnits=(c.paymentPlan?.sourceIds||[]).filter(id=>v.sources.some(s=>s.id===id&&s.unit)).length;
  return score-usedUnits*(enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))?25:3);
