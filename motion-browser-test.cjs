@@ -44,6 +44,30 @@ const server=http.createServer((req,res)=>{
    await page.locator('[data-motion="destroy"]').waitFor();
    assert.match(await page.locator('[data-motion="destroy"]').innerText(),/初級ゴーレム/);
    await page.locator('#battle-motion').waitFor({state:'hidden'});
+   const mapped=await page.evaluate(()=>{
+    const card={name:'初級ゴーレム',cardId:'nn9',type:'通常',attack:3,health:4};
+    const ref={name:'呪文',type:'呪文',color:'青'};
+    const events=[
+     {kind:'manaPlaced',fromZone:'hand',card},
+     {kind:'move',card,from:{player:'p1',zone:'trash'},to:{player:'p1',zone:'energy'}},
+     {kind:'unitEntry',card,zone:'signi-1'},
+     {kind:'bodyStrike',attacker:card,targetPlayer:'p2'},
+     {kind:'combatDamage',blocked:true,after:{attacker:card,defender:card},damageToAttacker:3,damageToDefender:2},
+     {kind:'unitHeal',card,beforeHealth:2,afterHealth:4},
+     {kind:'cardUse',card:ref},
+     {kind:'effect',source:card,effectKind:'tokens'},
+     ...[1,2,3,4].map(level=>({kind:'growth',level,card:{...card,level},ability:'成長能力'})),
+     {kind:'shieldDecision',used:false,card},
+     {kind:'shieldDecision',used:true,card}
+    ].map((event,i)=>({actor:'p1',number:i+1,...event}));
+    const layer=document.createElement('div');
+    const controller=BattleMotion.create(layer);
+    return controller.collect({gameId:'fixture',journalCount:events.length,battleLog:()=>events},'p1',true)
+     .map(e=>[e.kind,e.label||'',!!e.heal]);
+   });
+   assert.deepEqual(mapped.map(e=>e[0]),['mana','mana','summon','attack','attack','damage','damage','damage','spell','ability','growth','growth','growth','growth','shield']);
+   assert.equal(mapped[4][1],'ブロック！');
+   assert.equal(mapped[7][2],true);
    await page.locator('#battle-menu').click();
    await page.locator('#battle-motion-speed').selectOption('fast');
    await page.reload();

@@ -8,6 +8,8 @@ function create(layer){
  let speed='normal',session=null,cursor=0,token=0,busy=false,pending=[],completion=null;
  try{speed=localStorage.getItem(storageKey)||'normal';}catch{}
  if(!['normal','fast','off'].includes(speed))speed='normal';
+ const lifted=new Set();
+ const restore=()=>{for(const el of lifted)el.classList.remove('motion-lifted');lifted.clear();};
  const point=el=>{const r=el?.getBoundingClientRect();return r&&r.width&&r.height?{x:r.left+r.width/2,y:r.top+r.height/2,el}:null;};
  const center=()=>({x:innerWidth/2,y:innerHeight*.45});
  const find=(key,value)=>point(document.querySelector(`[data-${key}="${CSS.escape(String(value))}"]`));
@@ -15,7 +17,7 @@ function create(layer){
   (unit(z)?point(document.querySelector(`[data-player="${p}"][data-zone="${z}"]`)):null)||
   (z==='lrig'?find('character',p):null)||center();
  const at=(ref,fallback)=>ref?.instanceId&&find('card',ref.instanceId)||fallback||center();
- function cancel(){completion=null;token++;busy=false;pending=[];layer.replaceChildren();layer.hidden=true;}
+ function cancel(){completion=null;restore();token++;busy=false;pending=[];layer.replaceChildren();layer.hidden=true;}
  function skip(){const done=completion;cancel();done?.();}
  function setSpeed(value){if(!['normal','fast','off'].includes(value))return;speed=value;try{localStorage.setItem(storageKey,value);}catch{}}
  function collect(game,viewer,active){
@@ -62,7 +64,7 @@ function create(layer){
   const c=card&&!card.hidden&&card.name?card:null;
   const definition=c&&root.CardCatalog.cards[c.cardId];
   const palette=(definition?.civilizations||[c?.color]).map(color=>colors[color]||colors.無色);
-  node.style.setProperty('--motion-color',event.heal?'#76f5ac':palette[0]||colors.無色);
+  node.style.setProperty('--motion-color',event.heal?'#76f5ac':event.kind==='damage'?'#ff9478':palette[0]||colors.無色);
   if(palette.length>1)node.style.backgroundImage=`linear-gradient(140deg,${palette.map(color=>color+'44').join(',')})`;
   const line=(tag,value)=>{if(value){const el=document.createElement(tag);el.textContent=value;node.append(el);}};
   if(c){
@@ -71,7 +73,7 @@ function create(layer){
    const url=root.CardImages.path(c.awakened||definition?.faceId||c.cardId,c.type==='キャラクター'?(c.level??0):undefined,definition?.ownerCharacterId);
    if(url){const img=document.createElement('img');img.alt='';img.onerror=()=>img.remove();img.src=url;node.append(img);}
    if(c.type==='通常')line('small',`攻撃 ${c.attack??'–'} ／ 体力 ${c.health??'–'}`);
-  }else if(event.kind==='draw')node.classList.add('motion-card','motion-back');
+  }else if(['draw','move'].includes(event.kind))node.classList.add('motion-card','motion-back');
   line('b',event.label);line('small',event.detail);if(event.stat!==undefined)line('small',String(event.stat));
   return node;
  }
@@ -80,6 +82,7 @@ function create(layer){
   const node=nodeFor(event);
   node.dataset.motion=kind;
   layer.append(node);
+  if(['attack','destroy','mana','move'].includes(kind)&&a.el?.matches('[data-card]')){lifted.add(a.el);a.el.classList.add('motion-lifted');}
   const frames=(p,s=1,opacity=1,angle=0)=>({transform:`translate(${p.x}px,${p.y}px) translate(-50%,-50%) scale(${s}) rotate(${angle}deg)`,opacity});
   let keyframes;
   if(kind==='attack')keyframes=[frames(a,.62),frames({x:a.x,y:a.y-12},.77),{...frames(b,.85),offset:.56},frames(a,.62)];
@@ -87,6 +90,13 @@ function create(layer){
   else if(kind==='destroy')keyframes=[frames(a,.68),frames(a,.75,1,-8),frames(a,.72,1,7),{...frames(a,.3,0,25),filter:'brightness(4) blur(8px)'}];
   else if(['spell','shield','growth','ability'].includes(kind))keyframes=[frames(a,.72,0),frames(a,1),{...frames(a,1),offset:.78},frames(a,.94,0)];
   else keyframes=[frames(a,.46,0),{...frames(a,kind==='summon'?1:.66),offset:.36},frames(b,.46),frames(b,.38,0)];
+  if(kind==='growth'&&event.card?.level){
+   const previous=nodeFor({...event,label:'Lv'+(event.card.level-1),detail:null},{...event.card,level:event.card.level-1});
+   layer.append(previous);
+   previous.animate([frames(a,.75,0),frames(a,.98,1),frames(a,1.12,0)],{duration:ms*.48,fill:'both'});
+   setTimeout(()=>previous.remove(),ms);
+   keyframes=[frames(a,.8,0),{...frames(a,.93,0),offset:.42},{...frames(a,1),offset:.58},frames(a,.96,0)];
+  }
   const flashAt=kind==='attack'||kind==='summon'||kind==='mana'||kind==='spell'?b:kind==='damage'||kind==='destroy'?a:null;
   if(flashAt){
    const flash=document.createElement('i');flash.className='motion-impact';flash.style.left=flashAt.x+'px';flash.style.top=flashAt.y+'px';
@@ -112,6 +122,7 @@ function create(layer){
      const ms=durations[first.kind]*factor;
      group.slice(0,14).forEach((event,i)=>{const delay=first.kind==='draw'?Math.min(i,5)*42*factor:0;if(delay)setTimeout(()=>{if(id===token)try{animate(event,ms);}catch{}},delay);else animate(event,ms);});
      await new Promise(resolve=>setTimeout(resolve,ms+(first.kind==='draw'?Math.min(group.length-1,5)*42*factor:0)));
+     if(id===token)restore();
     }
    }catch{/* Rendering failures must never hold up the match. */}
    finally{if(id===token){cancel();done();}}
