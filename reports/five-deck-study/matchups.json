@@ -1,0 +1,202 @@
+[
+  {
+    "a": "whiteBeginner",
+    "b": "blueBeginner",
+    "aResults": {
+      "games": 200,
+      "win": 142,
+      "loss": 58,
+      "draw": 0,
+      "winRate": 71,
+      "averageTurns": 23.865
+    },
+    "bResults": {
+      "games": 200,
+      "win": 58,
+      "loss": 142,
+      "draw": 0,
+      "winRate": 29,
+      "averageTurns": 23.865
+    }
+  },
+  {
+    "a": "whiteBeginner",
+    "b": "blackBeginner",
+    "aResults": {
+      "games": 200,
+      "win": 104,
+      "loss": 96,
+      "draw": 0,
+      "winRate": 52,
+      "averageTurns": 23.22
+    },
+    "bResults": {
+      "games": 200,
+      "win": 96,
+      "loss": 104,
+      "draw": 0,
+      "winRate": 48,
+      "averageTurns": 23.22
+    }
+  },
+  {
+    "a": "whiteBeginner",
+    "b": "redBeginner",
+    "aResults": {
+      "games": 200,
+      "win": 102,
+      "loss": 98,
+      "draw": 0,
+      "winRate": 51,
+      "averageTurns": 21.19
+    },
+    "bResults": {
+      "games": 200,
+      "win": 98,
+      "loss": 102,
+      "draw": 0,
+      "winRate": 49,
+      "averageTurns": 21.19
+    }
+  },
+  {
+    "a": "whiteBeginner",
+    "b": "blueAdvanced",
+    "aResults": {
+      "games": 200,
+      "win": 14,
+      "loss": 186,
+      "draw": 0,
+      "winRate": 7,
+      "averageTurns": 20.165
+    },
+    "bResults": {
+      "games": 200,
+      "win": 186,
+      "loss": 14,
+      "draw": 0,
+      "winRate": 93,
+      "averageTurns": 20.165
+    }
+  },
+  {
+    "a": "blueBeginner",
+    "b": "blackBeginner",
+    "aResults": {
+      "games": 200,
+      "win": 35,
+      "loss": 165,
+      "draw": 0,
+      "winRate": 17.5,
+      "averageTurns": 26.12
+    },
+    "bResults": {
+      "games": 200,
+      "win": 165,
+      "loss": 35,
+      "draw": 0,
+      "winRate": 82.5,
+      "averageTurns": 26.12
+    }
+  },
+  {
+    "a": "blueBeginner",
+    "b": "redBeginner",
+    "aResults": {
+      "games": 200,
+      "win": 37,
+      "loss": 163,
+      "draw": 0,
+      "winRate": 18.5,
+      "averageTurns": 21.175
+    },
+    "bResults": {
+      "games": 200,
+      "win": 163,
+      "loss": 37,
+      "draw": 0,
+      "winRate": 81.5,
+      "averageTurns": 21.175
+    }
+  },
+  {
+    "a": "blueBeginner",
+    "b": "blueAdvanced",
+    "aResults": {
+      "games": 200,
+      "win": 1,
+      "loss": 199,
+      "draw": 0,
+      "winRate": 0.5,
+      "averageTurns": 19.95
+    },
+    "bResults": {
+      "games": 200,
+      "win": 199,
+      "loss": 1,
+      "draw": 0,
+      "winRate": 99.5,
+      "averageTurns": 19.95
+    }
+  },
+  {
+    "a": "blackBeginner",
+    "b": "redBeginner",
+    "aResults": {
+      "games": 200,
+      "win": 83,
+      "loss": 117,
+      "draw": 0,
+      "winRate": 41.5,
+      "averageTurns": 20.115
+    },
+    "bResults": {
+      "games": 200,
+      "win": 117,
+      "loss": 83,
+      "draw": 0,
+      "winRate": 58.5,
+      "averageTurns": 20.115
+    }
+  },
+  {
+    "a": "blackBeginner",
+    "b": "blueAdvanced",
+    "aResults": {
+      "games": 200,
+      "win": 6,
+      "loss": 194,
+      "draw": 0,
+      "winRate": 3,
+      "averageTurns": 19.85
+    },
+    "bResults": {
+      "games": 200,
+      "win": 194,
+      "loss": 6,
+      "draw": 0,
+      "winRate": 97,
+      "averageTurns": 19.85
+    }
+  },
+  {
+    "a": "redBeginner",
+    "b": "blueAdvanced",
+    "aResults": {
+      "games": 200,
+      "win": 11,
+      "loss": 189,
+      "draw": 0,
+      "winRate": 5.5,
+      "averageTurns": 19.43
+    },
+    "bResults": {
+      "games": 200,
+      "win": 189,
+      "loss": 11,
+      "draw": 0,
+      "winRate": 94.5,
+      "averageTurns": 19.43
+    }
+  }
+]

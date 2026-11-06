@@ -1,0 +1,122 @@
+[
+  {
+    "deck": "blueBeginner",
+    "key": "nn7",
+    "name": "流浪の研究者",
+    "ready": 9769,
+    "skipped": 9710,
+    "usedGames": 54,
+    "unused": {
+      "noOpportunity": 23,
+      "cost": 26,
+      "condition": 1,
+      "skipped": 682,
+      "unattributed": 14
+    }
+  },
+  {
+    "deck": "blueBeginner",
+    "key": "bn4",
+    "name": "コーライル",
+    "ready": 3019,
+    "skipped": 3002,
+    "usedGames": 17,
+    "unused": {
+      "noOpportunity": 81,
+      "cost": 71,
+      "condition": 2,
+      "skipped": 497,
+      "unattributed": 132
+    }
+  },
+  {
+    "deck": "redBeginner",
+    "key": "sbnr2",
+    "name": "知識の使者",
+    "ready": 7078,
+    "skipped": 7014,
+    "usedGames": 47,
+    "unused": {
+      "noOpportunity": 0,
+      "cost": 0,
+      "condition": 0,
+      "skipped": 753,
+      "unattributed": 0
+    }
+  },
+  {
+    "deck": "blueAdvanced",
+    "key": "br3",
+    "name": "対抗呪文",
+    "ready": 1577,
+    "skipped": 1534,
+    "usedGames": 17,
+    "unused": {
+      "noOpportunity": 0,
+      "cost": 145,
+      "condition": 1,
+      "skipped": 633,
+      "unattributed": 4
+    }
+  },
+  {
+    "deck": "blueAdvanced",
+    "key": "ns1",
+    "name": "テミスの審判",
+    "ready": 3045,
+    "skipped": 2887,
+    "usedGames": 14,
+    "unused": {
+      "noOpportunity": 4,
+      "cost": 50,
+      "condition": 0,
+      "skipped": 704,
+      "unattributed": 28
+    }
+  },
+  {
+    "deck": "blueAdvanced",
+    "key": "nl1",
+    "name": "慟哭のジル・クライハート",
+    "ready": 2066,
+    "skipped": 2049,
+    "usedGames": 1,
+    "unused": {
+      "noOpportunity": 55,
+      "cost": 114,
+      "condition": 0,
+      "skipped": 514,
+      "unattributed": 116
+    }
+  },
+  {
+    "deck": "blueAdvanced",
+    "key": "bs3",
+    "name": "根源への回帰",
+    "ready": 4968,
+    "skipped": 4832,
+    "usedGames": 43,
+    "unused": {
+      "noOpportunity": 1,
+      "cost": 10,
+      "condition": 0,
+      "skipped": 732,
+      "unattributed": 14
+    }
+  },
+  {
+    "deck": "blueAdvanced",
+    "key": "sbbu1",
+    "name": "ルナ・アレグル",
+    "ready": 5125,
+    "skipped": 5098,
+    "usedGames": 27,
+    "unused": {
+      "noOpportunity": 0,
+      "cost": 0,
+      "condition": 0,
+      "skipped": 773,
+      "unattributed": 0
+    }
+  }
+]
