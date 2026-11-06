@@ -92,7 +92,8 @@ assert(!Decks.available().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
 }
 {
  const g=setup();
- for(const [i,key] of ['rn21','rn17'].entries())use(g,put(g,key),'signi-'+(i+1));
+ fund(g,'p1',2,'黒');
+ for(const [i,key] of ['kn10','kn9'].entries())use(g,put(g,key),'signi-'+(i+1));
  assert.equal(g.life.p1,24);
 }
 {

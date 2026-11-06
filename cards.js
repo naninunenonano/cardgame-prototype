@@ -71,7 +71,7 @@
  {key:'conspiracy',name:'陰謀と計略の手',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'enemyUnitBounce'},{kind:'opponentDiscard'}],text:'相手の1体をバウンス→相手本人が手札1枚を選んで捨てる。'},
  {key:'technology',name:'インビンシブル・テクノロジー',type:'呪文',cost:M.cost(12,{青:1}),allBlueReduction:3,onUse:[{kind:'technologySearch'},{kind:'technologyCast'}],text:'自分のマナがすべて青なら不特定をさらに3軽減（0まで）。山札から任意枚数を手札へ→現在手札枚数以下の元コストの青カード1枚を任意で無料使用。'},
  {key:'interstellar',name:'星界の門番 デウス・エクス・マキナ',type:'通常',cost:M.cost(4,{青:3}),attack:9,maxHealth:9,symbols:{青:2},requiredCharacter:'almar',abilities:['ブロッカー'],justDiver:true,onEnter:[{kind:'interstellarEnter'}],onAttack:[{kind:'interstellarAttack'}],text:'ジャストダイバー：登場時、次の自分のターン開始まで相手に選ばれず、攻撃されない。登場時：手札の呪文またはトラッシュの元コスト5以下の呪文を無料使用→除外。攻撃時：除外の元コスト5以下の呪文を無料使用→使用後山札下。'},
- {key:'vt5000',provisional:true,name:'飛翔龍 5000VT',type:'通常',color:'青',cost:M.cost(8),attack:12,maxHealth:12,symbols:{青:1},creatureReduction:true,onEnter:[{kind:'vtBounceLock'}],text:'青シンボル1は仮設定。両者のクリーチャー数だけ不特定軽減（トークンを含みキャラを除く、Lv4軽減と併用し0まで）。登場時：両者の攻撃力5以下を全バウンス。次の相手ターン中、相手は攻撃力5以下を出せない。'}
+ {key:'vt5000',name:'飛翔龍 5000VT',type:'通常',color:'青',cost:M.cost(7,{青:1}),attack:12,maxHealth:12,symbols:{青:2},fieldReduction:true,onEnter:[{kind:'vtBounceLock'}],text:'両者の場のクリーチャー・設置物1枚につき無色コストを1軽減（0まで）。青1は必須。登場時：両者の攻撃力5以下を全バウンス。次の相手ターン中、相手は攻撃力5以下を出せない。'}
  ];
  for(const d of sideDefs)cards[d.key]={color:'青',symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],sideboardOnly:true,reduction:{minimum:{青:1}},...d};
  const awakened={
@@ -108,7 +108,7 @@
  cards.wl1={key:'wl1',name:'断罪の執行者',color:'白',rarity:'LEGEND',rarityProvisional:false,type:'通常',cost:M.cost(5,{白:2}),attack:0,maxHealth:1,symbols:{白:1},abilities:['ブロッカー'],onUse:[],onEnter:[{kind:'executorSelect'}],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:1,civilizations:['白'],spellImmune:true,text:'ブロッカー。自分・相手双方の呪文効果を受けない。登場時、相手クリーチャーを最大2体選ぶ。選択時の攻撃力合計を自身の攻撃力に、現在体力合計を最大体力に加算。その後選んだクリーチャーを破壊。場に残った対象は次の自分のターン終了時まで攻撃・ブロック不可。'};
  (typeof module==='object'&&module.exports?require('./white-cards.js'):globalThis.WhiteCards).install(M,cards,awakened);
  cards.gt5000.deckLimit=3;cards.vt5000.deckLimit=3;
- cards.vt5000.sideboardOnly=false;cards.vt5000.mainDeckOnly=true;delete cards.vt5000.sideboardScope;cards.vt5000.text=cards.vt5000.text.replace('、Lv4軽減と併用し0まで','、0まで');
+ cards.vt5000.sideboardOnly=false;cards.vt5000.mainDeckOnly=true;delete cards.vt5000.sideboardScope;
  const catalog=(typeof module==='object'&&module.exports?require('./identity.js'):globalThis.CardIdentity).install({starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:Object.values(cards).filter(c=>c.type==='シールドカード').map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'});
  return (typeof module==='object'&&module.exports?require('./character-series.js'):globalThis.CharacterSeries).install(catalog);
 });
