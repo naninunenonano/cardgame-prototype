@@ -5,7 +5,7 @@ const Decks=require('./decks');
 const Bot=require('./bot');
 const Cards=require('./cards');
 
-const characters={blueBeginner:'bluesage',redBeginner:'redcaptain',blackBeginner:'redmoonavenger'};
+const characters={blueBeginner:'bluesage',redBeginner:'redcaptain',blackBeginner:'redmoonavenger',whiteBeginner:'eira'};
 for(const id of Decks.beginnerBotIds){
  const deck=Decks.preset(id);
  assert.deepEqual(Decks.validate({...deck}),[]);
@@ -20,6 +20,7 @@ const baseline=process.argv.includes('--baseline');
 const rows=[];
 for(const [i,p1] of Decks.beginnerBotIds.entries()){
  for(const p2 of Decks.beginnerBotIds.slice(i+1)){
+  if(process.env.BOT_PAIR&&process.env.BOT_PAIR!==p1+':'+p2)continue;
   for(let seed=1;seed<=iterations;seed++){
    let state=seed,initial=true;
    const random=()=>{if(initial){initial=false;return seed%2?.25:.75;}state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
