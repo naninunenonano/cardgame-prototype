@@ -47,9 +47,7 @@ function setup(game,ids){
    else s.condition++;
   }
  }
- function finish(){
-  const journals=sides.flatMap(p=>game.battleLog(p,{detailed:true}));
-  const journal=[...new Map(journals.map(e=>[e.number,e])).values()].sort((a,b)=>a.number-b.number);
+ function finish(journal=require('./beginner-round-log.cjs').journal(game)){
   const pending=new Set(),level={};
   let source=null,body=null;
   const uses=(s,e)=>{if(s){s.uses++;s.turns+=e.turnSequence;}};

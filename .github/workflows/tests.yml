@@ -19,6 +19,7 @@ jobs:
       - run: node green-guardian-test.cjs
       - run: node five-deck-test.cjs
       - run: node beginner-matchup-test.cjs
+      - run: node beginner-round-test.cjs
       - run: node v044-test.cjs
       - run: node integrated-test.cjs
       - run: node vt-main-test.cjs
