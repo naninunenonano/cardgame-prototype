@@ -13,6 +13,10 @@ function motherTarget(v,targets){const {p,me,enemy,danger}=context(v);const poss
 function motherGain(v){const {p,me,enemy,danger}=context(v),c=motherTarget(v,[...me.units,...enemy.units]);if(!c)return -100;if(c.owner!==p)return unitValue(c,enemy.manaCount)-(enemy.counts.hand?10:0)-(enemy.manaCount>=8?7:3)+(danger?8:0);const choices=me.mana.filter(x=>x.type==='通常'&&total(x)<=me.manaCount+1);return Math.max(-100,...choices.map(x=>freeValue(v,x)-unitValue(c,me.manaCount)));}
 function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.counts.main+me.counts.trash>0;let score=-100;
  if(c.type==='通常'){
+  if(me.blackBeginner&&me.character?.level!==4){
+   const damage=(me.character?.level===2?2:0)+(c.key==='kn2'?3:0);
+   if(damage>=me.life)return -100;
+  }
   score=unitValue(c,me.manaCount)+8;
   if(c.manaAbility)score+=me.manaCount<6?45:0;
   if(c.key==='gn2')score+=supply?(me.manaCount<8?35:10):0;
@@ -50,12 +54,20 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
  else if(c.key==='gr2')score=(supply?12:0)+(canRefill?18:0);
  else if(c.key==='gs2'){const threat=best(enemy.units,c=>unitValue(c,enemy.manaCount));score=threat?unitValue(threat,enemy.manaCount)+(danger?50:0)-8-(enemy.manaCount<6?5:0):-100;}
  else if(c.key==='gl2')score=motherGain(v)+(danger?20:0);
+ if(me.blueBeginner){
+  if(c.key==='br1'&&me.counts.main<=6)score=-100;
+  if(c.key==='bn1'&&enemy.units.length){
+   const threat=Math.max(...enemy.units.map(unit=>unit.attack||0));
+   if(danger||threat>=5)score=Math.max(score,28+threat*6);
+  }
+ }
  // An untapped mana creature may be a winning attacker; otherwise reserve it when feasible.
  const usedUnits=(c.paymentPlan?.sourceIds||[]).filter(id=>v.sources.some(s=>s.id===id&&s.unit)).length;
  return score-usedUnits*(enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))?25:3);
 }
 function attackChoice(v,attacks=v.attacks){const {me,enemy}=context(v),choices=[];
  for(const entry of attacks)for(const t of entry.targets){const a=entry.card;
+  if(me.blackBeginner&&me.character?.level!==4&&a.key==='kr3'&&me.life<=2)continue;
   if(t.id==='body'){
    const blockers=enemy.units.filter(c=>!c.rest&&c.abilities?.includes('ブロッカー'));
    const lethal=a.attack>=enemy.life&&(a.unblockable||!blockers.length);

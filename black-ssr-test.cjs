@@ -10,6 +10,18 @@ test('Lv1 growth draw1 without self damage; no shield and no repeated growth abi
 test('Lv2 multiple summons including tokens force separate self2/SA, no limit; self threshold does not activate shields',()=>{const g=game();level(g,2);set(g,17);const h=g.state.p1.hand.length,a=summon(g),b=summon(g);A.equal(g.life.p1,13);A(g.hasSpeed(a));A(g.hasSpeed(b));A(g.state.p1.shields.every(c=>!c.faceUp));A.equal(g.state.p1.hand.length,h);});
 test('Lv3 both branches including equality15, direct set triggers yellow and never lower-level self/SA',()=>{for(const before of [30,15,14]){const g=game();level(g,2);set(g,before);const enemy=g.fromDefinition('nn3','p2');g.state.p2['signi-1'].push(enemy);const h=g.state.p1.hand.length;grow(g,3);A.equal(g.life.p1,15);A(g.yellowZoneActive('p1'));A.equal(g.maxLife('p1'),15);A.equal(g.state.p1.hand.length,h+(before>=15?2:0));A.equal(g.locate(enemy.id).z,before>=15?'signi-1':'trash');const c=summon(g);A(!g.hasSpeed(c));A.equal(g.life.p1,15);}});
 test('automatic threshold only after damage, no prompt, once per match; damage1/2 unchanged and 3+ capped',()=>{const g=game();level(g,1);set(g,18);yes(g.loseLife('p1',4));settle(g);A(g.yellowZoneActive('p1'));A.equal(g.life.p1,14);for(const [input,expected]of [[1,1],[2,2],[3,3],[9,3]]){set(g,15);yes(g.loseLife('p1',input));settle(g);A.equal(g.life.p1,15-expected);}A.equal(g.events.filter(e=>e.kind==='shieldUsed'&&e.card?.key==='redmoonavenger_shkl1').length,1);});
+test('yellow caps opponent damage but leaves card self damage and rule damage intact',()=>{
+ const g=game();
+ level(g,3);
+ A(g.yellowZoneActive('p1'));
+ yes(g.loseLife('p1',9));settle(g);
+ A.equal(g.life.p1,12);
+ summon(g,'kl1');
+ A.equal(g.life.p1,2);
+ g.state.p1.main=[];
+ yes(g.draw('p1',1));settle(g);
+ A.equal(g.life.p1,1);
+});
 test('yellow forbids actual shield healing but other healing/drain obey max15; reset removes all modifiers and never rearms',()=>{const g=game();level(g,3);set(g,5);yes(g.healLife('p1',10,{shield:true}));A.equal(g.life.p1,5);yes(g.healLife('p1',30));A.equal(g.life.p1,15);const s=g.state.p1.shields.find(c=>c.key==='redmoonavenger_shkl1');const repair=g.fromDefinition('gs3','p1');g.state.p1.hand.push(repair);fund(g,'p1',10,'緑');yes(g.beginPayment(repair.id));yes(g.confirmPayment());settle(g);A(!s.faceUp);A(!g.yellowZoneActive('p1'));A.equal(g.maxLife('p1'),30);A.equal(g.life.p1,18);set(g,20);yes(g.loseLife('p1',5));settle(g);A.equal(g.life.p1,15);A(!s.faceUp);s.faceUp=true;A(!g.yellowZoneActive('p1'));yes(g.healLife('p1',10,{shield:true}));A.equal(g.life.p1,25);});
 test('Lv4 death self3 never triggers shields, noncombat floor1, combat lethal and rule-draw lethal remain',()=>{const g=game({yellow:false});level(g,4);set(g,2);const c=summon(g);g.destroyUnit(c.id);settle(g);A.equal(g.life.p1,1);A(!g.result);A(g.state.p1.shields.every(c=>!c.faceUp));yes(g.loseLife('p1',99));settle(g);A.equal(g.life.p1,1);A(!g.result);g.state.p1.main=[];yes(g.draw('p1',1));A.equal(g.result.winner,'p2');const h=game();level(h,4);set(h,2);yes(h.loseLife('p1',8,'戦闘ダメージ',{type:'combat'}));A.equal(h.result.winner,'p2');});
 test('Lv4 drain is dynamic vengeance only, heals combat against units and on block even when creature dies',()=>{const g=game({yellow:false});level(g,4);set(g,14);const a=summon(g),b=summon(g,'nn3','p2');a.sick=false;b.rest=true;g.turn.player='p1';g.turn.step='attack';yes(g.declareAttack(a.id,b.id));settle(g);A.equal(g.life.p1,13); // +2 combat drain, -3 own destruction
