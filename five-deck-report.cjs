@@ -124,7 +124,7 @@ function report(input,out,perPair=200){
  fs.writeFileSync(path.join(out,'card-evaluation.md'),summary.slice(0,-1).join('\n')+'\n');
  return {decks,matchups,cardsByDeck,issues};
 }
-module.exports={report,read};
+module.exports={report,read,evaluate};
 if(require.main===module){
  const [out,...files]=process.argv.slice(2);
  assert(out&&files.length);
