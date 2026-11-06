@@ -17,6 +17,7 @@ assert.equal(Cards.cards.nr1.cost.generic,3);
 const iterations=Number(process.argv[2]||2);
 assert(Number.isSafeInteger(iterations)&&iterations>0&&iterations%2===0);
 const baseline=process.argv.includes('--baseline');
+const impact=process.argv.includes('--impact')?require('./beginner-card-impact.cjs'):null;
 const rows=[];
 for(const [i,p1] of Decks.beginnerBotIds.entries()){
  for(const p2 of Decks.beginnerBotIds.slice(i+1)){
@@ -40,6 +41,7 @@ for(const [i,p1] of Decks.beginnerBotIds.entries()){
    const lastLoss=journal.findLast(e=>e.targetPlayer===loser&&['life','ruleDamage'].includes(e.kind));
    rows.push({p1,p2,seed,first:expected,winner:g.result.winner,turn:g.turn.sequence,life:g.life,
     levels:Object.fromEntries(g.PLAYERS.map(p=>[p,g.character(p)?.level??0])),
+    ...(impact?{impact:impact.assess(journal,{p1,p2},g.result.winner)}:{}),
     ruleDamage:journal.some(e=>e.kind==='ruleDamage'),
     finish:lastLoss?.reason||(lastLoss?.kind==='ruleDamage'?'山札切れ':g.result.reason)});
   }
