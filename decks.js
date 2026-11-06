@@ -27,13 +27,13 @@ const counts=(entries)=>entries.map(([key,count=3])=>({key,count}));
 const beginnerSide=key=>counts([[key,1],['sbnn1'],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
 Object.assign(official,{
  blueBeginner:{id:'blueBeginner',name:'青・初級Bot',preset:true,
-  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn1'],['nn6'],['nn7'],['bn2'],['bn6'],['bn1'],['br1'],['nn8'],['nn9'],['bl2',1]]),
+  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn1'],['nn6'],['nn7'],['bn2'],['bn6'],['bn1'],['br1',1],['bn4',2],['nn8'],['nn9'],['bl2',1]]),
   sideboard:beginnerSide('bluesage'),shields:counts([['shnr4',1],['shnr5',1],['shns1',1],['shnr6',1]])},
  redBeginner:{id:'redBeginner',name:'アパッチ最強伝説',preset:true,
   main:counts([['rn15'],['rn16'],['rn21'],['rn17'],['rn18'],['nn2'],['nn3'],['nn4'],['nn5'],['nn7'],['nn1'],['nn6',1],['rn14'],['rn20',2],['rl1',1]]),
   sideboard:beginnerSide('redcaptain'),shields:counts([['shnr6'],['shnr2',1]])},
  blackBeginner:{id:'blackBeginner',name:'黒・初級Bot',preset:true,
-  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn6'],['nn7'],['kn3'],['kr1'],['kn2',2],['ks2'],['kr3',2],['kn1']]),
+  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn6'],['nn7'],['kn3'],['kr1'],['kn2',2],['ks2'],['kr3',2],['kn1',1],['ks10',2]]),
   sideboard:beginnerSide('redmoonavenger'),shields:counts([['redmoonavenger_shkl1',1],['shnr6',2],['shnr5',1]])},
  whiteBeginner:{id:'whiteBeginner',name:'白・初級Bot',preset:true,
   main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn6'],['nn7'],['nn8'],['wn3'],['wr2'],['wr3',2],['wn2',2],['nr1']]),
