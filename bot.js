@@ -14,7 +14,7 @@ function motherGain(v){const {p,me,enemy,danger}=context(v),c=motherTarget(v,[..
 function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.counts.main+me.counts.trash>0;let score=-100;
  if(c.type==='通常'){
   if(me.blackBeginner&&me.character?.level!==4){
-   const damage=(me.character?.level===2?2:0)+(c.key==='kn2'?3:0);
+   const damage=(me.character?.level===2?2:0)+(c.key==='kn2'||me.life>15&&c.onEnter?.some(e=>e.unlessVengeance)?3:0);
    if(damage>=me.life)return -100;
   }
   score=unitValue(c,me.manaCount)+8;
@@ -59,6 +59,21 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
   if(c.key==='wn3')score=me.counts.main>3?(me.life<me.maxLife?43:22):-100;
   if(c.key==='wr2'||c.key==='wr3')score=enemy.units.length?(danger?72:47):-100;
   if(c.key==='nr1'&&me.life<me.maxLife&&me.character.level>=2)score=Math.max(score,48);
+ }
+ if(me.blueAdvanced){
+  const bounceValue=units=>units.reduce((n,unit)=>n+unitValue(unit),0);
+  const bounceGain=bounceValue(enemy.units)-bounceValue(me.units);
+  const followUp=me.hand.some(x=>['br4','br5'].includes(x.key))||me.character?.level===4;
+  if(c.key==='bo1'){
+   const small=units=>units.filter(unit=>unit.attack<=5&&!unit.bounceImmune);
+   score=25+bounceValue(small(enemy.units))-bounceValue(small(me.units))+2*small(enemy.units).length;
+  }
+  if(c.key==='bs1'&&me.hand.length>=10)score+=35;
+  if(c.key==='bn1')score=enemy.units.length?(danger?55:16)+(followUp?10:0):-100;
+  if(c.key==='bs3')score=bounceGain>0?bounceGain+(followUp?8:0):-100;
+  if(c.key==='br5')score=enemy.counts.hand?18+Math.min(2,enemy.counts.hand)*13:-100;
+  if(c.key==='br4')score=enemy.counts.hand?22:-100;
+  if(c.key==='almar_sbbs1')score=enemy.counts.hand?score:-100;
  }
  if(me.blueBeginner){
   if(c.key==='br1'&&me.counts.main<=6)score=-100;

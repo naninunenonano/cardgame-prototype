@@ -37,7 +37,7 @@ function play(g,key,slot){
 {
  const keys=['wn3','wr2','wr3','ws5','wn4','wn5','wr4','wo1','wr5','ws6','wr6','wu2','lumiere_sbwl1','sbwu1','lumiere_sbwr1'];
  for(const key of keys)assert(K.pool().some(c=>c.key===key),key);
- for(const key of ['ko1','no1','wo1'])assert.equal(D.limit(C.cards[key]),3);
+ for(const key of ['ko1','bo1','wo1'])assert.equal(D.limit(C.cards[key]),3);
  assert(D.available('main').some(c=>c.key==='wo1'));
  assert(!D.available('sideboard').some(c=>c.key==='wo1'));
  const g=setup();
