@@ -19,42 +19,60 @@ assert(Number.isSafeInteger(iterations)&&iterations>0&&iterations%2===0);
 const baseline=process.argv.includes('--baseline');
 const impact=process.argv.includes('--impact')?require('./beginner-card-impact.cjs'):null;
 const usage=process.argv.includes('--usage')?require('./beginner-card-usage.cjs'):null;
+const five=process.argv.includes('--five')||process.argv.includes('--five-control');
+const study=process.argv.includes('--five')?require('./five-deck-observation.cjs'):null;
+assert(!five||(!baseline&&!impact&&!usage),'--five/--five-control cannot be combined with historical analysis options');
+const entrants=five?['whiteBeginner','blueBeginner','blackBeginner','redBeginner','blueAdvanced']:Decks.beginnerBotIds;
+let pair=-1;
 const rows=[];
-for(const [i,p1] of Decks.beginnerBotIds.entries()){
- for(const p2 of Decks.beginnerBotIds.slice(i+1)){
+for(const [i,p1] of entrants.entries()){
+ for(const p2 of entrants.slice(i+1)){
+  pair++;
   if(process.env.BOT_PAIR&&process.env.BOT_PAIR!==p1+':'+p2)continue;
-  for(let seed=1;seed<=iterations;seed++){
-   let state=seed,initial=true;
-   const random=()=>{if(initial){initial=false;return seed%2?.25:.75;}state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
-   const g=Game.create({mode:'bot',decks:{p1,p2},random,strictTargets:true});
-   const original=usage?.roster(g);
-   const corile={inHand:false,playable:false};
-   const expected=seed%2?'p1':'p2';
-   assert.equal(g.firstPlayer,expected);
-   for(let step=0;step<12000&&!g.result;step++){
-    g.turn.notBefore=0;
-    const player=g.decisionPlayer(),view=g.observe(player);
-    if(baseline){view.players[player].blackBeginner=false;view.players[player].blueBeginner=false;}
-    const action=Bot.decide(view);
-    if(usage&&view.players[player].blueBeginner){
-     const copies=view.players[player].hand.filter(c=>c.key==='bn4');
-     corile.inHand ||= copies.length>0;
-     corile.playable ||= ['main1','main2'].includes(view.turn.step)&&!view.operation&&copies.some(c=>c.canPlay);
+  let attempts=0;
+  for(let index=1;index<=iterations;index++){
+   const seed=five?1000001+pair*100000+attempts++:index;
+   const expected=(five?index:seed)%2?'p1':'p2';
+   try{
+    let state=seed,initial=true;
+    const random=()=>{if(initial){initial=false;return expected==='p1'?.25:.75;}state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
+    const g=Game.create({mode:'bot',decks:{p1,p2},random,strictTargets:true});
+    const original=usage?.roster(g);
+    const corile={inHand:false,playable:false};
+    const observation=study?.setup(g,{p1,p2});
+    assert.equal(g.firstPlayer,expected);
+    for(let step=0;step<12000&&!g.result;step++){
+     g.turn.notBefore=0;
+     const player=g.decisionPlayer(),view=g.observe(player);
+     if(baseline){view.players[player].blackBeginner=false;view.players[player].blueBeginner=false;}
+     const action=Bot.decide(view);
+     if(usage&&view.players[player].blueBeginner){
+      const copies=view.players[player].hand.filter(c=>c.key==='bn4');
+      corile.inHand ||= copies.length>0;
+      corile.playable ||= ['main1','main2'].includes(view.turn.step)&&!view.operation&&copies.some(c=>c.canPlay);
+     }
+     observation?.decision(view,action);
+     const r=g.dispatch(action,player);
+     assert(r.ok,JSON.stringify({p1,p2,seed,step,player,action,error:r.message,operation:g.operation?.kind}));
     }
-    const r=g.dispatch(action,player);
-    assert(r.ok,JSON.stringify({p1,p2,seed,step,player,action,error:r.message,operation:g.operation?.kind}));
+    assert(g.result,JSON.stringify({p1,p2,seed,error:'対戦未完了'}));
+    const journal=g.battleLog('p1',{detailed:true});
+    const loser=g.result.winner==='p1'?'p2':'p1';
+    const lastLoss=journal.findLast(e=>e.targetPlayer===loser&&['life','ruleDamage'].includes(e.kind));
+    const row={p1,p2,seed,first:expected,winner:g.result.winner??null,turn:g.turn.sequence,life:g.life,
+     levels:Object.fromEntries(g.PLAYERS.map(p=>[p,g.character(p)?.level??0])),
+     ...(impact?{impact:impact.assess(journal,{p1,p2},g.result.winner)}:{}),
+     ...(usage?{usage:usage.collect(journal,original),corile}:{}),
+     ruleDamage:journal.some(e=>e.kind==='ruleDamage'),
+     finish:lastLoss?.reason||(lastLoss?.kind==='ruleDamage'?'山札切れ':g.result.reason),
+     ...(observation?{cards:observation.finish()}:{} )};
+    if(five)console.log(JSON.stringify(row));else rows.push(row);
+   }catch(error){
+    if(!five||attempts>=iterations+50)throw error;
+    console.log(JSON.stringify({p1,p2,seed,first:expected,error:error.message}));
+    index--;
    }
-   assert(g.result,JSON.stringify({p1,p2,seed,error:'対戦未完了'}));
-   const journal=g.battleLog('p1',{detailed:true});
-   const loser=g.result.winner==='p1'?'p2':'p1';
-   const lastLoss=journal.findLast(e=>e.targetPlayer===loser&&['life','ruleDamage'].includes(e.kind));
-   rows.push({p1,p2,seed,first:expected,winner:g.result.winner,turn:g.turn.sequence,life:g.life,
-    levels:Object.fromEntries(g.PLAYERS.map(p=>[p,g.character(p)?.level??0])),
-    ...(impact?{impact:impact.assess(journal,{p1,p2},g.result.winner)}:{}),
-    ...(usage?{usage:usage.collect(journal,original),corile}:{}),
-    ruleDamage:journal.some(e=>e.kind==='ruleDamage'),
-    finish:lastLoss?.reason||(lastLoss?.kind==='ruleDamage'?'山札切れ':g.result.reason)});
   }
  }
 }
-console.log(JSON.stringify(rows));
+if(!five)console.log(JSON.stringify(rows));

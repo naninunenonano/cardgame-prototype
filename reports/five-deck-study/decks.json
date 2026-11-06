@@ -1,0 +1,164 @@
+[
+  {
+    "id": "whiteBeginner",
+    "name": "白・初級Bot",
+    "games": 800,
+    "win": 362,
+    "loss": 438,
+    "draw": 0,
+    "winRate": 45.25,
+    "averageTurns": 22.11,
+    "first": {
+      "games": 400,
+      "win": 253,
+      "loss": 147,
+      "draw": 0,
+      "winRate": 63.25,
+      "averageTurns": 22.4125
+    },
+    "second": {
+      "games": 400,
+      "win": 109,
+      "loss": 291,
+      "draw": 0,
+      "winRate": 27.25,
+      "averageTurns": 21.8075
+    },
+    "beginnerOnly": {
+      "games": 600,
+      "win": 348,
+      "loss": 252,
+      "draw": 0,
+      "winRate": 58,
+      "averageTurns": 22.758333333333333
+    }
+  },
+  {
+    "id": "blueBeginner",
+    "name": "青・初級Bot",
+    "games": 800,
+    "win": 131,
+    "loss": 669,
+    "draw": 0,
+    "winRate": 16.375,
+    "averageTurns": 22.7775,
+    "first": {
+      "games": 400,
+      "win": 114,
+      "loss": 286,
+      "draw": 0,
+      "winRate": 28.5,
+      "averageTurns": 23.71
+    },
+    "second": {
+      "games": 400,
+      "win": 17,
+      "loss": 383,
+      "draw": 0,
+      "winRate": 4.25,
+      "averageTurns": 21.845
+    },
+    "beginnerOnly": {
+      "games": 600,
+      "win": 130,
+      "loss": 470,
+      "draw": 0,
+      "winRate": 21.666666666666668,
+      "averageTurns": 23.72
+    }
+  },
+  {
+    "id": "blackBeginner",
+    "name": "黒・初級Bot",
+    "games": 800,
+    "win": 350,
+    "loss": 450,
+    "draw": 0,
+    "winRate": 43.75,
+    "averageTurns": 22.32625,
+    "first": {
+      "games": 400,
+      "win": 236,
+      "loss": 164,
+      "draw": 0,
+      "winRate": 59,
+      "averageTurns": 22.41
+    },
+    "second": {
+      "games": 400,
+      "win": 114,
+      "loss": 286,
+      "draw": 0,
+      "winRate": 28.5,
+      "averageTurns": 22.2425
+    },
+    "beginnerOnly": {
+      "games": 600,
+      "win": 344,
+      "loss": 256,
+      "draw": 0,
+      "winRate": 57.333333333333336,
+      "averageTurns": 23.151666666666667
+    }
+  },
+  {
+    "id": "redBeginner",
+    "name": "赤・初級Bot",
+    "games": 800,
+    "win": 389,
+    "loss": 411,
+    "draw": 0,
+    "winRate": 48.625,
+    "averageTurns": 20.4775,
+    "first": {
+      "games": 400,
+      "win": 263,
+      "loss": 137,
+      "draw": 0,
+      "winRate": 65.75,
+      "averageTurns": 19.865
+    },
+    "second": {
+      "games": 400,
+      "win": 126,
+      "loss": 274,
+      "draw": 0,
+      "winRate": 31.5,
+      "averageTurns": 21.09
+    },
+    "beginnerOnly": {
+      "games": 600,
+      "win": 378,
+      "loss": 222,
+      "draw": 0,
+      "winRate": 63,
+      "averageTurns": 20.826666666666668
+    }
+  },
+  {
+    "id": "blueAdvanced",
+    "name": "青上級Bot／アルマー",
+    "games": 800,
+    "win": 768,
+    "loss": 32,
+    "draw": 0,
+    "winRate": 96,
+    "averageTurns": 19.84875,
+    "first": {
+      "games": 400,
+      "win": 391,
+      "loss": 9,
+      "draw": 0,
+      "winRate": 97.75,
+      "averageTurns": 19.1425
+    },
+    "second": {
+      "games": 400,
+      "win": 377,
+      "loss": 23,
+      "draw": 0,
+      "winRate": 94.25,
+      "averageTurns": 20.555
+    }
+  }
+]
