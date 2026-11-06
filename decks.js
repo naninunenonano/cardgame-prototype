@@ -22,19 +22,22 @@ const VERSION=1,STORAGE_KEY='cardgame-prototype.decks.v1',MAIN_SIZE=40,SIDE_SIZE
 // Only the existing official definitions are grandfathered. Returned objects are
 // recognized by identity AND their exact composition, never a user-controlled flag/name.
 const official=Object.fromEntries(['green','blue','redStarter','blueStarter'].map(id=>[id,{id,name:id==='redStarter'?'赤・初期デッキ':id==='blueStarter'?'青・初期デッキ':id==='green'?'緑プリセット':'青プリセット',preset:true,main:copy(C.decks[id]),sideboard:id.endsWith('Starter')?[{key:id==='redStarter'?'redcaptain':'bluesage',count:1},...C.starter.sideKeys.map(key=>({key,count:1}))]:[],shields:defaultShields()}]));
-const beginnerBotIds=['blueBeginner','redBeginner','blackBeginner'];
+const beginnerBotIds=['blueBeginner','redBeginner','blackBeginner','whiteBeginner'];
 const counts=(entries)=>entries.map(([key,count=3])=>({key,count}));
 const beginnerSide=key=>counts([[key,1],['sbnn1'],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
 Object.assign(official,{
  blueBeginner:{id:'blueBeginner',name:'青・初級Bot',preset:true,
-  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn1'],['nn6'],['nn7'],['bn2'],['bn6'],['bn1'],['br1'],['nn8'],['nn9'],['bl2',1]]),
+  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn1'],['nn6'],['nn7'],['bn2'],['bn6'],['bn1'],['br1',1],['bn4',2],['nn8'],['nn9'],['bl2',1]]),
   sideboard:beginnerSide('bluesage'),shields:counts([['shnr4',1],['shnr5',1],['shns1',1],['shnr6',1]])},
  redBeginner:{id:'redBeginner',name:'アパッチ最強伝説',preset:true,
   main:counts([['rn15'],['rn16'],['rn21'],['rn17'],['rn18'],['nn2'],['nn3'],['nn4'],['nn5'],['nn7'],['nn1'],['nn6',1],['rn14'],['rn20',2],['rl1',1]]),
   sideboard:beginnerSide('redcaptain'),shields:counts([['shnr6'],['shnr2',1]])},
  blackBeginner:{id:'blackBeginner',name:'黒・初級Bot',preset:true,
-  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn6'],['nn7'],['kn3'],['kr1'],['kn2',2],['ks2'],['kr3',2],['kn1']]),
-  sideboard:beginnerSide('redmoonavenger'),shields:counts([['redmoonavenger_shkl1',1],['shnr6',2],['shnr5',1]])}
+  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn6'],['nn7'],['kn3'],['kr1'],['kn2',2],['ks2'],['kr3',2],['kn1',1],['ks10',2]]),
+  sideboard:beginnerSide('redmoonavenger'),shields:counts([['redmoonavenger_shkl1',1],['shnr6',2],['shnr5',1]])},
+ whiteBeginner:{id:'whiteBeginner',name:'白・初級Bot',preset:true,
+  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn6'],['nn7'],['nn8'],['wn3'],['wr2'],['wr3',2],['wn2',2],['nr1']]),
+  sideboard:beginnerSide('eira'),shields:counts([['shnr6',2],['shnr2',1],['shnr5',1]])}
 
 });
 const hasPreset=id=>Object.hasOwn(official,id);

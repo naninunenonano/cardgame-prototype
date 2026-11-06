@@ -54,6 +54,12 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
  else if(c.key==='gr2')score=(supply?12:0)+(canRefill?18:0);
  else if(c.key==='gs2'){const threat=best(enemy.units,c=>unitValue(c,enemy.manaCount));score=threat?unitValue(threat,enemy.manaCount)+(danger?50:0)-8-(enemy.manaCount<6?5:0):-100;}
  else if(c.key==='gl2')score=motherGain(v)+(danger?20:0);
+ if(me.character?.key==='eira'){
+  if(c.key==='wn2')score=me.structures.some(x=>x.key==='wn2')?12:48;
+  if(c.key==='wn3')score=me.counts.main>3?(me.life<me.maxLife?43:22):-100;
+  if(c.key==='wr2'||c.key==='wr3')score=enemy.units.length?(danger?72:47):-100;
+  if(c.key==='nr1'&&me.life<me.maxLife&&me.character.level>=2)score=Math.max(score,48);
+ }
  if(me.blueBeginner){
   if(c.key==='br1'&&me.counts.main<=6)score=-100;
   if(c.key==='bn1'&&enemy.units.length){
@@ -152,6 +158,7 @@ function decide(v){
   if(v.turn.step==='main1'&&enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))&&!enemy.units.some(c=>c.lure)&&me.units.some(c=>!c.rest&&!c.sick&&!c.cannotAttack))return {type:'advance'};
   const destroy=me.linkDestroyTargets?.find(t=>t.canPay);if(destroy)return {type:'linkDestroy',id:destroy.id};
   if(me.character?.key==='lumiere'&&me.shieldLinkCount<5){if(me.character.level===3&&me.character.activeTurn!==v.turn.counts[p]&&me.hand.some(c=>c.shieldLink))return {type:'characterAbility'};if(me.character.level===4&&v.sources.length&&me.lumiereUsed.length<5)return {type:'characterAbility'};}
+  if(me.character?.key==='eira'&&me.character.level===4&&me.life<me.maxLife&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
   if(me.character?.key==='ereshthianox'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
   if(me.units.some(c=>c.cardcarAbility)&&me.hand.length<3&&me.counts.main>=4){const c=me.units.find(c=>c.cardcarAbility);return {type:'cardcar',id:c.id};}
   if(me.character?.key==='redcaptain'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p]&&me.units.length<7&&me.hand.some(c=>c.canFreeSummon))return {type:'characterAbility'};

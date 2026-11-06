@@ -203,6 +203,22 @@ function install(M,cards,awakened){
   cost:null,attack:0,maxHealth:1,symbols:{},abilities:['ブロッカー'],cannotAttack:true,
   token:true,onEnter:[],text:'攻撃不可。場を離れれば消滅。'};
 
+ cards.eira={
+  key:'eira',name:'エイラ',type:'キャラクター',color:'白',civilizations:['白'],rarity:'UR',
+  level:0,cost:M.cost(1),sideboardOnly:true,deckLimit:1,symbols:{},abilities:[],growthOnly:true,
+  onUse:[],onEnter:[],onDefeat:[],
+  characterEffects:{1:[{kind:'draw',count:1}],2:[],3:[],4:[]},
+  levelTexts:{
+   1:'成長時、1ドロー。',
+   2:'自分のライフ回復時、相手クリーチャー1体に2ダメージ。相手の場にクリーチャーがいなければ相手に2ダメージ。',
+   3:'各ターン1回、ライフ回復時に相手クリーチャー1体を破壊し、その攻撃力の半分（切り捨て）のダメージを相手に与える。',
+   4:'自分のターンに1回、ライフを1回復できる。回復時に1/1・マッハファイターのトークンを出す（各ターン最大5回）。そのトークンが破壊されると相手に1ダメージ、自分を1回復。相手クリーチャーの破壊時は相手に3ダメージ、自分を3回復。トークンはターン終了時に消滅。サイドボードの不特定コスト3軽減。'
+  },text:'回復に連動するキャラクター。現在レベルの能力のみ有効。'
+ };
+ cards.t11={key:'t11',name:'エイラのトークン',type:'通常',color:'白',civilizations:['白'],cost:null,
+  attack:1,maxHealth:1,symbols:{},abilities:['マッハファイター'],machFighter:{duration:'entryTurn'},
+  token:true,eiraToken:true,onEnter:[],text:'ターン終了時に消滅する。'};
+
 }
 root.WhiteCards={install};
 if(typeof module==='object'&&module.exports)module.exports=root.WhiteCards;

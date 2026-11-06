@@ -109,6 +109,58 @@ assert(!Decks.available().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
  for(let i=0;i<3;i++)put(g,'nn3','p2');
  assert(!g.observe('p2').players.p2.holdBeginnerGrowth);
 }
+{
+ const g=setup({p1:'redBeginner',p2:'blueBeginner'});
+ const red=g.character('p1')||put(g,'redcaptain','p1','lrig');
+ red.level=3;
+ const decision=()=>Bot.decide(g.observe('p1')).type;
+ for(let i=0;i<2;i++)put(g,'nn3');
+ assert(g.growStatus('p1').ok);
+ assert.notEqual(decision(),'grow');
+ console.log('PASS 赤P1 手札2枚：成長可能だが見送り');
+ put(g,'nn3');
+ assert.equal(decision(),'grow');
+ console.log('PASS 赤P1 手札3枚：成長を選択');
+ for(const mana of g.state.p1.energy)mana.rest=true;
+ assert(!g.growStatus('p1').ok);
+ assert.notEqual(decision(),'grow');
+ console.log('PASS 赤P1 手札3枚・コスト不足：成長不可');
+}
+{
+ const g=setup({p1:'whiteBeginner',p2:'blueBeginner'});
+ const eira=g.character('p1')||put(g,'eira','p1','lrig');
+ assert.equal(eira.level,0);
+ const grow=level=>{
+  g.turn.counts.p1++;g.turn.sequence++;
+  for(const mana of g.state.p1.energy)mana.rest=false;
+  yes(g.beginGrowth('p1'));yes(g.confirmPayment());pass(g);
+  while(g.operation){const actor=g.decisionPlayer();yes(g.dispatch(Bot.decide(g.observe(actor)),actor));}
+  assert.equal(g.character('p1').level,level);
+ };
+ const heal=()=>use(g,put(g,'nr1'));
+ yes(g.setLife('p1',15));
+ grow(1);heal();assert.equal(g.life.p2,30);
+ grow(2);heal();assert.equal(g.life.p2,28);
+ const first=put(g,'nn9','p2','signi-1');
+ heal();assert.equal(g.operation.choice,'enemyDamage');yes(g.resolveStarter(first.id));
+ assert.equal(first.health,2);
+ grow(3);heal();assert.equal(g.operation.choice,'eiraDestroy');yes(g.resolveStarter(first.id));
+ assert.equal(g.locate(first.id).z,'trash');assert.equal(g.life.p2,27);
+ const next=put(g,'nn9','p2','signi-1');
+ yes(g.setLife('p1',20));heal();assert.equal(g.locate(next.id).z,'signi-1');
+ grow(4);
+ yes(g.setLife('p1',10));yes(g.beginCharacterAbility('p1'));
+ const token=g.fieldCards('p1').find(c=>c.key==='t11');
+ assert(token);assert.equal(token.attack,1);assert(!g.beginCharacterAbility('p1').ok);
+ g.destroyUnit(token.id);assert.equal(g.life.p2,26);assert.equal(g.life.p1,12);
+ g.destroyUnit(next.id);assert.equal(g.life.p2,23);assert.equal(g.life.p1,15);
+ for(let n=0;n<6;n++){yes(g.setLife('p1',10));heal();}
+ assert.equal(eira.eiraTokens,5);
+ const before=g.life.p2;
+ g.turn.step='main2';g.turn.notBefore=0;yes(g.advance());
+ assert(!g.fieldCards('p1').some(c=>c.key==='t11'));assert.equal(g.life.p2,before);
+ console.log('PASS エイラ Lv0〜Lv4、回復誘発、5回上限、終了時消滅');
+}
 console.log('PASS Ver.0.44 crest, escape, Mother, Apache and beginner deck');
 for(const id of Decks.beginnerBotIds){
  const deck=Decks.preset(id);
