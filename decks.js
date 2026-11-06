@@ -24,6 +24,7 @@ const VERSION=1,STORAGE_KEY='cardgame-prototype.decks.v1',MAIN_SIZE=40,SIDE_SIZE
 const official=Object.fromEntries(['green','blue','redStarter','blueStarter'].map(id=>[id,{id,name:id==='redStarter'?'赤・初期デッキ':id==='blueStarter'?'青・初期デッキ':id==='green'?'緑プリセット':'青プリセット',preset:true,main:copy(C.decks[id]),sideboard:id.endsWith('Starter')?[{key:id==='redStarter'?'redcaptain':'bluesage',count:1},...C.starter.sideKeys.map(key=>({key,count:1}))]:[],shields:defaultShields()}]));
 const advancedBotIds=['blueAdvanced'];
 const beginnerBotIds=['blueBeginner','redBeginner','blackBeginner','whiteBeginner'];
+const selectableBeginnerBotIds=[...beginnerBotIds,'greenBeginner'];
 const counts=(entries)=>entries.map(([key,count=3])=>({key,count}));
 const beginnerSide=key=>counts([[key,1],['sbnn1'],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
 Object.assign(official,{
@@ -39,6 +40,9 @@ Object.assign(official,{
  whiteBeginner:{id:'whiteBeginner',name:'白・初級Bot',preset:true,
   main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn6'],['nn7'],['nn8'],['wn3'],['wr2'],['wr3',2],['wn2',2],['nr1']]),
   sideboard:beginnerSide('eira'),shields:counts([['shnr6',2],['shnr2',1],['shnr5',1]])},
+ greenBeginner:{id:'greenBeginner',name:'緑・初級Bot',difficulty:'beginner',preset:true,
+  main:counts([['nn9'],['nn2'],['nn3'],['nn4'],['nn5'],['nn7'],['gn2'],['gn4'],['gs5'],['gs1'],['gn1'],['gr1'],['gr2',1],['gs2']]),
+  sideboard:beginnerSide('verdantguardian'),shields:counts(['shnr1','shnr5','shnr3','shnr2'].map(key=>[key,1]))},
  blueAdvanced:{id:'blueAdvanced',name:'青上級Bot／アルマー',difficulty:'advanced',preset:true,
   main:counts([['bo1'],['bs1'],['bl2',1],['bl3',1],['nl2',1],['br1'],['bn1'],['br3'],['br5'],['ns1'],['br4'],['nn1'],['ns2'],['nl1',1],['bs3'],['nn7']]),
   sideboard:counts(['almar','almar_sbbu1','sbbu1','almar_sbbu2','almar_sbbs1','almar_sbnr1','sbbr1','sbbu2','sbnl4','sbnl1'].map(key=>[key,1])),
@@ -67,5 +71,5 @@ function create({storage=null}={}){let records=[],warning='',migrationRaw=null,l
  const id=()=>`custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
  return {list:()=>copy(records),get:id=>hasPreset(id)?preset(id):copy(records.find(d=>d.id===id)||null),save(d){d=migrateDeck(d);if(!d||hasPreset(d.id))return {ok:false,message:'プリセットは複製して編集してください。'};const item={id:d.id||id(),name:String(d.name||'自作デッキ').trim().slice(0,80)||'自作デッキ',main:copy(d.main||[]),sideboard:copy(d.sideboard||[]),shields:copy(d.shields??defaultShields()),...(d.evolution?{evolution:copy(d.evolution)}:{})};const errors=validate(item),next=records.filter(x=>x.id!==item.id).concat(item),r=persist(next);return {...r,id:item.id,errors};},duplicate(source){const d=preset(source)||records.find(d=>d.id===source);return d?this.save({...copy(d),id:id(),name:d.name+' コピー'}):{ok:false,message:'複製元がありません。'};},remove(source){return hasPreset(source)?{ok:false,message:'プリセットは削除できません。'}:persist(records.filter(d=>d.id!==source));},get warning(){return warning;}};
 }
-return {beginnerBotIds,advancedBotIds,evolutionErrors,canonicalKey,migrateDeck,migrateOwned,migrateProfile,adoptionError,VERSION,STORAGE_KEY,MAIN_SIZE,SIDE_SIZE,SHIELD_SIZE,defaultShields,available,sectionOf,limit,preset,isOfficialPreset,validate,resolve,create};
+return {beginnerBotIds,selectableBeginnerBotIds,advancedBotIds,evolutionErrors,canonicalKey,migrateDeck,migrateOwned,migrateProfile,adoptionError,VERSION,STORAGE_KEY,MAIN_SIZE,SIDE_SIZE,SHIELD_SIZE,defaultShields,available,sectionOf,limit,preset,isOfficialPreset,validate,resolve,create};
 });

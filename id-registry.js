@@ -3,6 +3,7 @@
   "version": 1,
   "baseCommit": "e220f6d914ad29ca78d2a7c07f80148a052c65cc",
   "entries": [
+    {"oldId":"verdantguardian","baseId":"verdantguardian","id":"verdantguardian","name":"新緑の守護者","oldRarity":"UR","rarity":"UR","color":"緑","section":"character","ownerCharacterId":null,"token":false,"generated":false,"faces":[],"oldForm":null,"serial":null,"retired":false},
     {"oldId": "eira", "baseId": "eira", "id": "eira", "name": "エイラ", "oldRarity": "UR", "rarity": "UR", "color": "白", "section": "character", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": null, "retired": false},
     {"oldId": "t11", "baseId": "t11", "id": "t11", "name": "エイラのトークン", "oldRarity": null, "rarity": null, "color": "白", "section": "token", "ownerCharacterId": null, "token": true, "generated": false, "faces": [], "oldForm": null, "serial": 11, "retired": false},
 

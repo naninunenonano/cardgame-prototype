@@ -107,6 +107,18 @@
  cards.ws1={key:'ws1',name:'光神龍スペル・デル・フィン',color:'白',rarity:'SR',rarityProvisional:false,type:'通常',cost:M.cost(6,{白:3}),attack:3,maxHealth:8,symbols:{白:2},abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:3,civilizations:['白'],spellLock:true,revealEnemyHand:true,spellHandBonus:true,text:'相手は呪文を唱えられない。相手は手札を公開してプレイする。相手の手札の呪文1枚につき攻撃力+1。'};
  cards.wl1={key:'wl1',name:'断罪の執行者',color:'白',rarity:'LEGEND',rarityProvisional:false,type:'通常',cost:M.cost(5,{白:2}),attack:0,maxHealth:1,symbols:{白:1},abilities:['ブロッカー'],onUse:[],onEnter:[{kind:'executorSelect'}],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:1,civilizations:['白'],spellImmune:true,text:'ブロッカー。自分・相手双方の呪文効果を受けない。登場時、相手クリーチャーを最大2体選ぶ。選択時の攻撃力合計を自身の攻撃力に、現在体力合計を最大体力に加算。その後選んだクリーチャーを破壊。場に残った対象は次の自分のターン終了時まで攻撃・ブロック不可。'};
  (typeof module==='object'&&module.exports?require('./white-cards.js'):globalThis.WhiteCards).install(M,cards,awakened);
+ cards.verdantguardian={
+  key:'verdantguardian',name:'新緑の守護者',type:'キャラクター',color:'緑',civilizations:['緑'],rarity:'UR',
+  level:0,cost:M.cost(1),sideboardOnly:true,deckLimit:1,symbols:{},abilities:[],growthOnly:true,
+  onUse:[],onEnter:[],onDefeat:[],
+  characterEffects:{1:[{kind:'draw',count:1}],2:[{kind:'guardianHand'}],3:[{kind:'guardianTop'}],4:[]},
+  levelTexts:{
+   1:'成長時：1ドロー。',
+   2:'成長時：手札から元コスト4以下のカード1枚を任意で無料使用。',
+   3:'成長時：山札の上5枚を見て、リソース枚数以下の元コストのクリーチャー1枚を任意で無料登場。残りはランダムな順番で山札の下へ。',
+   4:'自分のターンに1回、自分のクリーチャー1体をリソースへ置き、山札の一番上を公開。クリーチャーなら無料登場し、その攻撃力以下の相手1体を任意でリソースへ。それ以外なら公開カードを自分のリソースに置き、リソース1枚を手札へ。サイドの無色3軽減。'
+  },text:'現在レベルの能力のみ有効。'
+ };
  cards.gt5000.deckLimit=3;cards.vt5000.deckLimit=3;
  cards.vt5000.sideboardOnly=false;cards.vt5000.mainDeckOnly=true;delete cards.vt5000.sideboardScope;
  const catalog=(typeof module==='object'&&module.exports?require('./identity.js'):globalThis.CardIdentity).install({starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:Object.values(cards).filter(c=>c.type==='シールドカード').map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'});
