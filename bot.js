@@ -137,7 +137,7 @@ function decide(v){
   if(o.kind==='lootCost')return {type:'lootCost',id:best(o.candidates,c=>-keepScore(v,c))?.id};
 
   if(o.kind==='scryMany'){const c=o.candidates.find(c=>o.top.includes(c.id)&&keepScore(v,c)<8);return c?{type:'scryMove',id:c.id,destination:'bottom'}:{type:'scry'};}
-  if(o.kind==='starterChoice'){const c=best(o.candidates,c=>['discardDamage','discardDestroy'].includes(o.choice)?-keepScore(v,c):o.choice==='invasion'?100:o.choice==='redFree'?unitValue(c,me.manaCount):c.type==='プレイヤー'?(enemy.life<=3?10000:10):(c.owner!==p?100:0)+unitValue(c,enemy.manaCount));return {type:'starter',id:c?.id||null};}
+  if(o.kind==='starterChoice'){const c=best(o.candidates,c=>o.choice==='galmieux'?(c.galmieux&&!c.galmieuxMach&&c.health>1?100:c.health>1?20-c.attack:-10-c.attack):['discardDamage','discardDestroy'].includes(o.choice)?-keepScore(v,c):o.choice==='invasion'?100:o.choice==='redFree'?unitValue(c,me.manaCount):c.type==='プレイヤー'?(enemy.life<=3?10000:10):(c.owner!==p?100:0)+unitValue(c,enemy.manaCount));return {type:'starter',id:c?.id||null};}
   if(o.kind==='manaCharge')return {type:'confirmCharge'};
   if(o.kind==='refreshPenalty'){const need=Math.min(2,me.mana.length);const c=best(o.candidates.filter(c=>!o.ids.includes(c.id)),c=>(c.manaToken?40:0)+(c.rest?10:0)-me.hand.filter(x=>x.color===c.color).length*3);return o.ids.length<need&&c?{type:'refreshSelect',id:c.id}:{type:'refresh'};}
 
@@ -197,7 +197,7 @@ function decide(v){
   if(me.growth?.ok&&!me.holdBeginnerGrowth)return {type:'grow'};
   const usable=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].filter(c=>c.canPlay);
   const c=best(usable,c=>playScore(v,c));
-  if(c&&playScore(v,c)>0)return {type:'play',id:c.id};
+  if(c&&playScore(v,c)>0)return {type:'play',id:c.id,...(c.canEnhance&&me.units.length<6?{method:'enhance'}:{})};
  }else if(v.turn.step==='attack'){const a=attackChoice(v);if(a)return {type:'attack',id:a.id,target:a.target};}
  return v.canAdvance?{type:'advance'}:{type:'wait'};
 }
