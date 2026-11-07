@@ -3,7 +3,11 @@ function install(M,cards,awakened){const make=(key,name,color,rarity,generic,col
 const common=[['守備兵',2,[1,3]],['傭兵',2,[2,2]],['重装兵',3,[2,4]],['歴戦の戦士',3,[3,3]],['見習い学者',2,[1,2]],['流浪の研究者',3,[1,2]],['魔力弾',4,null]];common.forEach((x,i)=>make('c'+(i+1),x[0],'無色','N',x[1],0,i===6?'呪文':'通常',x[2],i===4?{onDeath:[{kind:'draw',count:1}],text:'破壊時1ドロー。'}:i===5?{onEnter:[{kind:'draw',count:1}],onDeath:[{kind:'draw',count:1}],text:'登場時・破壊時それぞれ1ドロー。'}:i===6?{onUse:[{kind:'damageChoice',amount:3}],text:'相手クリーチャー1体または相手プレイヤーに3ダメージ。'}:{text:'能力なし。'}));
 make('r1','白銀の戦乙女 アストレア','赤','UR',3,3,'通常',[5,1],{symbols:{赤:2},speedAttacker:true,cannotBeAttacked:true,text:'SA。攻撃されない。呪文や能力は受け、ブロックもされる。'});
 make('r2','ストームジャベリン・ワイバーン','赤','R',3,1,'通常',[7,7],{blockerOnlyAttack:true,text:'相手のブロッカーだけを向きに関係なく攻撃できる。'});
-make('r3','クリムゾン・ワイバーン','赤','SR',5,3,'通常',[3,3],{onEnter:[{kind:'destroyBlockers'}],text:'登場時、お互いのブロッカーをすべて破壊。'});
+make('r3','クリムゾン・ワイバーン','赤','SR',3,2,'通常',[4,3],{onEnter:[{kind:'crimsonWyvern'}],text:'登場時、相手のブロッカーをすべて破壊。1体以上破壊した場合、このターン攻撃できない。1体も破壊しなかった場合、このターン、スピードアタッカーを得る。'});
+make('rs4','侮蔑の絶傑・ガルミーユ','赤','SR',4,2,'通常',[6,6],{starter:false,galmieux:true,onEnter:[{kind:'galmieuxChoose'},{kind:'galmieuxStrike'}],text:'登場時、自分のクリーチャー1体に1ダメージ。その後、相手のクリーチャーまたは相手プレイヤーをランダムに1つ選び3ダメージ。ダメージを受けたときマッハファイターを得る。攻撃中、体力は1未満にならない。'});
+make('rs5','カインドクイーン・ヴァンピィ','赤','SR',2,2,'通常',[2,2],{starter:false,enhanceCost:M.cost(6,{赤:2}),onEnter:[{kind:'tokens',count:2,tokenKey:'t12'}],text:'登場時、専用トークンAを2体出す。自分の専用トークンAが登場するたび相手に2ダメージ。エンハンス8（赤2＋無色6）：ブラッドクイーン・ヴァンピィとして登場。'});
+make('t12','ヴァンピィ専用トークンA','赤','N',1,0,'通常',[1,1],{starter:false,token:true,symbols:{},speedAttacker:true,drain:true,text:'スピードアタッカー、ドレイン。'});
+make('t13','ヴァンピィ専用トークンB','赤','N',0,0,'通常',[2,2],{starter:false,token:true,symbols:{},cannotAttack:true,cannotBeAttacked:true,text:'攻撃できず、攻撃されない。ブラッドクイーンが存在する間、効果ダメージを受けない。'});
 make('r4','襲撃者エグゼドライブ','赤','SR',2,1,'通常',[3,3],{symbols:{},speedAttacker:true,onEnd:[{kind:'returnSelf'}],text:'SA。自分のターン終了時、持ち主の手札へ戻る。シンボルなし。'});
 make('r5','王家の御旗','赤','N',2,2,'設置物',null,{redBanner:true,onEnter:[{kind:'bannerAll'}],text:'登場時、自分の赤クリーチャーすべての攻撃力+1。以降、自分の赤クリーチャー登場時、その攻撃力+1。'});
 make('r6','溶岩の撃ち込み','赤','N',0,1,'呪文',null,{onUse:[{kind:'damagePlayer',amount:3}],text:'相手プレイヤーに3ダメージ。'});

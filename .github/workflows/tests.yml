@@ -44,6 +44,7 @@ jobs:
       - run: node starter-test.cjs
       - run: node counterspell-test.cjs
       - run: node amaterasu-test.cjs
+      - run: node red-sr-test.cjs
       - run: node battle-log-test.cjs
       - run: node mana-test.cjs
       - run: node sideboard-test.cjs
