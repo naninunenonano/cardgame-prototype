@@ -3428,9 +3428,27 @@
       "oldForm": null,
       "serial": 10,
       "retired": false
+    },
+    {
+      "oldId": "bn7",
+      "baseId": "bn7",
+      "id": "bn7",
+      "name": "エナジー・ライト",
+      "oldRarity": "N",
+      "rarity": "N",
+      "color": "青",
+      "section": "main",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 7,
+      "retired": false
     }
   ],
   "aliases": {
+    "bn7": "bn7",
     "piruluk": "almar",
     "life": "gn1",
     "fortune": "gr1",
@@ -3653,7 +3671,7 @@
     "br": 5,
     "bl": 3,
     "bs": 4,
-    "bn": 6,
+    "bn": 7,
     "nl": 2,
     "ns": 2,
     "nr": 6,

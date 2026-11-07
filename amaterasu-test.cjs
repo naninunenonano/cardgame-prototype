@@ -6,12 +6,12 @@ const Bot=require('./bot');
 const {cards}=require('./cards');
 const {fund,skipCharge}=require('./test-fixtures.cjs');
 const yes=r=>assert(r.ok,r.message);
-assert.equal(cards.bs2.attack,4);
-assert.equal(cards.bs2.maxHealth,4);
+assert.equal(cards.bs2.attack,2);
+assert.equal(cards.bs2.maxHealth,2);
 assert.deepEqual(cards.bs2.abilities,['ブロッカー']);
 assert.equal(cards.bs2.rarity,'SR');
 assert.equal(cards.bs2.cost.青,2);
-assert.equal(cards.bs2.cost.generic,4);
+assert.equal(cards.bs2.cost.generic,2);
 assert.deepEqual(cards.bs2.symbols,{青:1});
 assert.deepEqual(Decks.validate(Decks.preset('blueBeginner')),[]);
 function fixture(){
@@ -29,8 +29,8 @@ function cast(g){
 }
 for(const z of ['hand','main']){
  const {g,calls}=fixture();
- const chosen=put(g,'br1',z),other=put(g,'br1',z==='hand'?'main':'hand');
- const invalid=put(g,'br3',z),expensive=put(g,'bs3',z),noTarget=put(g,'bn1',z);
+ const chosen=put(g,'bn7',z),other=put(g,'bn7',z==='hand'?'main':'hand');
+ const invalid=put(g,'br3',z),expensive=put(g,'br1',z),noTarget=put(g,'bn1',z);
  for(let i=0;i<7;i++)put(g,'nn2','main');
  // Use a friendly unit to fill the first slot only after the summon if a target is needed.
  const c=cast(g),n=calls(),mana=g.paymentSources('p1').length;
@@ -48,28 +48,28 @@ for(const z of ['hand','main']){
  while(g.operation?.kind==='response')yes(g.passResponse());
  assert.equal(g.operation,null);
  assert.equal(g.locate(chosen.id).z,'trash');
- assert.equal(g.state.p1.hand.length,before+3-(z==='hand'?1:0));
+ assert.equal(g.state.p1.hand.length,before+2-(z==='hand'?1:0));
  assert.equal(g.paymentSources('p1').length,mana);
  assert.equal(calls()>n,z==='main');
 }
 {
  const {g,calls}=fixture();
- put(g,'br1','main');put(g,'nn2','main');cast(g);
+ put(g,'bn7','main');put(g,'nn2','main');cast(g);
  const n=calls();yes(g.resolvePrivate('main'));yes(g.resolvePrivate(null));
  assert(calls()>n);assert.equal(g.operation,null);
 }
 {
  const {g}=fixture();
- put(g,'br3','hand');put(g,'bs3','main');
+ put(g,'br3','hand');put(g,'br1','main');
  cast(g);assert.equal(g.operation,null);
 }
 {
  const {g}=fixture();
- const brain=put(g,'br1','hand');put(g,'br1','main');put(g,'nn2','main');
+ const light=put(g,'bn7','hand');put(g,'bn7','main');put(g,'nn2','main');
  for(let i=0;i<10;i++)put(g,'nn2','main');
  cast(g);
  const source=Bot.decide(g.observe('p1'));assert.equal(source.id,'hand');yes(g.dispatch(source,'p1'));
- const spell=Bot.decide(g.observe('p1'));assert.equal(spell.id,brain.id);yes(g.dispatch(spell,'p1'));
+ const spell=Bot.decide(g.observe('p1'));assert.equal(spell.id,light.id);yes(g.dispatch(spell,'p1'));
 }
 {
  const {g}=fixture(),blocker=cast(g);
@@ -83,7 +83,31 @@ for(const z of ['hand','main']){
  yes(g.resolveAttack(blocker.id));
  assert.equal(g.life.p1,life);
  assert.equal(g.locate(blocker.id).z,'trash');
- assert.equal(attacker.health,2);
+ assert.equal(attacker.health,4);
  assert(g.battleLog('p1',{detailed:true}).some(e=>e.kind==='block'&&e.blocker?.cardId==='bs2'));
+}
+{
+ const {cards}=require('./cards');
+ const Collection=require('./collection');
+ const light=cards.bn7;
+ assert.equal(light.type,'呪文');
+ assert.equal(light.color,'青');
+ assert.equal(light.rarity,'N');
+ assert.deepEqual(light.symbols,{});
+ assert.equal(light.cost.青,1);
+ assert.equal(light.cost.generic,2);
+ assert(Decks.available('main').includes(light));
+ assert(Collection.catalog().includes(light));
+ assert(Collection.craftable(light));
+ for(const remaining of [0,1,2]){
+  const {g}=fixture();
+  const spell=put(g,'bn7');
+  for(let i=0;i<remaining;i++)put(g,'nn2','main');
+  yes(g.beginPayment(spell.id));yes(g.confirmPayment());
+  while(g.operation?.kind==='response')yes(g.passResponse());
+  assert.equal(g.state.p1.hand.length,remaining);
+  assert.equal(g.life.p1,30-(2-remaining));
+  assert.equal(g.locate(spell.id).z,'trash');
+ }
 }
 console.log('PASS Amaterasu stats, both spell sources, one cast, shuffle, eligibility, Bot and blocking');
