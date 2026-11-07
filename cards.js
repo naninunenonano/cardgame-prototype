@@ -24,7 +24,7 @@
  {key:'shaper',name:'ストリーミング・シェイパー',type:'呪文',cost:M.cost(0,{青:3}),deckLimit:1,onUse:[{kind:'revealBlue',count:4}],text:'上から4枚を公開。青をすべて手札へ、残りをトラッシュへ。ドローではない。'},
  {key:'vegas',name:'Dの博才 サイバーダイス・ベガス',type:'設置物',cost:M.cost(4,{青:1}),symbols:{青:1},onEnd:[{kind:'optionalDraw',count:1}],text:'自分のターン終了時、1枚引いてもよい。Dスイッチ・置き換えルールなし。'},
  {key:'cosmo',name:'ルナ・コスモビュー',type:'通常',cost:M.cost(8,{青:1}),attack:6,maxHealth:6,symbols:{青:2},abilities:['ブロッカー'],gZero:{hand:10},onEnter:[{kind:'draw',count:1}],provisional:true,text:'ブロッカー。G・ゼロ：使用前の手札10枚以上なら無料召喚。登場時1枚ドロー。コスト内訳は仮値。'},
- {key:'counter',name:'対抗呪文',type:'呪文',cost:M.cost(2,{青:1}),responseOnly:true,instant:true,spellCounter:true,text:'インスタント。呪文1つを打ち消す。'},
+ {key:'counter',name:'対抗呪文',type:'呪文',cost:M.cost(2,{青:1}),responseOnly:true,instant:true,spellCounter:true,text:'インスタント。相手が呪文を使用するか、クリーチャーを召喚するか、カードの効果によってクリーチャーを場に出そうとしたとき、その使用・召喚・登場を1件無効にする。'},
  {key:'gate',name:'スパイラル・ゲート',type:'呪文',cost:M.cost(1,{青:1}),instant:true,onUse:[{kind:'unitBounce'}],text:'インスタント。クリーチャー1体を持ち主の手札へ。'},
  {key:'goby',name:'パルピィ・ゴービー',type:'通常',cost:M.cost(2,{青:1}),attack:2,maxHealth:2,symbols:{青:1},abilities:['ブロッカー'],cannotAttack:true,onEnter:[{kind:'reorder',count:5}],text:'ブロッカー・攻撃不可。登場時上5枚を自分だけ見て並べ直す。'},
  {key:'zwei',deckLimit:1,name:'万象の水霊 ネレイア',type:'通常',cost:M.cost(3,{青:5}),attack:13,maxHealth:13,symbols:{青:3},evolution:{color:'青'},unblockable:true,text:'自分の青ユニットの上へ進化。ブロックされない。最上段だけがシンボル・能力・攻撃力・最大体力を供給。使用済みを継承、召喚酔いなし。'},

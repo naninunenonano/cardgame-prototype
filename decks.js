@@ -29,7 +29,7 @@ const counts=(entries)=>entries.map(([key,count=3])=>({key,count}));
 const beginnerSide=key=>counts([[key,1],['sbnn1'],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
 Object.assign(official,{
  blueBeginner:{id:'blueBeginner',name:'青・初級Bot',preset:true,
-  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn1'],['nn6'],['bn2'],['bn6'],['bn1'],['br1',1],['nn8'],['nn9'],['bl2',1],['bs1',2],['bn5']]),
+  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9',2],['nn1'],['nn6',2],['bn1'],['bn5'],['br1'],['br3'],['bs2'],['ns2'],['bs1']]),
   sideboard:beginnerSide('bluesage'),shields:counts([['shnr4',1],['shnr5',1],['shns1',1],['shnr6',1]])},
  redBeginner:{id:'redBeginner',name:'赤・初級Bot',preset:true,
   main:counts([['rn15'],['rn16'],['rs2'],['nn9'],['rn18'],['nn2'],['nn3'],['nn4'],['nn5'],['nn7'],['nn1'],['nn6',1],['rn14'],['rn20',2],['rl1',1]]),
