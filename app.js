@@ -135,7 +135,7 @@ function renderOperation(){const o=Game.operation;if(!o||!ownChoice()||o.kind===
  }else if(['reorder','stackOrder'].includes(o.kind)){const a=Game.privateCandidates();openModal(o.scry?'占術1：自分だけ確認':o.kind==='stackOrder'?'持ち主が山札の上からの順を選択':'上からの順番を変更（自分だけ確認）',`<p>${Game.label(o.p)}だけが確認します。1番が山札の一番上です。</p><div class="order-list">${a.map((c,i)=>`<section><b>${i+1}番目</b>${cardHTML(c,{full:true,mode:'order-view'})}${!o.scry?`<div><button data-order-up="${c.id}" ${i?'':'disabled'}>↑ 上へ</button><button data-order-down="${c.id}" ${i<a.length-1?'':'disabled'}>↓ 下へ</button></div>`:''}</section>`).join('')}</div><button id="confirm-order">${o.scry?'上に残す':'この順で戻す'}</button>${o.scry?'<button id="scry-bottom">山札の下へ</button>':''}`);$('#confirm-order').onclick=()=>notify(Game.confirmOrder(false,o));if($('#scry-bottom'))$('#scry-bottom').onclick=()=>notify(Game.confirmOrder(true,o));
  }else if(o.kind==='searchSpell'){
  const cards=Game.privateCandidates();
- openModal('アマテラス：コスト4以下の呪文を無料使用',o.zone?
+ openModal(`アマテラス：コスト${o.max}以下の呪文を無料使用`,o.zone?
   `<p>${o.zone==='main'?'山札':'手札'}から1枚選べます。</p><div class="choice-cards">${cards.map(c=>`<section>${cardHTML(c,{full:true,mode:'private-view'})}<button data-private="${c.id}">無料使用</button></section>`).join('')}</div><button id="private-none">使用しない</button>`:
   `<p>使用元を選んでください。山札を確認した場合はシャッフルします。</p>${o.zones.map(z=>`<button data-private="${z}">${z==='main'?'山札から選ぶ':'手札から選ぶ'}</button>`).join('')}<button id="private-none">使用しない</button>`);
  $('#private-none').onclick=()=>notify(Game.resolvePrivate(null,o));

@@ -42,7 +42,7 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
  else if(c.key==='nr5')score=me.units.length?35+(me.units.some(c=>c.key==='nl1')&&canRefill?20:0):-100;
  else if(c.key==='nr6')score=me.units.some(c=>c.key==='nl1')?75:enemy.units.length<me.units.length?35:5;
  else if(c.key==='br2')score=me.structures.length<3?20:3;
- else if(c.key==='br1'||c.key==='bl1')score=canRefill?(me.hand.some(x=>x.key==='bs1')&&me.hand.length<10?45:me.hand.length<6?35:8):-100;
+ else if(c.key==='br1'||c.key==='bl1'||c.key==='bn7')score=canRefill?(me.hand.some(x=>x.key==='bs1')&&me.hand.length<10?45:me.hand.length<6?35:8):-100;
  else if(c.key==='bn5')score=me.units.length<5?40:5;
  else if(c.key==='bn1')score=enemy.units.length||enemy.structures.length?(danger?65:12):-100;
  else if(c.key==='br4'||c.key==='br5')score=enemy.counts.hand?18:-100;
@@ -77,7 +77,7 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
  }
  if(me.blueBeginner){
   if(c.key==='bs1'&&c.canFreeSummon)score+=35;
-  if(c.key==='br1'&&me.counts.main<=6)score=-100;
+  if((c.key==='br1'||c.key==='bn7')&&me.counts.main<=6)score=-100;
   if(c.key==='bn1'&&enemy.units.length){
    const threat=Math.max(...enemy.units.map(unit=>unit.attack||0));
    if(danger||threat>=5)score=Math.max(score,28+threat*6);
@@ -183,7 +183,7 @@ function decide(v){
   if(o.kind==='discard')return {type:'discard',ids:me.hand.slice().sort((a,b)=>keepScore(v,a)-keepScore(v,b)||a.id.localeCompare(b.id)).slice(0,o.required).map(c=>c.id)};
   return {type:'wait'};
  }
- if(v.turn.step==='charge'){const cards=me.hand.filter(c=>!c.generated&&!c.token&&!c.sideboardOnly);if(!cards.length||me.manaCount>=Math.max(10,...me.hand.map(c=>total(c))))return {type:'skipCharge'};const c=best(cards,c=>{const colorCount=me.mana.filter(m=>m.color===c.color).length,need=me.hand.filter(x=>x.id!==c.id&&x.cost&&(x.cost[c.color]||0)>colorCount).length;return need*12+(colorCount===0?8:0)+(total(c)>me.manaCount+3?10:0)-keepScore(v,c)*.4-(me.hand.filter(x=>x.key===c.key).length===1&&['gn1','gr1','br1'].includes(c.key)?15:0);});return c?{type:'charge',id:c.id}:{type:'skipCharge'};}
+ if(v.turn.step==='charge'){const cards=me.hand.filter(c=>!c.generated&&!c.token&&!c.sideboardOnly);if(!cards.length||me.manaCount>=Math.max(10,...me.hand.map(c=>total(c))))return {type:'skipCharge'};const c=best(cards,c=>{const colorCount=me.mana.filter(m=>m.color===c.color).length,need=me.hand.filter(x=>x.id!==c.id&&x.cost&&(x.cost[c.color]||0)>colorCount).length;return need*12+(colorCount===0?8:0)+(total(c)>me.manaCount+3?10:0)-keepScore(v,c)*.4-(me.hand.filter(x=>x.key===c.key).length===1&&['gn1','gr1','br1','bn7'].includes(c.key)?15:0);});return c?{type:'charge',id:c.id}:{type:'skipCharge'};}
  if(['main1','main2'].includes(v.turn.step)){
   // Preserve an immediate direct win rather than tapping its mana creature to deploy more cards.
   if(v.turn.step==='main1'&&enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))&&!enemy.units.some(c=>c.lure)&&me.units.some(c=>!c.rest&&!c.sick&&!c.cannotAttack))return {type:'advance'};

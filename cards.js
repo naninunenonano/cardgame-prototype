@@ -28,7 +28,7 @@
  {key:'gate',name:'スパイラル・ゲート',type:'呪文',cost:M.cost(1,{青:1}),instant:true,onUse:[{kind:'unitBounce'}],text:'インスタント。クリーチャー1体を持ち主の手札へ。'},
  {key:'goby',name:'パルピィ・ゴービー',type:'通常',cost:M.cost(2,{青:1}),attack:2,maxHealth:2,symbols:{青:1},abilities:['ブロッカー'],cannotAttack:true,onEnter:[{kind:'reorder',count:5}],text:'ブロッカー・攻撃不可。登場時上5枚を自分だけ見て並べ直す。'},
  {key:'zwei',deckLimit:1,name:'万象の水霊 ネレイア',type:'通常',cost:M.cost(3,{青:5}),attack:13,maxHealth:13,symbols:{青:3},evolution:{color:'青'},unblockable:true,text:'自分の青ユニットの上へ進化。ブロックされない。最上段だけがシンボル・能力・攻撃力・最大体力を供給。使用済みを継承、召喚酔いなし。'},
- {key:'amaterasu',name:'蒼狼の始祖アマテラス',type:'通常',cost:M.cost(4,{青:2}),attack:4,maxHealth:4,abilities:['ブロッカー'],symbols:{青:1},onEnter:[{kind:'searchSpell',max:4}],text:'ブロッカー。登場時、自分の山札または手札からコスト4以下の呪文を1枚、コストを支払わずに使用してもよい。山札を見た場合、その後シャッフルする。'},
+ {key:'amaterasu',name:'蒼狼の始祖アマテラス',type:'通常',cost:M.cost(2,{青:2}),attack:2,maxHealth:2,abilities:['ブロッカー'],symbols:{青:1},onEnter:[{kind:'searchSpell',max:3}],text:'ブロッカー。登場時、自分の山札または手札からコスト3以下の呪文を1枚、コストを支払わずに使用してもよい。山札を見た場合、その後シャッフルする。'},
  {key:'emeral',name:'エメラル',type:'通常',cost:M.cost(1,{青:1}),attack:1,maxHealth:1,symbols:{青:1},onEnter:[{kind:'inspectShield'}],text:'登場時：相手の未使用シールド1枚を選び、自分だけ内容を確認する。使用状態は変えない。'},
  {key:'corile',name:'コーライル',type:'通常',cost:M.cost(4,{青:1}),attack:2,maxHealth:2,symbols:{青:1},onEnter:[{kind:'topUnit'}],text:'登場時：相手ユニット1体を持ち主のメインデッキの上へ戻す。設置物・マナ・キャラ対象外。'},
  {key:'snow',name:'スノーマン召喚',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'tokens',count:3}],text:'スノーマントークン3体を召喚。'},
@@ -36,6 +36,7 @@
  {key:'vice',name:'スケルトン・バイス',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'randomDiscard',count:2}],text:'相手の手札からランダムに2枚を重複せずトラッシュへ。手札全体は公開しない。1枚なら1枚だけ。'}
  ];
  for(const d of blueDefs)cards[d.key]={color:'青',symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:{minimum:{青:1}},...d};
+ cards.bn7={color:'青',symbols:{},abilities:[],onEnter:[],onDefeat:[],reduction:{minimum:{青:1}},key:'bn7',rarity:'N',rarityProvisional:false,name:'エナジー・ライト',type:'呪文',cost:M.cost(2,{青:1}),onUse:[{kind:'draw',count:2}],text:'カードを2枚引く。'};
  cards.snowToken={key:'snowToken',name:'スノーマン',type:'通常',color:'青',cost:null,attack:1,maxHealth:1,symbols:{青:1},abilities:[],token:true,onUse:[],onEnter:[],onDefeat:[]};
  const neutralDefs=[
  {key:'jil',name:'慟哭のジル・クライハート',type:'通常',cost:M.cost(8),attack:5,maxHealth:5,symbols:{},deckLimit:1,genericReduction:{maximum:4,minimum:4},onEnter:[{kind:'chooseFate'}],provisional:true,text:'運命を選ぶ。有色シンボル1つにつき1軽減、最大4・最低4。攻撃力・最大体力5は暫定。'},
