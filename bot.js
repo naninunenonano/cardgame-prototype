@@ -76,6 +76,7 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
   if(c.key==='almar_sbbs1')score=enemy.counts.hand?score:-100;
  }
  if(me.blueBeginner){
+  if(c.key==='bs1'&&c.canFreeSummon)score+=35;
   if(c.key==='br1'&&me.counts.main<=6)score=-100;
   if(c.key==='bn1'&&enemy.units.length){
    const threat=Math.max(...enemy.units.map(unit=>unit.attack||0));
@@ -106,6 +107,7 @@ function chooseBlock(v,o){const {me,enemy}=context(v),a=o.attacker;if(!a||!o.blo
  return best(favorable,c=>-value(c))?.id||null;
 }
 function keepScore(v,c){const {me,danger,supply}=context(v);let n=c.type==='通常'?unitValue(c,me.manaCount)+10:12;
+ if(me.blueBeginner&&c.responseOnly&&me.hand.filter(x=>x.key===c.key).length===1)n+=20;
  if(c.manaAbility)n+=me.manaCount<6?35:-5;
  if(['gn1','gr1','gn2'].includes(c.key))n+=supply&&me.manaCount<8?35:-25;
  if(c.key==='gs3')n+=danger?65:me.life<10?20:0;
@@ -156,7 +158,9 @@ function decide(v){
   if(o.kind==='untapMana'){const c=o.candidates.find(c=>c.rest&&!o.ids.includes(c.id));return c&&o.ids.length<o.max?{type:'untapSelect',id:c.id}:{type:'untap'};}
   if(o.kind==='handPick'){const c=best(o.candidates,c=>-keepScore(v,c));return {type:'private',id:c?.id||null};}
   if(o.kind==='recoverUnit'){const c=best(o.candidates,c=>unitValue(c,me.manaCount));return {type:'private',id:c?.id||null};}
-  if(o.kind==='response'){const c=o.candidates.find(c=>c.responseOnly&&o.target?.type==='呪文'&&o.target.owner!==p)||o.candidates.find(c=>!c.responseOnly&&(enemy.units.length>0));return c?{type:'play',id:c.id,method:'instant'}:{type:'pass'};}
+  if(o.kind==='response'){const target=o.target;
+  const worthCountering=target?.owner!==p&&(target?.type==='呪文'||me.blueBeginner&&target?.type==='通常'&&(target.onEnter?.length||unitValue(target)>=9));
+  const c=o.candidates.find(c=>c.responseOnly&&worthCountering)||o.candidates.find(c=>!c.responseOnly&&enemy.units.length);return c?{type:'play',id:c.id,method:'instant'}:{type:'pass'};}
   if(o.kind==='optionalDraw')return {type:'optional',use:me.counts.main>0};
   if(o.kind==='tokens'){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount):10000);return {type:'token',slot:slot&&(!slot.card||unitValue(slot.card,me.manaCount)<10)?slot.id:null};}
   if(['reorder','stackOrder'].includes(o.kind)){if(o.scry)return {type:'order',bottom:keepScore(v,o.candidates[0])<8};const desired=o.candidates.slice().sort((a,b)=>keepScore(v,b)-keepScore(v,a)||a.id.localeCompare(b.id));const i=desired.findIndex((c,i)=>c.id!==o.order[i]);if(i>=0){const index=o.order.indexOf(desired[i].id);return {type:'orderMove',id:desired[i].id,delta:index>i?-1:1};}return {type:'order'};}

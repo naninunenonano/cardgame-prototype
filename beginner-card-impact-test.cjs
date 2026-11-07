@@ -10,7 +10,7 @@ const ref=(cardId,owner,instanceId)=>({cardId,owner,instanceId,type:'通常'});
 const a=ref('kn10','p1','a'),b=ref('kn10','p1','b'),vanilla=ref('nn3','p1','c');
 assert(!eligible(players.p1).has('nn3'));
 assert(!eligible(players.p2).has('sbnn1'));
-assert(eligible(players.p2).has('bl2')); // No description, but an evolution with abilities.
+assert(eligible(players.p2).has('ns2')); // Evolution with an attack-triggered ability.
 const hit=(attacker,beforeLife,afterLife)=>[
  {kind:'bodyStrike',attacker},
  {kind:'life',reason:'戦闘ダメージ',targetPlayer:'p2',beforeLife,afterLife},

@@ -10,7 +10,7 @@ make('r6','溶岩の撃ち込み','赤','N',0,1,'呪文',null,{onUse:[{kind:'dam
 make('r7','セージコマンダー','赤','R',5,1,'通常',[4,6],{onEnter:[{kind:'sageBuff'}],text:'登場時、自分のほかの全クリーチャーに永続+2/+2。退場後も維持、累積。'});
 make('b1','千変万化 ヴェルミナ','青','UR',4,3,'通常',[3,5],{symbols:{青:2},abilities:['ブロッカー'],aurelia:true,onDeath:[{kind:'tokens',count:1,tokenKey:'aureliaToken'}],text:'敵1体につき攻撃力+1、ほかの味方1体につき最大体力+1。合計10以上なら相手効果で選ばれない。破壊時、死亡時能力なしの自身のトークンを生成。'});
 make('gate','スパイラル・ゲート','青','N',1,1,'呪文',null,{instant:true,onUse:[{kind:'unitBounce'}],text:'インスタント。クリーチャー1体を持ち主の手札へ。'});
-make('counter','対抗呪文','青','R',2,1,'呪文',null,{instant:true,responseOnly:true,spellCounter:true,text:'インスタント。呪文1つを打ち消す。'});
+make('counter','対抗呪文','青','R',2,1,'呪文',null,{instant:true,responseOnly:true,spellCounter:true,text:'インスタント。相手が呪文を使用するか、クリーチャーを召喚するか、カードの効果によってクリーチャーを場に出そうとしたとき、その使用・召喚・登場を1件無効にする。'});
 cards.brain.rarity='R';cards.brain.deckLimit=3;cards.brain.starter=true;
 make('b5','蒼海の番兵','青','N',2,1,'通常',[4,5],{abilities:['ブロッカー'],cannotAttack:true,text:'ブロッカー。攻撃できない。'});
 make('b6','根源への回帰','青','SR',3,2,'呪文',null,{onUse:[{kind:'bounceAll'}],text:'お互いの全クリーチャーをバウンス。対象を取らない。進化元はトラッシュ、トークンは消滅、サイドは帰還。'});
