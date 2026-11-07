@@ -30,8 +30,8 @@ A.deepEqual(cards.rs4.cost,require('./mana').cost(4,{赤:2}));
  yes(g.manualMove(c.id,'p1','hand'));A.equal(c.name,'カインドクイーン・ヴァンピィ');A(!g.fieldCards('p1').some(c=>c.key==='t13'));
 }
 {
- const g=fixture(),c=cast(g,'rs4');
- A.equal(g.operation.choice,'galmieux');yes(g.resolveStarter(c.id));
+ const g=fixture(),ally=add(g,'nn4','signi-2'),c=cast(g,'rs4');
+ A.equal(g.operation,null);A.equal(ally.health,4);
  A.equal(c.health,5);A(c.galmieuxMach);A.equal(g.life.p2,27);
 }
 {
