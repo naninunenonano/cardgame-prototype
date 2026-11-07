@@ -164,7 +164,14 @@ function decide(v){
   if(o.kind==='optionalDraw')return {type:'optional',use:me.counts.main>0};
   if(o.kind==='tokens'){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount):10000);return {type:'token',slot:slot&&(!slot.card||unitValue(slot.card,me.manaCount)<10)?slot.id:null};}
   if(['reorder','stackOrder'].includes(o.kind)){if(o.scry)return {type:'order',bottom:keepScore(v,o.candidates[0])<8};const desired=o.candidates.slice().sort((a,b)=>keepScore(v,b)-keepScore(v,a)||a.id.localeCompare(b.id));const i=desired.findIndex((c,i)=>c.id!==o.order[i]);if(i>=0){const index=o.order.indexOf(desired[i].id);return {type:'orderMove',id:desired[i].id,delta:index>i?-1:1};}return {type:'order'};}
-  if(o.kind==='searchSpell'){const c=best(o.candidates,c=>playScore(v,c));return {type:'private',id:c.id};}
+  if(o.kind==='searchSpell'){
+   if(!o.zone){
+    const hand=best(o.handSpells||[],c=>playScore(v,c));
+    return {type:'private',id:hand&&playScore(v,hand)>0?'hand':o.zones.includes('main')?'main':null};
+   }
+   const c=best(o.candidates,c=>playScore(v,c));
+   return {type:'private',id:c&&playScore(v,c)>0?c.id:null};
+  }
   if(o.kind==='inspectHand'){const c=best(o.candidates.filter(c=>c.cost&&total(c)<=o.max),c=>total(c)+unitValue(c,enemy.manaCount));return {type:'private',id:c?.id||null};}
   if(o.kind==='freeCast'){if(!o.targetId){const c=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:c.id};}return {type:'freeCast'};}
   if(o.kind==='payment'){const c=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].find(c=>c.id===o.id);if(o.targets?.length&&!o.targetId){const target=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:target.id};}if(c?.type==='通常'&&o.purpose!=='set'&&!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'pay'};}
