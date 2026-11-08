@@ -15,9 +15,9 @@
     return result;
   }
   function total(required){return required.generic+colors.reduce((n,color)=>n+required[color],0);}
-  function evolutionBaseCost(required, base, blueCharacter) {
+  function evolutionBaseCost(required, base, matchesCharacter, color='青', extra=0) {
     const discount=base?.type==='通常'&&cardColors(base).length===1&&hasColor(base,'無色')&&base.cost?total(base.cost):0;
-    return discount&&required.青>0?{...required,青:Math.max(blueCharacter?0:1,required.青-discount)}:{...required};
+    return (discount||extra)&&required[color]>0?{...required,[color]:Math.max(matchesCharacter?0:1,required[color]-discount-extra)}:{...required};
   }
   function pool(lands) {
     const result={total:0,...Object.fromEntries(manaColors.map(color=>[color,0]))};

@@ -1,6 +1,14 @@
 (function(root,factory){const a=factory();if(typeof module==='object'&&module.exports)module.exports=a;else root.BlackCards=a;})(globalThis,function(){
 function install(M,c){
  const make=(key,name,rarity,black,generic,stats,symbols,extra={})=>{if(c[key])throw Error('Duplicate card: '+key);return c[key]={key,name,rarity,deckLimit:rarity==='UR'?1:3,color:'黒',civilizations:['黒'],type:stats?'通常':'呪文',cost:M.cost(generic,{黒:black}),symbols:symbols?{黒:symbols}:{},abilities:[],onUse:[],onEnter:[],onDeath:[],onDefeat:[],reduction:{minimum:{黒:1}},...(stats?{attack:stats[0],maxHealth:stats[1]}:{}),...extra};};
+ const misery=(trigger)=>[
+  {kind:'optionalEffect',label:'山札の上から2枚をトラッシュに置きますか？',effects:[{kind:'graveMill',count:2}]},
+  {kind:'graveReanimate',max:6,emptyOnly:true,miseryTrigger:trigger}
+ ];
+ make('ks13','鮮血の還流','SR',1,0,null,0,{type:'設置物',bloodReflux:true,text:'他のカードによって自分がダメージを受けるたび、自分に1ダメージ。その後、自分のライフを3回復する。《鮮血の還流》のダメージでは誘発しない。'});
+ make('ks14','フェリックス・ミザリィ','SR',6,0,[6,6],1,{evolution:{any:true,colorlessBaseDiscount:true,discountColor:'黒'},trashEvolutionDiscount:2,onEnter:misery('entry'),onAttack:misery('attack'),text:'自分のクリーチャー1体の上に進化。無色進化元の元コスト分だけ黒コストを軽減。トラッシュから召喚でき、その場合はさらに黒2軽減。黒キャラなら0、それ以外は最低黒1。登場時・攻撃時、山札の上から2枚をトラッシュに置いてもよい。その後、トラッシュからコスト6以下のクリーチャー1体を出す。単独で攻撃したとき、自身を破壊する。'});
+ make('ks15','命削りの狂戦士','SR',1,6,[6,3],0,{speedAttacker:true,yellowDiscount:6,text:'スピードアタッカー。自分の《イエローゾーン》が表向きなら無色コストを6軽減。召喚時、この能力で軽減した数だけ自分にダメージ。'});
+ make('kn11','蠢く死霊','N',1,0,[1,2],0,{onEnter:[{kind:'restlessDamage'}],text:'登場時、お互いのプレイヤーに1ダメージ。'});
  make('zalba','黒神龍ザルバ','N',4,0,[5,3],1,{onEnter:[{kind:'opponentDraw',count:1}],text:'登場時：相手は1枚引く。'});
  make('bloodPactServant','血契の従者','N',1,2,[3,3],0,{vengeanceStats:true,onEnter:[{kind:'selfDamage',amount:3},{kind:'draw',count:1}],text:'登場時：自分に3ダメージ、その後1ドロー。復讐（現在ライフ15以下）の間+1/+1。'});
  make('duskSentry','宵闇の番兵','N',1,0,[0,3],0,{onEnter:[{kind:'vengeanceEntry',attack:2}],text:'登場時、復讐状態なら永続+2/+0。復讐解除後も維持。'});

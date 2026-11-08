@@ -11,7 +11,47 @@ function freeValue(v,c){const {me}=context(v);if(c.key==='gl1'&&wipeGain(v)<=0&&
 function motherTarget(v,targets){const {p,me,enemy,danger}=context(v);const possible=me.mana.filter(c=>c.type==='通常'&&total(c)<=me.manaCount+1);const upgrade=best(possible,c=>freeValue(v,c));
  return best(targets,c=>c.owner===p?(upgrade?freeValue(v,upgrade)-unitValue(c,me.manaCount)+2:-100):unitValue(c,enemy.manaCount)-(enemy.counts.hand?10:0)-(enemy.manaCount>=8?7:3)+(danger?8:0));}
 function motherGain(v){const {p,me,enemy,danger}=context(v),c=motherTarget(v,[...me.units,...enemy.units]);if(!c)return -100;if(c.owner!==p)return unitValue(c,enemy.manaCount)-(enemy.counts.hand?10:0)-(enemy.manaCount>=8?7:3)+(danger?8:0);const choices=me.mana.filter(x=>x.type==='通常'&&total(x)<=me.manaCount+1);return Math.max(-100,...choices.map(x=>freeValue(v,x)-unitValue(c,me.manaCount)));}
+function miseryAttackValue(v,c){
+ const {me,enemy}=context(v);
+ const allies=me.units.filter(u=>u.id!==c.id);
+ if(!allies.length)return -80;
+ const extra=me.trash.filter(u=>u.key==='ks14').length;
+ const bases=allies.filter(u=>!u.rest&&u.key!=='ks14').length;
+ const fuel=me.trash.filter(u=>u.type==='通常'&&!u.evolution&&!u.noReanimate&&u.cost&&total(u)<=6);
+ const chain=Math.min(extra,bases+Math.min(fuel.length,7-me.units.length));
+ const apache=me.life<=15?Math.min(2,fuel.filter(u=>u.key==='kn10').length,7-me.units.length):0;
+ const blockers=enemy.units.filter(u=>!u.rest&&u.abilities?.includes('ブロッカー')).length;
+ return Math.max(0,6*(1+chain)+4*apache-6*blockers)>=enemy.life?80:12+chain*10+apache*4;
+}
+function miseryReviveScore(v,c,operation){
+ const {me,enemy}=context(v);
+ const source=me.units.find(u=>u.id===operation.sourceId);
+ const ready=me.units.some(u=>u.id!==operation.sourceId&&!u.rest&&u.key!=='ks14');
+ const copies=me.trash.filter(u=>u.key==='ks14').length;
+ const apache=c.key==='kn10'&&me.life<=15;
+ if(c.key==='ks14')return ready?(operation.miseryTrigger==='attack'?100:45):-100;
+ if(c.evolution)return ready?unitValue(c):0;
+ if(apache&&enemy.life<=4)return 130;
+ if(operation.miseryTrigger==='entry'&&copies&&!ready&&source)return 80+unitValue(c)-(apache?25:0);
+ return unitValue(c)+(apache?32:0);
+}
 function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.counts.main+me.counts.trash>0;let score=-100;
+ if(me.blackBeginner){
+  if(c.key==='ks13')return me.structures.filter(u=>u.key==='ks13').length<3?42:-100;
+  if(c.key==='ks15'){
+   const self=c.effectiveCost?.generic===0?6:0;
+   if(self>=me.life)return -100;
+   const net=self?self-me.structures.filter(u=>u.key==='ks13').length*2:0;
+   return 30+(!enemy.units.some(u=>!u.rest&&u.abilities?.includes('ブロッカー'))&&enemy.life<=6?100:0)-net*2;
+  }
+  if(c.key==='kn11')return me.life<=1?-100:enemy.life<=1?1000:18+me.structures.filter(u=>u.key==='ks13').length*6;
+  if(c.key==='ks14'){
+   const options=(c.evolutionOptions??[]).filter(x=>x.plan);
+   if(!options.length)return -100;
+   const pay=Math.min(...options.map(x=>M.total(x.cost)));
+   return 45-pay*4+me.trash.filter(u=>u.key==='ks14'&&u.id!==c.id).length*7+(me.units.length>=2?7:0);
+  }
+ }
  if(c.type==='通常'){
   if(me.blackBeginner&&me.character?.level!==4){
    const damage=(me.character?.level===2?2:0)+(c.key==='kn2'||me.life>15&&c.onEnter?.some(e=>e.unlessVengeance)?3:0);
@@ -90,10 +130,11 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
 function attackChoice(v,attacks=v.attacks){const {me,enemy}=context(v),choices=[];
  for(const entry of attacks)for(const t of entry.targets){const a=entry.card;
   if(me.blackBeginner&&me.character?.level!==4&&a.key==='kr3'&&me.life<=2)continue;
+  if(a.key==='ks14'&&me.blackBeginner&&me.units.length===1&&!a.abilitiesDisabled)continue;
   if(t.id==='body'){
    const blockers=enemy.units.filter(c=>!c.rest&&c.abilities?.includes('ブロッカー'));
    const lethal=a.attack>=enemy.life&&(a.unblockable||!blockers.length);
-   choices.push({id:a.id,target:'body',score:lethal?10000:a.attack*5-(a.manaAbility?3:0)+(me.blueBeginner&&a.key==='bs5'&&a.evolution?.colorlessBaseDiscount&&me.counts.main>=3?12:0)});
+   choices.push({id:a.id,target:'body',score:lethal?10000:a.attack*5+(me.blackBeginner&&a.key==='ks14'?miseryAttackValue(v,a):0)-(a.manaAbility?3:0)+(me.blueBeginner&&a.key==='bs5'&&a.evolution?.colorlessBaseDiscount&&me.counts.main>=3?12:0)});
   }else{const b=enemy.units.find(c=>c.id===t.id);if(!b)continue;
    const kill=a.attack>=b.health,survive=b.attack<a.health;
    const score=(kill?unitValue(b,enemy.manaCount)+22:0)-(survive?0:unitValue(a,me.manaCount))+ (a.key==='gs4'&&kill?20:0);
@@ -186,8 +227,8 @@ function decide(v){
  }
  if(o){
   if(o.graveBases&&o.graveEvolution){const ids=o.graveBaseIds||[];if(ids.length<o.graveEvolution.min){const c=best(o.graveBases.filter(c=>!ids.includes(c.id)),c=>-unitValue(c));if(c)return {type:'graveBase',id:c.id};}}
-  if(o.kind==='graveChoice'){if(o.choice==='ereshMode')return {type:'graveChoice',id:me.trash.some(c=>c.type==='通常'&&c.color==='黒'&&!c.evolution&&!c.noReanimate)?'revive':'recover'};const c=best(o.candidates,c=>o.choice==='iwashinDiscard'?-keepScore(v,c):o.choice==='fushigi'?-unitValue(c)+total(c):unitValue(c));return {type:'graveChoice',id:c?.id??null};}
-  if(o.kind==='gravePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card):10000);return {type:'slot',slot:slot.id};}return {type:'gravePlace'};}
+  if(o.kind==='graveChoice'){if(me.blackBeginner&&o.miseryTrigger)return {type:'graveChoice',id:best(o.candidates,c=>miseryReviveScore(v,c,o))?.id};if(o.choice==='ereshMode')return {type:'graveChoice',id:me.trash.some(c=>c.type==='通常'&&c.color==='黒'&&!c.evolution&&!c.noReanimate)?'revive':'recover'};const c=best(o.candidates,c=>o.choice==='iwashinDiscard'?-keepScore(v,c):o.choice==='fushigi'?-unitValue(c)+total(c):unitValue(c));return {type:'graveChoice',id:c?.id??null};}
+  if(o.kind==='gravePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card)+(o.miseryTrigger&&me.blackBeginner&&!s.card.rest?50:0)-(o.miseryTrigger&&s.card.key==='ks14'?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'gravePlace'};}
 
   if(o.kind==='rulePayment')return {type:'rulePay'};
   if(o.kind==='expansionChoice'&&o.choice.startsWith('guardian')){
@@ -216,7 +257,7 @@ function decide(v){
   if(o.kind==='inspectShield')return {type:'shieldEffect',id:o.candidates[0]?.id||null};
   if(o.kind==='shieldReveal')return {type:'shieldEffect'};
   if(o.kind==='fateChoice'){const kind=v.sources.length>=8&&me.units.filter(c=>!c.cannotAttack).length>=2?'extraTurns':'fateWhim',c=o.candidates.find(c=>c.onUse?.some(e=>e.kind===kind))||o.candidates[0];return {type:'fate',key:c.key};}
-  if(o.kind==='optionalEffect')return {type:'optional',use:me.counts.main+me.counts.trash>0};
+  if(o.kind==='optionalEffect')return {type:'optional',use:o.effects?.some(e=>e.kind==='graveMill')?me.counts.main>=2:me.counts.main+me.counts.trash>0};
   if(o.kind==='untapMana'){const c=o.candidates.find(c=>c.rest&&!o.ids.includes(c.id));return c&&o.ids.length<o.max?{type:'untapSelect',id:c.id}:{type:'untap'};}
   if(o.kind==='handPick'){const c=best(o.candidates,c=>-keepScore(v,c));return {type:'private',id:c?.id||null};}
   if(o.kind==='recoverUnit'){const c=best(o.candidates,c=>unitValue(c,me.manaCount));return {type:'private',id:c?.id||null};}
@@ -242,7 +283,7 @@ function decide(v){
   }
   if(o.kind==='inspectHand'){const c=best(o.candidates.filter(c=>c.cost&&total(c)<=o.max),c=>total(c)+unitValue(c,enemy.manaCount));return {type:'private',id:c?.id||null};}
   if(o.kind==='freeCast'){if(!o.targetId){const c=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:c.id};}return {type:'freeCast'};}
-  if(o.kind==='payment'){const c=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].find(c=>c.id===o.id);if(o.targets?.length&&!o.targetId){const target=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:target.id};}if(c?.type==='通常'&&o.purpose!=='set'&&!o.slot){if(c.evolution?.colorlessBaseDiscount&&me.blueBeginner){const planning={...v,operation:null},hand=me.hand.map(x=>x.id===c.id?{...x,canPlay:true}:x);planning.players={...v.players,[p]:{...me,hand}};const route=best(blueWarslaPlan(planning).routes.filter(r=>r.kind==='evolve'),r=>r.lethal?10000:r.score);if(route)return {type:'slot',slot:route.slot};}const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'pay'};}
+  if(o.kind==='payment'){const c=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].find(c=>c.id===o.id);if(o.targets?.length&&!o.targetId){const target=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:target.id};}if(c?.type==='通常'&&o.purpose!=='set'&&!o.slot){if(c.key==='ks14'&&me.blackBeginner){const slot=best(o.slots,s=>-unitValue(s.card)+(s.card.rest?0:35)-(s.card.key==='ks14'?45:0)-M.total(c.evolutionOptions?.find(x=>x.slot===s.id)?.cost??c.cost)*4);if(slot)return {type:'slot',slot:slot.id};}if(c.evolution?.colorlessBaseDiscount&&me.blueBeginner){const planning={...v,operation:null},hand=me.hand.map(x=>x.id===c.id?{...x,canPlay:true}:x);planning.players={...v.players,[p]:{...me,hand}};const route=best(blueWarslaPlan(planning).routes.filter(r=>r.kind==='evolve'),r=>r.lethal?10000:r.score);if(route)return {type:'slot',slot:route.slot};}const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'pay'};}
   if(['freePlace','returnPlace'].includes(o.kind)){const c=me.hand.find(x=>x.id===o.id);if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:o.kind==='returnPlace'?'returnPlace':'freePlace'};}
   if(o.kind==='freeUnit'){const c=best(o.candidates,c=>(c.owner===p?1:-1)*unitValue(c,c.owner===p?me.manaCount:enemy.manaCount));return {type:'freeUnit',id:c?.id||null};}
   if(o.kind==='effectTarget'){const c=o.effect==='mother'?motherTarget(v,o.candidates):best(o.candidates,c=>(c.owner===p?-100:0)+unitValue(c,enemy.manaCount));return {type:'target',id:c.id};}

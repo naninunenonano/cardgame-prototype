@@ -35,7 +35,7 @@ Object.assign(official,{
   main:counts([['rn15'],['nn9'],['nn2'],['nn3'],['nn4'],['nn5'],['nn7'],['nn1'],['nn6',1],['rn14'],['rn20'],['rs1'],['rs5'],['rs4']]),
   sideboard:beginnerSide('redcaptain'),shields:counts([['shnr6'],['shnr2',1]])},
  blackBeginner:{id:'blackBeginner',name:'黒・初級Bot',preset:true,
-  main:counts([['nn2'],['kn9'],['nn4'],['nn5'],['nn9'],['nn1'],['kn10'],['nn7'],['kn3'],['kr1'],['kn2',2],['ks2'],['kr3',2],['kn1',1],['ks10',2]]),
+  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn7',1],['kn9'],['kn10'],['kn2'],['ks13'],['ks14'],['ks15'],['kn11']]),
   sideboard:beginnerSide('redmoonavenger'),shields:counts([['redmoonavenger_shkl1',1],['shnr6',2],['shnr5',1]])},
  whiteBeginner:{id:'whiteBeginner',name:'白・初級Bot',preset:true,
   main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn6'],['nn7'],['nn8'],['wn3'],['wr2'],['wr3',2],['wn2',2],['nr1']]),
