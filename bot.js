@@ -93,7 +93,7 @@ function attackChoice(v,attacks=v.attacks){const {me,enemy}=context(v),choices=[
   if(t.id==='body'){
    const blockers=enemy.units.filter(c=>!c.rest&&c.abilities?.includes('ブロッカー'));
    const lethal=a.attack>=enemy.life&&(a.unblockable||!blockers.length);
-   choices.push({id:a.id,target:'body',score:lethal?10000:a.attack*5-(a.manaAbility?3:0)+(me.blueBeginner&&a.key==='ns2'&&a.evolution?.colorlessBaseDiscount&&me.counts.main>=3?12:0)});
+   choices.push({id:a.id,target:'body',score:lethal?10000:a.attack*5-(a.manaAbility?3:0)+(me.blueBeginner&&a.key==='bs5'&&a.evolution?.colorlessBaseDiscount&&me.counts.main>=3?12:0)});
   }else{const b=enemy.units.find(c=>c.id===t.id);if(!b)continue;
    const kill=a.attack>=b.health,survive=b.attack<a.health;
    const score=(kill?unitValue(b,enemy.manaCount)+22:0)-(survive?0:unitValue(a,me.manaCount))+ (a.key==='gs4'&&kill?20:0);
@@ -125,10 +125,10 @@ function gateProbability(size,copies,draws){
 }
 function blueWarslaPlan(v){
  const {me,enemy}=context(v), own=v.turn.counts[v.viewer];
- const warsla=me.hand.find(c=>c.key==='ns2'&&c.evolution?.colorlessBaseDiscount);
+ const warsla=me.hand.find(c=>c.key==='bs5'&&c.evolution?.colorlessBaseDiscount);
  const routes=[];
  if(!warsla||!me.blueBeginner||v.operation||!['main1','main2'].includes(v.turn.step))return {routes};
- const available=v.sources.length, main1=v.turn.step==='main1', am=me.hand.find(c=>c.key==='bs2'&&c.canPlay);
+ const main1=v.turn.step==='main1', am=me.hand.find(c=>c.key==='bs2'&&c.canPlay);
  const opposing=enemy.units.filter(u=>!u.cannotAttack);
  const incoming=opposing.reduce((sum,u)=>sum+u.attack,0);
  const forced=enemy.units.filter(u=>u.lure);
@@ -157,8 +157,10 @@ function blueWarslaPlan(v){
  }
  if(main1&&me.units.length<7&&!enemy.units.some(u=>u.replaceWeakEntry&&!u.abilitiesDisabled)){
   for(const base of me.hand.filter(c=>c.canPlay&&c.type==='通常'&&c.color==='無色'&&!c.evolution&&!c.abilities?.length&&!c.onEnter?.length&&!c.onAttack?.length&&!c.onDeath?.length&&!c.onDefeat?.length&&!c.manaAbility&&!c.speedAttacker&&!c.lure&&!c.cannotAttack&&!c.justDiver&&!Object.keys(c.symbols??{}).length)){
-   const first=M.total(base.effectiveCost), second=M.total(M.evolutionBaseCost(warsla.cost,base));
-   if(first+second<=available)add('setup',base,second,base.paymentPlan?.sourceIds??[]);
+   const paid=base.paymentPlan?.sourceIds??[];
+   const cost=M.evolutionBaseCost(warsla.evolutionCostBeforeBase,base,warsla.blueCharacter);
+   const remaining=v.sources.filter(source=>!paid.includes(source.id));
+   if(M.total(cost)<=remaining.length&&cost.青<=remaining.filter(source=>source.colors.includes('青')).length)add('setup',base,M.total(cost),paid);
   }
  }
  const route=best(routes,r=>r.lethal?10000:r.score+(own===4&&r.ready?100:0));

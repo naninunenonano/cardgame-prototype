@@ -13,7 +13,7 @@ assert.equal(advanced.name,'青上級Bot／アルマー');
 assert.equal(advanced.difficulty,'advanced');
 assert.deepEqual(advanced.main.map(({key,count})=>[key,count]),[
  ['bo1',3],['bs1',3],['bl2',1],['bl3',1],['nl2',1],['br1',3],['bn1',3],['br3',3],
- ['br5',3],['ns1',3],['br4',3],['nn1',3],['ns2',3],['nl1',1],['bs3',3],['nn7',3]
+ ['br5',3],['ns1',3],['br4',3],['nn1',3],['bs5',3],['nl1',1],['bs3',3],['nn7',3]
 ]);
 assert.deepEqual(advanced.sideboard.map(e=>e.key),[
  'almar','almar_sbbu1','sbbu1','almar_sbbu2','almar_sbbs1','almar_sbnr1','sbbr1','sbbu2','sbnl4','sbnl1'
