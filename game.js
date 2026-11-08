@@ -300,14 +300,20 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function refreshDeck(p){if(state[p].main.length)return true;const eligible=state[p].trash.filter(c=>!c.resolving&&!isSideCard(c)&&!c.token&&c.type!=='土地');if(!eligible.length)return false;const ids=new Set(eligible.map(c=>c.id));state[p].trash=state[p].trash.filter(c=>!ids.has(c.id));for(const c of eligible){c.faceUp=false;c.rest=false;c.sick=false;}state[p].main.push(...eligible);shuffleRaw(p,'main');record(`${label(p)}が通常トラッシュ${eligible.length}枚でリフレッシュ。`);if(state[p].energy.length){operation={kind:'refreshPenalty',p,required:Math.min(2,state[p].energy.length),ids:[]};}return true;}
  function requireMain(p){return state[p].main.length>0;}
  // Failed draws bypass card-damage/life-loss triggers and every shield window.
- function applyRuleDamage(p,reason){
+ function applyRuleDamage(players,amount,reason){
   if(result)return;
-  const before=life[p];life[p]--;
-  trace('ruleDamage',label(p)+'にルールダメージ1：'+before+'→'+life[p]+'。',{targetPlayer:p,beforeLife:before,afterLife:life[p],amount:1,damageType:'rule',reason},p);
-  events.push({id:++eventSerial,kind:'ruleDamage',p,amount:1,text:reason+'：ルールダメージ1'});
-  if(life[p]<=0)finish(other(p),reason+'のルールダメージでライフが0以下');
+  const before=Object.fromEntries(players.map(p=>[p,life[p]]));
+  for(const p of players)life[p]-=amount;
+  for(const p of players){
+   trace('ruleDamage',label(p)+'にルールダメージ'+amount+'：'+before[p]+'→'+life[p]+'。',{targetPlayer:p,beforeLife:before[p],afterLife:life[p],amount,damageType:'rule',reason},p);
+   events.push({id:++eventSerial,kind:'ruleDamage',p,amount,text:reason+'：ルールダメージ'+amount});
+  }
+  if(players.some(p=>life[p]<=0)){
+   const winner=players.length===1?other(players[0]):life.p1===life.p2?null:life.p1>life.p2?'p1':'p2';
+   finish(winner,reason+'のルールダメージでライフが0以下');
+  }
  }
- function failedDraw(p){applyRuleDamage(p,'ドロー失敗');}
+ function failedDraw(p){applyRuleDamage([p],1,'ドロー失敗');}
  function selectRefreshMana(id){const o=operation;if(o?.kind!=='refreshPenalty'||!state[o.p].energy.some(c=>c.id===id)||o.eligibleIds&&!o.eligibleIds.includes(id))return fail('自分のマナから選んでください。');if(o.ids.includes(id))o.ids=o.ids.filter(x=>x!==id);else if(o.ids.length<o.required)o.ids.push(id);else return fail(`必ず${o.required}枚を選んでください。`);return ok('リフレッシュの除外対象を変更しました。');}
  function confirmRefresh(expected=operation){const o=operation;if(result||o!==expected||o?.kind!=='refreshPenalty'||o.ids.length!==Math.min(2,state[o.p].energy.length)||new Set(o.ids).size!==o.ids.length||o.ids.some(id=>!state[o.p].energy.some(c=>c.id===id)||o.eligibleIds&&!o.eligibleIds.includes(id)))return fail('必要な枚数のマナを選んでください。');operation=null;for(const id of o.ids)rawMove(locate(id),o.p,'exile');refreshDerived();pump();return ok('リフレッシュのペナルティを解決し、処理を再開しました。');}
  function drawRaw(p,count){let drawn=0;for(let i=0;i<count&&!result;i++){if(!requireMain(p)){failedDraw(p);continue;}const c=state[p].main.shift();c.faceUp=true;c.rest=false;state[p].hand.push(c);drawn++;}if(drawn)trace('draw',label(p)+'が'+drawn+'枚ドロー。',{count:drawn},p);return drawn;}
@@ -559,7 +565,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   const recoveryCap=manaRecoveryCaps[p]?.at<=turn.counts[p]?manaRecoveryCaps[p]:null,recoveryIds=[];if(recoveryCap)delete manaRecoveryCaps[p];turn.manaRecoveryLimit=recoveryCap?{p,max:recoveryCap.max,used:0}:null;
   for(const z of ZONES)if(isField(z.id)||z.id==='energy')state[p][z.id].forEach(c=>{if(z.id==='energy'){if(c.manaLock&&c.manaLock.skipAt<=turn.counts[p]){c.rest=true;delete c.manaLock;}else if(recoveryCap&&c.rest)recoveryIds.push(c.id);else c.rest=false;}else untapUnit(c,p,true);if(isField(z.id))c.sick=false;});
   turn.charged=false;trace('turnStart',label(p)+'のターン開始。マナ・場をアンタップ。',{after:auditState().players},p);record(`${label(p)}の第${turn.number}ターン${extra?'（追加ターン）':''}：アンタップ、召喚酔い解除。`);
-  if(turn.number>=20){applyRuleDamage(p,'20ターン目以降');if(result)return;}
+  if(p===firstPlayer&&turn.sequence>=41&&turn.number>=21){applyRuleDamage(PLAYERS,10,'41手番目以降');if(result)return;}
   const returning=state[p].exile.filter(c=>c.returnReservation?.owner===p&&c.returnReservation.at<=turn.counts[p]);
   enqueue([...(recoveryCap?[{kind:'cappedRecovery',ids:recoveryIds,max:recoveryCap.max}]:[]),{kind:'characterStart'},...fieldCards(p).map(c=>({kind:'cardStart',id:c.id,generation:c.entryGeneration,...(c.type==='設置物'?{startEffects:(c.onStart||[]).filter(e=>e.kind!=='falconStart'||c.sacrificeAt<=turn.counts[p]).map(e=>({...e,generation:c.entryGeneration}))}:{})})),...returning.map(c=>({kind:'return',id:c.id})),{kind:'startDraw'}],p,null);pump();
  }
@@ -1175,7 +1181,7 @@ if(kind==='scryMany'){const ids=state[p].main.slice(0,e.count).map(c=>c.id);if(i
   if(a.card.onBodySuccess)enqueue(a.card.onBodySuccess,a.p,a.card.id);
   const beforeLife=life[o.defender],hit=loseLife(o.defender,damage,'戦闘ダメージ',{type:'combat',drainPlayer:hasDrain(a.card,a.p)?a.p:null});const dealt=hit.damage??beforeLife-life[o.defender];if(!result&&!a.card.abilitiesDisabled&&a.card.onPlayerDamage)enqueue(a.card.onPlayerDamage.map(e=>({...e,dealt})),a.p,a.card.id);events.push({id:++eventSerial,kind:'playerCombatDamage',p:o.defender,amount:dealt,text:`戦闘ダメージ${dealt}`});trace('attackEnd','本体へ'+dealt+'ダメージ。攻撃終了。',{combatId:o.combatId,blocked:false,playerDamage:dealt,targetPlayer:o.defender,attackEnded:true},o.p);pump();return ok('プレイヤーへの攻撃を解決しました。');
  }
- function finish(winner,reason,extra={}){if(result)return;trace('result',label(winner)+'の勝利：'+reason+'。',{winner,loser:other(winner),reason});result={winner,loser:other(winner),reason,type:'normal',turnNumber:turn.number,gameId,...extra};operation=null;queue=[];stack=[];turn.key={};epoch++;record(`${label(winner)}の勝利：${reason}。`);}
+ function finish(winner,reason,extra={}){if(result)return;const loser=winner?other(winner):null,outcome=winner?label(winner)+'の勝利':'引き分け';trace('result',outcome+'：'+reason+'。',{winner,loser,reason});result={winner,loser,reason,type:'normal',turnNumber:turn.number,gameId,...extra};operation=null;queue=[];stack=[];turn.key={};epoch++;record(`${outcome}：${reason}。`);}
  function chooseFate(key,expected=operation){const o=operation;if(o!==expected||o?.kind!=='fateChoice'||!Catalog.fateKeys.includes(key))return fail('3種類の運命から1枚を選んでください。');const c=fromDefinition(key,o.p);state[o.p].hand.push(c);operation=null;record(`${label(o.p)}が${c.name}を手札に生成しました。`);pump();return ok('運命を選びました。');}
  function toggleUntapMana(id){const o=operation;if(o?.kind!=='untapMana'||!state[o.p].energy.some(c=>c.id===id)||o.eligibleIds&&!o.eligibleIds.includes(id))return fail('自分のマナを選んでください。');if(!o.ids.includes(id)&&o.ids.length>=o.max)return fail(`最大${o.max}枚です。`);o.ids=o.ids.includes(id)?o.ids.filter(x=>x!==id):[...o.ids,id];return ok('未使用に戻すマナを選択しました。');}
  function confirmUntap(expected=operation){const o=operation;if(o!==expected||o?.kind!=='untapMana'||o.ids.length>o.max||new Set(o.ids).size!==o.ids.length||o.ids.some(id=>!state[o.p].energy.some(c=>c.id===id)||o.eligibleIds&&!o.eligibleIds.includes(id)))return fail('マナの選択が不正です。');if(o.ids.filter(id=>locate(id)?.card.rest).length>recoveryAllowance(o.p))return fail('このターンに回復できるマナの上限を超えています。');recoverManaIds(o.p,o.ids);operation=null;record(`${label(o.p)}がマナ${o.ids.length}枚を未使用へ。`);pump();return ok('マナの回復を確定しました。');}
