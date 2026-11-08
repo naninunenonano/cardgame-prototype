@@ -29,7 +29,7 @@ const counts=(entries)=>entries.map(([key,count=3])=>({key,count}));
 const beginnerSide=key=>counts([[key,1],['sbnn1'],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
 Object.assign(official,{
  blueBeginner:{id:'blueBeginner',name:'青・初級Bot',preset:true,
-  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9',2],['nn1'],['nn6',2],['bn1'],['bn5'],['bn7'],['br3'],['bs2'],['ns2'],['bs1']]),
+  main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9',2],['nn1'],['nn6',2],['bn1'],['bn5'],['bn7'],['br3'],['bs2'],['bs5'],['bs1']]),
   sideboard:beginnerSide('bluesage'),shields:counts([['shnr4',1],['shnr5',1],['shns1',1],['shnr6',1]])},
  redBeginner:{id:'redBeginner',name:'赤・初級Bot',preset:true,
   main:counts([['rn15'],['nn9'],['nn2'],['nn3'],['nn4'],['nn5'],['nn7'],['nn1'],['nn6',1],['rn14'],['rn20'],['rs1'],['rs5'],['rs4']]),
@@ -44,7 +44,7 @@ Object.assign(official,{
   main:counts([['nn9'],['nn2'],['nn3'],['nn4'],['nn5'],['nn7'],['gn2'],['gn4'],['gs5'],['gs1'],['gn1'],['gr1'],['gr2',1],['gs2']]),
   sideboard:beginnerSide('verdantguardian'),shields:counts(['shnr1','shnr5','shnr3','shnr2'].map(key=>[key,1]))},
  blueAdvanced:{id:'blueAdvanced',name:'青上級Bot／アルマー',difficulty:'advanced',preset:true,
-  main:counts([['bo1'],['bs1'],['bl2',1],['bl3',1],['nl2',1],['br1'],['bn1'],['br3'],['br5'],['ns1'],['br4'],['nn1'],['ns2'],['nl1',1],['bs3'],['nn7']]),
+  main:counts([['bo1'],['bs1'],['bl2',1],['bl3',1],['nl2',1],['br1'],['bn1'],['br3'],['br5'],['ns1'],['br4'],['nn1'],['bs5'],['nl1',1],['bs3'],['nn7']]),
   sideboard:counts(['almar','almar_sbbu1','sbbu1','almar_sbbu2','almar_sbbs1','almar_sbnr1','sbbr1','sbbu2','sbnl4','sbnl1'].map(key=>[key,1])),
   shields:counts(['shnl1','shnl2','shnr2','shnr5'].map(key=>[key,1]))}
 

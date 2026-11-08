@@ -813,20 +813,21 @@
     },
     {
       "oldId": "walsura",
-      "baseId": "ns2",
-      "id": "ns2",
+      "baseId": "bs5",
+      "id": "bs5",
       "name": "プラチナ・ワルスラS",
       "oldRarity": "SR",
       "rarity": "SR",
-      "color": "無色",
+      "color": "青",
       "section": "main",
       "ownerCharacterId": null,
       "token": false,
       "generated": false,
       "faces": [],
       "oldForm": null,
-      "serial": 2,
-      "retired": false
+      "serial": 5,
+      "retired": false,
+      "migrationFrom": "ns2"
     },
     {
       "oldId": "honenbee",
@@ -3502,7 +3503,8 @@
     "holyMail": "nr1",
     "kaiser": "nr2",
     "glennya": "nn1",
-    "walsura": "ns2",
+    "walsura": "bs5",
+    "ns2": "bs5",
     "honenbee": "nr3",
     "fateWhim": "nr4",
     "fateWings": "nr5",
@@ -3675,7 +3677,7 @@
     "rn": 21,
     "br": 5,
     "bl": 3,
-    "bs": 4,
+    "bs": 5,
     "bn": 7,
     "nl": 2,
     "ns": 2,
@@ -3727,6 +3729,7 @@
     "sbwl": 1
   },
   "retiredIds": [
+    "ns2",
     "piruluk",
     "life",
     "fortune",
