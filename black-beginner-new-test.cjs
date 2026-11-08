@@ -78,7 +78,23 @@ for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
 }
 {
  const g=fixture(), c=add(g,'ks15');add(g,'redmoonavenger','lrig').level=4;
- add(g,'redmoonavenger_shkl1','shields').faceUp=true;yes(g.setLife('p1',6));cast(g,c);A.equal(g.result.winner,'p2');
+ add(g,'redmoonavenger_shkl1','shields').faceUp=true;add(g,'ks13','structures');yes(g.setLife('p1',6));cast(g,c);A.equal(g.result,null);A.equal(g.life.p1,4);
+}
+{
+ const g=fixture();add(g,'redmoonavenger','lrig').level=4;
+ add(g,'ks13','structures');yes(g.setLife('p1',2));cast(g,add(g,'kn11'));
+ A.equal(g.life.p1,4);A.equal(g.life.p2,29);A.equal(g.result,null);
+}
+{
+ const g=fixture();add(g,'redmoonavenger','lrig').level=4;
+ add(g,'ks13','structures');add(g,'redmoonavenger_shkl1','shields').faceUp=true;
+ g.turn.counts.p1=18;g.turn.sequence=36;g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
+ A.equal(g.turn.number,19);A.equal(g.life.p1,30);
+ g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
+ A.equal(g.turn.number,20);A.equal(g.life.p1,29);
+ A.equal(g.battleLog('p1',{detailed:true}).filter(e=>e.kind==='ruleDamage'&&e.reason==='20ターン目以降').length,1);
+ yes(g.setLife('p1',1));g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
+ A.equal(g.life.p1,0);A.equal(g.result.winner,'p2');
 }
 {
  const g=fixture();const m=add(g,'ks14'), ally=add(g,'nn2','trash');
