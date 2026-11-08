@@ -561,11 +561,16 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function beginTurn(forcedPlayer=null) {
   let p,extra=false;if(forcedPlayer&&mode==='solo'){p=forcedPlayer;normalNext=other(p);}else if(turn.sequence===0){p=firstPlayer;normalNext=other(p);}else if(extraTurns.length){p=extraTurns.shift();extra=true;}else if(mode==='bot'){p=normalNext;normalNext=other(p);}else p=SELF;
   for(const q of PLAYERS)for(const c of fieldCards(q))if(c.attackZero?.until===p)delete c.attackZero;operation=null;turn.player=p;turn.extra=extra;turn.sequence++;turn.counts[p]++;turn.number=turn.counts[p];turn.key={};turn.step='untap';turn.lastDraw=0;turn.attacks=0;turn.battleWins={p1:0,p2:0};delete turn.attackForbidden;delete turn.scramble;
+  const lateRuleDamage=p===firstPlayer&&turn.sequence>=41&&turn.number>=21;
+  if(lateRuleDamage){
+   trace('turnStart',label(p)+'のターン開始。',{after:auditState().players},p);
+   applyRuleDamage(PLAYERS,10,'41手番目以降');
+   if(result)return;
+  }
   for(const c of fieldCards(p))if(c.justDiverUntil&&c.justDiverUntil.owner===p&&c.justDiverUntil.turn<=turn.counts[p]){delete c.justDiverUntil;record(c.name+'のジャストダイバーの期限終了。');}
   const recoveryCap=manaRecoveryCaps[p]?.at<=turn.counts[p]?manaRecoveryCaps[p]:null,recoveryIds=[];if(recoveryCap)delete manaRecoveryCaps[p];turn.manaRecoveryLimit=recoveryCap?{p,max:recoveryCap.max,used:0}:null;
   for(const z of ZONES)if(isField(z.id)||z.id==='energy')state[p][z.id].forEach(c=>{if(z.id==='energy'){if(c.manaLock&&c.manaLock.skipAt<=turn.counts[p]){c.rest=true;delete c.manaLock;}else if(recoveryCap&&c.rest)recoveryIds.push(c.id);else c.rest=false;}else untapUnit(c,p,true);if(isField(z.id))c.sick=false;});
-  turn.charged=false;trace('turnStart',label(p)+'のターン開始。マナ・場をアンタップ。',{after:auditState().players},p);record(`${label(p)}の第${turn.number}ターン${extra?'（追加ターン）':''}：アンタップ、召喚酔い解除。`);
-  if(p===firstPlayer&&turn.sequence>=41&&turn.number>=21){applyRuleDamage(PLAYERS,10,'41手番目以降');if(result)return;}
+  turn.charged=false;if(!lateRuleDamage)trace('turnStart',label(p)+'のターン開始。マナ・場をアンタップ。',{after:auditState().players},p);record(`${label(p)}の第${turn.number}ターン${extra?'（追加ターン）':''}：アンタップ、召喚酔い解除。`);
   const returning=state[p].exile.filter(c=>c.returnReservation?.owner===p&&c.returnReservation.at<=turn.counts[p]);
   enqueue([...(recoveryCap?[{kind:'cappedRecovery',ids:recoveryIds,max:recoveryCap.max}]:[]),{kind:'characterStart'},...fieldCards(p).map(c=>({kind:'cardStart',id:c.id,generation:c.entryGeneration,...(c.type==='設置物'?{startEffects:(c.onStart||[]).filter(e=>e.kind!=='falconStart'||c.sacrificeAt<=turn.counts[p]).map(e=>({...e,generation:c.entryGeneration}))}:{})})),...returning.map(c=>({kind:'return',id:c.id})),{kind:'startDraw'}],p,null);pump();
  }
@@ -585,7 +590,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(turn.step==='charge')return skipCharge();if(turn.step==='main1')turn.step='attack';else if(turn.step==='attack')turn.step='main2';else if(turn.step==='main2'){
    turn.step='end';enqueue([...PLAYERS.filter(owner=>baseAbility(character(owner),'celestia')&&character(owner)?.level===4).map(owner=>({kind:'celestiaEnd',p:owner,sourceId:character(owner).id})),...PLAYERS.flatMap(q=>fieldCards(q).filter(c=>c.markerGuard&&!state[q].markers.some(x=>x.hostId===c.id)).map(c=>({kind:'markerEnd',id:c.id}))),...fieldCards(turn.player).flatMap(c=>(c.onEnd||[]).map(e=>({...e,sourceId:c.id}))),{kind:'lumiereEnd'},{kind:'graveEnd'},{kind:'sideEnd'},{kind:'returnSealedHands'},{kind:'turnTemporaryCleanup'}],turn.player,null);pump();
   }else if(turn.step==='end'){summonLocks=summonLocks.filter(l=>!(l.p===turn.player&&l.turn<=turn.counts[turn.player]));beginTurn();}else return fail('進行できないフェイズです。');
-  checkReversions();return ok(`${STEPS[turn.step]}へ進みました。`);
+  if(!result)checkReversions();return ok(`${STEPS[turn.step]}へ進みました。`);
  }
  function toggleDiscard(){return fail('手札上限はありません。');}
  function confirmDiscard(){return fail('手札上限はありません。');}

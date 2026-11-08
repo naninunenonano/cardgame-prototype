@@ -100,10 +100,11 @@ for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
 }
 for(const [p1,p2,winner] of [[8,11,'p2'],[9,7,'p1'],[8,8,null]]){
  const g=fixture();add(g,'redmoonavenger','lrig').level=4;add(g,'ks13','structures');
+ const rested=add(g,'nn2','signi-1');rested.rest=true;
  yes(g.setLife('p1',p1));yes(g.setLife('p2',p2));
  g.turn.counts.p1=20;g.turn.sequence=40;g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
  A.equal(g.life.p1,p1-10);A.equal(g.life.p2,p2-10);
- A.equal(g.result.winner,winner);
+ A.equal(g.result.winner,winner);A.equal(rested.rest,true);
 }
 {
  const g=fixture();const m=add(g,'ks14'), ally=add(g,'nn2','trash');
