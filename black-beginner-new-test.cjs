@@ -39,10 +39,17 @@ for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
 {
  const g=fixture();const a=add(g,'ks14'),b=add(g,'ks14','trash'),c=add(g,'ks14','trash');
  add(g,'nn9','signi-1');add(g,'nn2','trash');add(g,'nn3','trash');
+ b.faceUp=false;c.faceUp=false;
  add(g,'kn10','trash');add(g,'kn10','trash');yes(g.setLife('p1',15));
  cast(g,a);
  g.turn.step='attack';
- for(const m of [a,b,c]){A(!g.attackError(m.id));yes(g.declareAttack(m.id,'body'));settle(g);}
+ for(const m of [a,b,c]){
+  A(g.observe('p1').players.p1.units.some(u=>u.id===m.id),'蘇生後はBotから見える');
+  A(!g.attackError(m.id));
+  const action=B.decide(g.observe('p1'));
+  A.deepEqual(action,{type:'attack',id:m.id,target:'body'});
+  yes(g.dispatch(action,'p1'));settle(g);
+ }
  A.equal(g.life.p2,12);
  const apaches=g.fieldCards('p1').filter(u=>u.key==='kn10');A.equal(apaches.length,2);
  for(const apache of apaches){A(!g.attackError(apache.id));yes(g.declareAttack(apache.id,'body'));settle(g);}
