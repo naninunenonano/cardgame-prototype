@@ -15,6 +15,10 @@
     return result;
   }
   function total(required){return required.generic+colors.reduce((n,color)=>n+required[color],0);}
+  function evolutionBaseCost(required, base) {
+    const discount=base?.type==='通常'&&cardColors(base).length===1&&hasColor(base,'無色')&&base.cost?total(base.cost):0;
+    return {...required,generic:Math.max(0,required.generic-discount)};
+  }
   function pool(lands) {
     const result={total:0,...Object.fromEntries(manaColors.map(color=>[color,0]))};
     for(const land of lands) {
@@ -59,5 +63,5 @@
     for(const color of colors)if(required[color])parts.push(`${color}${required[color]}`);
     return parts.join('＋')||'0';
   }
-  return {colors,manaColors,cardColors,hasColor,producedColors,cost,total,pool,assess,payment,suggest,describe};
+  return {colors,manaColors,cardColors,hasColor,producedColors,cost,total,evolutionBaseCost,pool,assess,payment,suggest,describe};
 });

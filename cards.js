@@ -45,7 +45,7 @@
  {key:'holyMail',name:'ホーリー・メール',type:'呪文',cost:M.cost(3),onUse:[{kind:'healLife',count:4}],text:'自分のライフを4回復する（最大30）。'},
  {key:'kaiser',name:'ショットガン・カイザー',type:'通常',cost:M.cost(7),attack:9,maxHealth:9,symbols:{},onEnd:[{kind:'untapMana',count:4}],text:'自分のターン終了時、自分のマナを最大4枚選んで未使用に戻す。複数体はそれぞれ誘発。'},
  {key:'glennya',name:'グレンニャー',type:'通常',cost:M.cost(2),attack:1,maxHealth:1,symbols:{},onEnter:[{kind:'draw',count:1}],text:'登場時：カードを1枚引く。'},
- {key:'walsura',name:'プラチナ・ワルスラS',type:'通常',cost:M.cost(4),attack:6,maxHealth:6,symbols:{},evolution:{any:true},onAttack:[{kind:'optionalEffect',label:'3枚引いて手札1枚を捨てますか？',effects:[{kind:'draw',count:3},{kind:'handDiscard',count:1}]}],text:'自分のユニット1体の上に進化（文明不問）。攻撃時、3枚引いてもよい。そうしたら手札1枚を選びトラッシュへ。'},
+ {key:'walsura',name:'プラチナ・ワルスラS',type:'通常',cost:M.cost(4),attack:6,maxHealth:6,symbols:{},evolution:{any:true,colorlessBaseDiscount:true},onAttack:[{kind:'optionalEffect',label:'3枚引いて手札1枚を捨てますか？',effects:[{kind:'draw',count:3},{kind:'handDiscard',count:1}]}],text:'自分のユニット1体の上に進化（文明不問）。無色の進化元の記載コスト分、召喚コストを軽減する（最低0）。攻撃時、3枚引いてもよい。そうしたら手札1枚を選びトラッシュへ。'},
  {key:'honenbee',name:'白骨の守護者ホネンビー',type:'通常',cost:M.cost(4),attack:3,maxHealth:3,symbols:{},abilities:['ブロッカー'],onEnter:[{kind:'optionalEffect',label:'上から3枚をトラッシュへ置き、ユニット1枚を回収しますか？',effects:[{kind:'millRecover',count:3}]}],text:'ブロッカー。登場時、上から3枚をトラッシュへ置いてもよい。そうしたらトラッシュのユニット1枚を手札へ。シンボル0でも攻撃可能。'}
  ];
  for(const d of neutralDefs)cards[d.key]={color:'無色',symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:null,...d};
