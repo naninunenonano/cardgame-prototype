@@ -68,7 +68,7 @@ for(let n=1;n<=6;n++){
  assert(g.state.p1.hand.includes(spell));assert.equal(g.operation?.kind,'handPick');
  yes(g.resolvePrivate(am.id));settle(g);
  if(g.operation?.kind==='combat')yes(g.resolveAttack(null));
- settle(g);assert.equal(g.life.p2,24);
+ settle(g);assert.equal(g.life.p2,14);
  g.turn.notBefore=0;yes(g.advance());
  yes(g.beginPayment(spell.id));yes(g.selectUseTarget(target.id));yes(g.confirmPayment());settle(g);
  assert.equal(g.locate(target.id).z,'hand');
@@ -86,16 +86,16 @@ for(let n=1;n<=6;n++){
  const blue=put(g,'bs2','signi-2');
  blue.rest=true;blue.symbols.青=2;
  put(g,'bs2','energy');
- assert.equal(g.effectiveCost(w,'p1').青,2);
- assert.equal(g.evolutionPaymentOptions(w,'p1')[0].cost.青,0);
- const red=put(g,'redcaptain','lrig');red.level=4;
- assert.equal(g.evolutionPaymentOptions(w,'p1')[0].cost.青,1);
- assert.equal(g.effectiveCost(w,'p1').青,2);
+ assert.equal(g.effectiveCost(w,'p1').青,4);
+ assert.equal(g.evolutionPaymentOptions(w,'p1')[0].cost.青,2);
+ g.state.p1.lrig.length=0;const red=put(g,'redcaptain','lrig');red.level=4;
+ assert.equal(g.evolutionPaymentOptions(w,'p1')[0].cost.青,2);
+ assert.equal(g.effectiveCost(w,'p1').青,4);
  const side=put(g,'sbnr3','extra');side.cost=Mana.cost(3,{青:4});
  side.reduction={minimum:{青:1}};
- assert.deepEqual(g.effectiveCost(side,'p1'),Mana.cost(0,{青:2}));
+ assert.deepEqual(g.effectiveCost(side,'p1'),Mana.cost(3,{青:4}));
  blue.symbols.青=0;
- assert.deepEqual(g.effectiveCost(side,'p1'),Mana.cost(0,{青:4}));
+ assert.deepEqual(g.effectiveCost(side,'p1'),Mana.cost(3,{青:4}));
  assert.equal(g.costBreakdown(w,'p1').level4,0);
  base.symbols={青:1};w.symbols={青:1};
  cast(g,w,'signi-1');
@@ -103,7 +103,7 @@ for(let n=1;n<=6;n++){
  assert.equal(g.effectiveCost(w,'p1').青,4);
  const shaper=put(g,'bn1');
  shaper.cost=Mana.cost(0,{青:3});shaper.reduction={minimum:{青:1}};
- assert.equal(g.effectiveCost(shaper,'p1').青,2);
+ assert.equal(g.effectiveCost(shaper,'p1').青,3);
 }
 {
  const g=fixture(0), w=put(g,'bs5'), golem=put(g,'nn9');

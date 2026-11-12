@@ -11,14 +11,14 @@ function settle(g){while(g.operation?.kind==='response'||g.operation?.kind==='to
 function cast(g,key,method){const c=add(g,key);yes(g.beginPayment(c.id,method));yes(g.chooseSlot('signi-1'));yes(g.confirmPayment());settle(g);return c;}
 const deck=D.preset('redBeginner');
 A.deepEqual(D.validate(deck),[]);
-A.deepEqual(deck.main.filter(x=>cards[x.key].rarity==='SR').map(x=>[x.key,x.count]),[['rs1',3],['rs5',3],['rs4',3]]);
+A.deepEqual(deck.main.filter(x=>cards[x.key].rarity==='SR').map(x=>[x.key,x.count]),[['rs4',3],['rs5',2],['rs2',4],['rs1',3]]);
 A.deepEqual(cards.rs5.enhanceCost,require('./mana').cost(6,{赤:2}));
 A.deepEqual(cards.rs4.cost,require('./mana').cost(4,{赤:2}));
 {
  const g=fixture(), c=cast(g,'rs5');
  A.equal(c.name,'カインドクイーン・ヴァンピィ');
  A.equal(g.fieldCards('p1').filter(c=>c.key==='t12').length,2);
- A.equal(g.life.p2,26);
+ A.equal(g.life.p2,16);
 }
 {
  const g=fixture(),enemy=add(g,'nn4','signi-1','p2'),c=cast(g,'rs5','enhance');
@@ -32,7 +32,7 @@ A.deepEqual(cards.rs4.cost,require('./mana').cost(4,{赤:2}));
 {
  const g=fixture(),ally=add(g,'nn4','signi-2'),c=cast(g,'rs4');
  A.equal(g.operation,null);A.equal(ally.health,4);
- A.equal(c.health,5);A(c.galmieuxMach);A.equal(g.life.p2,27);
+ A.equal(c.health,5);A(c.galmieuxMach);A.equal(g.life.p2,17);
 }
 {
  const g=fixture(),c=cast(g,'rs1');

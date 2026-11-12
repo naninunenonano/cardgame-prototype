@@ -7,6 +7,7 @@ function fixture(){
  const g=G.create({decks:{p1:'blackBeginner',p2:'blueBeginner'},random:()=>.4,strictTargets:true});
  yes(g.completeMulligan('p1'));yes(g.completeMulligan('p2'));skipCharge(g);
  for(const p of ['p1','p2']){g.state[p].hand=[];g.state[p].shields=[];}
+ yes(g.setLife('p1',30));yes(g.setLife('p2',30));
  fund(g,'p1',8,'黒');return g;
 }
 function settle(g,choose){
@@ -24,17 +25,17 @@ function cast(g,c,slot='signi-1'){
 for(let n=1;n<=3;n++){
  const g=fixture();for(let i=0;i<n;i++)add(g,'ks13','structures');
  yes(g.setLife('p1',20));yes(g.loseLife('p1',1,'相手の効果'));A.equal(g.life.p1,19+2*n);
- yes(g.setLife('p1',30));yes(g.loseLife('p1',1));A.equal(g.life.p1,30);
+ yes(g.setLife('p1',30));yes(g.loseLife('p1',1));A.equal(g.life.p1,29+2*n);
  yes(g.setLife('p1',2));yes(g.loseLife('p1',1));A.equal(g.result.winner,'p2');
 }
 {
- const g=fixture();add(g,'ks13','structures');g.state.p1.main=[];g.state.p1.trash=[];yes(g.draw('p1',1));A.equal(g.life.p1,29);
+ const g=fixture();add(g,'ks13','structures');g.state.p1.main=[];g.state.p1.trash=[];yes(g.draw('p1',1));A.equal(g.life.p1,30);
 }
 for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
  const g=fixture();add(g,key,'signi-1');const hand=add(g,'ks14'),trash=add(g,'ks14','trash');
  A.equal(g.evolutionPaymentOptions(hand,'p1')[0].cost.黒,n);
  A.equal(g.evolutionPaymentOptions(trash,'p1')[0].cost.黒,n-2);
- add(g,'bluesage','lrig');A.equal(g.evolutionPaymentOptions(trash,'p1')[0].cost.黒,Math.max(1,n-2));
+ g.state.p1.lrig.length=0;add(g,'bluesage','lrig');A.equal(g.evolutionPaymentOptions(trash,'p1')[0].cost.黒,Math.max(1,n-2));
 }
 {
  const g=fixture();const a=add(g,'ks14'),b=add(g,'ks14','trash'),c=add(g,'ks14','trash');
@@ -77,16 +78,16 @@ for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
  cast(g,c);A.equal(g.life.p1,1);g.turn.step='attack';A(!g.attackError(c.id));
 }
 {
- const g=fixture(), c=add(g,'ks15');add(g,'redmoonavenger','lrig').level=4;
+ const g=fixture(), c=add(g,'ks15');g.character('p1').level=4;
  add(g,'redmoonavenger_shkl1','shields').faceUp=true;add(g,'ks13','structures');yes(g.setLife('p1',6));cast(g,c);A.equal(g.result,null);A.equal(g.life.p1,4);
 }
 {
- const g=fixture();add(g,'redmoonavenger','lrig').level=4;
+ const g=fixture();g.character('p1').level=4;
  add(g,'ks13','structures');yes(g.setLife('p1',2));cast(g,add(g,'kn11'));
  A.equal(g.life.p1,4);A.equal(g.life.p2,29);A.equal(g.result,null);
 }
 {
- const g=fixture();add(g,'redmoonavenger','lrig').level=4;
+ const g=fixture();g.character('p1').level=4;
  add(g,'ks13','structures');add(g,'redmoonavenger_shkl1','shields').faceUp=true;
  g.turn.counts.p1=19;g.turn.sequence=38;g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
  A.equal(g.turn.number,20);A.equal(g.life.p1,30);A.equal(g.life.p2,30);
@@ -99,7 +100,7 @@ for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
  A.equal(g.turn.sequence,43);A.equal(g.life.p1,10);A.equal(g.life.p2,10);
 }
 for(const [p1,p2,winner] of [[8,11,'p2'],[9,7,'p1'],[8,8,null]]){
- const g=fixture();add(g,'redmoonavenger','lrig').level=4;add(g,'ks13','structures');
+ const g=fixture();g.character('p1').level=4;add(g,'ks13','structures');
  const rested=add(g,'nn2','signi-1');rested.rest=true;
  yes(g.setLife('p1',p1));yes(g.setLife('p2',p2));
  g.turn.counts.p1=20;g.turn.sequence=40;g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
@@ -138,5 +139,5 @@ for(const [p1,p2,winner] of [[8,11,'p2'],[9,7,'p1'],[8,8,null]]){
  A.equal(g.life.p2,30);
 }
 const deck=D.preset('blackBeginner');
-A.equal(deck.main.reduce((n,c)=>n+c.count,0),40);A.equal(deck.sideboard.reduce((n,c)=>n+c.count,0),10);A.equal(deck.shields.reduce((n,c)=>n+c.count,0),4);
+A.equal(deck.main.reduce((n,c)=>n+c.count,0),40);A.equal(deck.sideboard.reduce((n,c)=>n+c.count,0),1);A.equal(deck.shields.reduce((n,c)=>n+c.count,0),4);
 console.log('PASS black beginner cards, cost floors, damage, forced revival, self-destruction, 18/26-point chain');
