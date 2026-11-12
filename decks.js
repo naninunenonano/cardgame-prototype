@@ -78,7 +78,7 @@ Object.assign(official,{
   sideboard:beginnerSide('verdantguardian'),shields:counts(['shnr1','shnr5','shnr3','shnr2'].map(key=>[key,1]))},
  blueAdvanced:{id:'blueAdvanced',name:'青上級Bot／アルマー',difficulty:'advanced',preset:true,
   main:counts([['bo1'],['bs1'],['bl2',1],['bl3',1],['nl2',1],['br1'],['bn1'],['br3'],['br5'],['ns1'],['br4'],['nn1'],['bs5'],['bs3'],['nn7',4]]),
-  sideboard:counts(['almar','almar_sbbu1','sbbu1','almar_sbbu2','almar_sbbs1','almar_sbnr1','sbbr1','sbbu2','sbnl4','sbnl1'].map(key=>[key,1])),
+  sideboard:counts(['almar','almar_sbbu1','sbbu1','almar_sbbu2','almar_sbbs1','almar_sbnr1','sbbr1','sbbu2','sbnl4'].map(key=>[key,1])),
   shields:counts(['shnl1','shnl2','shnr2','shnr5'].map(key=>[key,1]))}
 
 });

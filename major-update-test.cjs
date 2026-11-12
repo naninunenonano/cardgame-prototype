@@ -295,29 +295,27 @@ test('Force Release consumes any five stacks and can destroy an additional creat
  assert.equal(g.life.p2,20);assert.equal(g.state.p2.stacks.length,0);
 });
 
-test('combined parallel card uses one selected face and inherits the attack',()=>{
- const definition=Cards.cards.sbnl4;
- const unavailable=definition.unavailable;
- // Test payment fixtures only. Production has no confirmed payment for this card.
- delete definition.unavailable;definition.stackCost=Mana.cost(0,{赤:1});
- try{
-  for(const face of ['revolution','invasion']){
-   const preset=Decks.preset('redBeginner');
-   const deck={...preset,id:'parallel-test',sideboard:[{key:'redcaptain',count:1},{key:'sbnl1',count:1}]};
-   const {g,advance}=ready('parallel-test','blueBeginner',[deck]);
-   advanceToMain(g,advance);g.character('p1').level=3;
-   g.state.p1.hand.length=0;g.state.p2.shields.length=0;
-   const unit=add(g,'nn9','p1','signi-1');unit.attack=6;unit.sick=false;
-   const card=g.state.p1.extra.find(c=>c.key==='sbnl4');
-   advance();ok(g.declareAttack(unit.id,'body'));pass(g);
-   assert.deepEqual(g.expansionCandidates().map(c=>c.id),['invasion','revolution','done']);
-   choose(g,face);assert(card.used);assert.equal(g.state.p1.stacks.length,0);
-   assert.equal(g.operation.kind,'combat');assert.equal(g.operation.id,card.id);
-   ok(g.resolveAttack(null));pass(g);
-   assert.equal(g.life.p2,face==='revolution'?7:14);
-   assert.equal(g.locate(unit.id)?.z,face==='revolution'?'exile':undefined);
-  }
- }finally{definition.unavailable=unavailable;delete definition.stackCost;}
+test('combined parallel card is attack-only and either face spends zero stacks',()=>{
+ for(const face of ['revolution','invasion']){
+  const preset=Decks.preset('redBeginner');
+  const deck={...preset,id:'parallel-test',sideboard:[{key:'redcaptain',count:1},{key:'sbnl1',count:1}]};
+  const {g,advance}=ready('parallel-test','blueBeginner',[deck]);
+  advanceToMain(g,advance);g.character('p1').level=3;
+  g.state.p1.hand.length=0;g.state.p2.shields.length=0;
+  if(face==='invasion')g.state.p1.stacks.length=0;
+  const before=g.state.p1.stacks.map(c=>c.id);
+  const unit=add(g,'nn9','p1','signi-1');unit.attack=6;unit.sick=false;
+  const card=g.state.p1.extra.find(c=>c.key==='sbnl4');
+  assert.match(g.beginPayment(card.id).message,/攻撃時のみ/);
+  advance();ok(g.declareAttack(unit.id,'body'));pass(g);
+  assert.deepEqual(g.expansionCandidates().map(c=>c.id),['invasion','revolution','done']);
+  choose(g,face);assert(card.used);assert.deepEqual(g.state.p1.stacks.map(c=>c.id),before);
+  assert(g.sideSpent('p1'));
+  assert.equal(g.operation.kind,'combat');assert.equal(g.operation.id,card.id);
+  ok(g.resolveAttack(null));pass(g);
+  assert.equal(g.life.p2,face==='revolution'?7:14);
+  assert.equal(g.locate(unit.id)?.z,face==='revolution'?'exile':undefined);
+ }
 });
 
 test('commander Lv4 reveal requires actual attack damage and fires once per turn',()=>{

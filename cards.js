@@ -166,15 +166,15 @@
   ['shnr8','力の解放','attackDeclared','releaseStacks','相手の攻撃時、任意色のスタック5個で攻撃クリーチャーを破壊し、さらに相手のクリーチャー1体を任意で破壊。'],
   ['shnr9','水晶の記憶','damaged','crystalMemory','ダメージを受けた時、通常デッキから好きなカード1枚を手札に加える。']
  ]){add(key,{name,rarity:'R',type:'シールドカード',color:'無色',cardSection:'shields',deckSection:'shields',cost:null,shieldRule:{event,effect},text});catalog.shieldKeys.push(key);}
- forms.sbnl1={...c.sbnl1,faceId:'sbnl1',trample:true,abilities:['トランブル'],text:'パラレル革命：自分の攻撃力6以上のクリーチャーの攻撃時に、交換元を除外し、同じ枠で攻撃を引き継ぐ。トランブル。'};
+ forms.sbnl1={...c.sbnl1,faceId:'sbnl1',trample:true,abilities:['トランブル'],text:'パラレル革命：自分の攻撃力6以上のクリーチャーの攻撃時に、交換元を除外し、同じ枠で攻撃を引き継ぐ。スタック消費なし。トランブル。'};
  delete c.sbnl1;
- Object.assign(c.sbnl4,{faceIds:['sbnl4','sbnl1'],alternateFace:'sbnl1',revolutionMinimumAttack:6});
+ Object.assign(c.sbnl4,{faceIds:['sbnl4','sbnl1'],alternateFace:'sbnl1',revolutionMinimumAttack:6,stackCost:M.cost(0),text:c.sbnl4.text+' スタック消費なし。'});
  Object.assign(c.sbru1,{sideboardOnly:false,mainDeckOnly:true,cardSection:'main',unavailable:'単体通常カードへ移行。能力の確認・調整待ち。',text:'能力の確認・調整中。'});
  delete c.sbru1.awakenOnUntap;
  delete c.sbru1.faceIds;
  add('sbru4',{name:'ハートバーン',color:'赤',rarity:'UR',type:'設置物',cardSection:'sideboard',sideboardOnly:true,faceIds:['sbru4','sbru1-2'],unavailable:'ハートバーン／超戦覇龍 ガイNEXTの能力・支払い条件の確認待ち。',text:'裏面：超戦覇龍 ガイNEXT。能力の確認・調整中。'});
  forms['sbru1-2'].text='ハートバーンの裏面。能力の確認・調整中。';
- const eligibleLegacySide=new Set(['sbnl3','sbnl4','sbgu1','almar_sbbu1','sbbu1','almar_sbnr1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
+ const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','almar_sbnr1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
  for(const card of Object.values(c)){
   if(card.sideboardOnly&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
    card.unavailable=eligibleLegacySide.has(card.key)?'色付きスタック支払い条件が未確定。':'新しいサイド採用条件の対象外。通常デッキへの移行を確認中。';

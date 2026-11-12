@@ -15,9 +15,9 @@ assert.deepEqual(advanced.main.map(({key,count})=>[key,count]),[
  ['bo1',3],['bs1',3],['bl2',1],['bl3',1],['nl2',1],['br1',3],['bn1',3],['br3',3],
  ['br5',3],['ns1',3],['br4',3],['nn1',3],['bs5',3],['bs3',3],['nn7',4]
 ]);
-assert.deepEqual(advanced.sideboard.map(e=>e.key),['almar']);
+assert.deepEqual(advanced.sideboard.map(e=>e.key),['almar','sbnl4']);
 assert.deepEqual(advanced.shields.map(e=>e.key),['shnl1','shnl2','shnr2','shnr5']);
-assert.deepEqual(['main','sideboard','shields'].map(s=>size(advanced,s)),[40,1,4]);
+assert.deepEqual(['main','sideboard','shields'].map(s=>size(advanced,s)),[40,2,4]);
 assert.deepEqual(Decks.validate(advanced),[]);
 assert.equal(advanced.lands,undefined);
 const red=Decks.preset('redBeginner'),black=Decks.preset('blackBeginner');
