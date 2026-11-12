@@ -28,7 +28,7 @@ const path=require('node:path');
   await page.locator('[data-grow="p1"]').tap();
   assert.equal(await page.evaluate(()=>Game.character('p1').level),1);
   assert.equal(await page.evaluate(()=>Game.state.p1.stacks.length),0);
-  assert(await page.locator('[data-grow="p1"]').isDisabled());
+  await page.waitForFunction(()=>document.querySelector('[data-grow="p1"]')?.disabled);
   await advance();
   assert.equal(await page.evaluate(()=>Game.turn.step),'main1');
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
