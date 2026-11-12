@@ -9,7 +9,7 @@ const {fund}=require('./test-fixtures.cjs');
 const id='verdantguardian',p='p1',q='p2',yes=r=>A(r.ok,r.message);
 const deck=D.preset('greenBeginner');
 A.deepEqual(D.validate(deck),[]);
-A.deepEqual(deck.main.map(x=>[x.key,x.count]),['nn9','nn2','nn3','nn4','nn5','nn7','gn2','gn4','gs5','gs1','gn1','gr1','gr2','gs2'].map(k=>[k,k==='gr2'?1:3]));
+A.deepEqual(deck.main.map(x=>[x.key,x.count]),['nn9','nn2','nn3','nn4','nn5','gs6','gn2','gn4','gs5','gs1','gn1','gr1','gr2','gr5'].map(k=>[k,k==='gr2'?1:3]));
 A.deepEqual(deck.sideboard.map(x=>[x.key,x.count]),[[id,1],['sbnn1',3],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
 A.deepEqual(deck.shields.map(x=>[x.key,x.count]),['shnr1','shnr5','shnr3','shnr2'].map(k=>[k,1]));
 A.equal(C.cards[id].rarity,'UR');

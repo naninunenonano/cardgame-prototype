@@ -17,6 +17,7 @@ jobs:
       - run: node beginner-card-usage-test.cjs
       - run: node blue-advanced-test.cjs
       - run: node green-guardian-test.cjs
+      - run: node green-white-adjustments-test.cjs
       - run: node five-deck-test.cjs
       - run: node beginner-matchup-test.cjs
       - run: node beginner-round-test.cjs

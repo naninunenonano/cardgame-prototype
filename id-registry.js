@@ -3,6 +3,13 @@
   "version": 1,
   "baseCommit": "e220f6d914ad29ca78d2a7c07f80148a052c65cc",
   "entries": [
+    {"oldId": "trap", "migrationFrom": "gs2", "baseId": "gr5", "id": "gr5", "name": "ナチュラル・トラップ", "oldRarity": "SR", "rarity": "R", "color": "緑", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 5, "retired": false},
+    {"oldId": "gs6", "baseId": "gs6", "id": "gs6", "name": "統率するレオパルド・ホーン", "oldRarity": "SR", "rarity": "SR", "color": "緑", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 6, "retired": false},
+    {"oldId": "ws7", "baseId": "ws7", "id": "ws7", "name": "コンコルディア", "oldRarity": "SR", "rarity": "SR", "color": "白", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 7, "retired": false},
+    {"oldId": "ws8", "baseId": "ws8", "id": "ws8", "name": "希望の女王・リテュエル", "oldRarity": "SR", "rarity": "SR", "color": "白", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 8, "retired": false},
+    {"oldId": "ws9", "baseId": "ws9", "id": "ws9", "name": "七宝石の姫・レ・フィーエ", "oldRarity": "SR", "rarity": "SR", "color": "白", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 9, "retired": false},
+    {"oldId": "wr7", "baseId": "wr7", "id": "wr7", "name": "聖域の審判", "oldRarity": "R", "rarity": "R", "color": "白", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 7, "retired": false},
+    {"oldId": "t14", "baseId": "t14", "id": "t14", "name": "レ・フィーエ専用シールドリンク・トークン", "oldRarity": null, "rarity": null, "color": "白", "section": "token", "ownerCharacterId": null, "token": true, "generated": false, "faces": [], "oldForm": null, "serial": 14, "retired": false},
     {"oldId": "ks13", "baseId": "ks13", "id": "ks13", "name": "鮮血の還流", "oldRarity": "SR", "rarity": "SR", "color": "黒", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 13, "retired": false},
     {"oldId": "ks14", "baseId": "ks14", "id": "ks14", "name": "フェリックス・ミザリィ", "oldRarity": "SR", "rarity": "SR", "color": "黒", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 14, "retired": false},
     {"oldId": "ks15", "baseId": "ks15", "id": "ks15", "name": "命削りの狂戦士", "oldRarity": "SR", "rarity": "SR", "color": "黒", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 15, "retired": false},
@@ -103,7 +110,7 @@
       "retired": false
     },
     {
-      "oldId": "trap",
+      "oldId": "gs2",
       "baseId": "gs2",
       "id": "gs2",
       "name": "ナチュラル・トラップ",
@@ -117,7 +124,7 @@
       "faces": [],
       "oldForm": null,
       "serial": 2,
-      "retired": false
+      "retired": true
     },
     {
       "oldId": "repair",
@@ -3466,7 +3473,8 @@
     "touki": "gr2",
     "bronze": "gn2",
     "dragon": "gs1",
-    "trap": "gs2",
+    "trap": "gr5",
+    "gs2": "gr5",
     "repair": "gs3",
     "bahamut": "gl1",
     "bird": "gr3",
@@ -3676,8 +3684,8 @@
   },
   "highWaterMarks": {
     "gn": 4,
-    "gr": 4,
-    "gs": 5,
+    "gr": 5,
+    "gs": 6,
     "gl": 2,
     "rn": 21,
     "br": 5,
@@ -3717,12 +3725,12 @@
     "ks": 15,
     "shkr": 1,
     "redmoonavenger_shkl": 1,
-    "t": 13,
-    "ws": 6,
+    "t": 14,
+    "ws": 9,
     "wl": 2,
     "wn": 5,
     "wu": 2,
-    "wr": 6,
+    "wr": 7,
     "ko": 1,
     "sbno": 1,
     "no": 1,
@@ -3734,6 +3742,7 @@
     "sbwl": 1
   },
   "retiredIds": [
+    "gs2",
     "ns2",
     "piruluk",
     "life",

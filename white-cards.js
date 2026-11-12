@@ -137,12 +137,12 @@ function install(M,cards,awakened){
   key:"wr6", name:"聖域の威光", rarity:"R", color:"白", type:"呪文",
   civilizations:["白"], deckLimit:3, symbols:{},
   abilities:[],
-  onUse:[{"kind":"enemyUnitSweep","perLink":2}],
+  onUse:[{"kind":"enemyUnitSweep","perLink":1}],
   onEnter:[],
   onDefeat:[],
   reduction:{"minimum":{"白":1}},
-  text:"自分の場のシールドリンクの枚数×2のダメージを、相手のクリーチャーすべてに与える。",
-  cost:M.cost(4,{白:1})
+  text:"自分の場のシールドリンクの枚数分のダメージを、相手のクリーチャーすべてに与える。",
+  cost:M.cost(1,{白:1})
  };
  cards.lumiere_sbwl1={
   key:"lumiere_sbwl1", name:"スカルフェイン", rarity:"LEGEND", color:"白", type:"通常",
@@ -203,6 +203,12 @@ function install(M,cards,awakened){
   cost:null,attack:0,maxHealth:1,symbols:{},abilities:['ブロッカー'],cannotAttack:true,
   token:true,onEnter:[],text:'攻撃不可。場を離れれば消滅。'};
 
+ const white={color:'白',civilizations:['白'],deckLimit:3,symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[]};
+ cards.ws7={...white,key:'ws7',name:'コンコルディア',type:'通常',cost:M.cost(4,{白:1}),attack:1,maxHealth:1,symbols:{白:1},abilities:['ブロッカー'],concordia:true,onEnter:[{kind:'concordiaExile'}],text:'ブロッカー。自分のターン終了時、キャラクターLv3以上かつシールドリンク3枚以上なら山札から同名1枚を出す。登場時、相手クリーチャー1体をランダムに除外。相手ターン中1回、相手がクリーチャーを召喚した時、自分のライフを2回復。'};
+ cards.ws8={...white,key:'ws8',name:'希望の女王・リテュエル',type:'通常',cost:M.cost(2,{白:1}),attack:2,maxHealth:3,rituel:true,onEnter:[{kind:'healLife',count:1}],onAttack:[{kind:'rituelFree'}],text:'登場時、ライフ1回復。自分のライフ・クリーチャーを回復する能力1回につき1ドロー。自分ターン1回、無色1で自分のライフと全クリーチャーを1回復。攻撃時、このターンの起動コストを0にする。'};
+ cards.ws9={...white,key:'ws9',name:'七宝石の姫・レ・フィーエ',type:'通常',cost:M.cost(3,{白:1}),attack:2,maxHealth:5,abilities:['ブロッカー'],onEnter:[{kind:'refieLink'}],text:'ブロッカー。登場時、専用シールドリンク・トークンを1枚生成して設置する。'};
+ cards.t14={...white,key:'t14',name:'レ・フィーエ専用シールドリンク・トークン',type:'設置物',cost:M.cost(4),symbols:{白:1},token:true,shieldLink:true,indestructible:true,untargetable:true,onEnter:[{kind:'refieLinkEnter'}],onBattleStart:[{kind:'healTeam',count:1}],text:'設置時、自分のライフと全クリーチャーを1回復。同名が既にあれば新しいトークンを消滅させ1ドロー。自分のバトルフェイズ開始時、自分のライフと全クリーチャーを1回復。破壊されず、相手の効果で選ばれない。'};
+ cards.wr7={...white,key:'wr7',name:'聖域の審判',type:'呪文',cost:M.cost(0,{白:1}),onUse:[{kind:'sanctuaryJudgment'}],text:'自分のシールドリンク1枚を選び、そのコストの2倍のダメージを相手クリーチャー1体に与える。'};
  cards.eira={
   key:'eira',name:'エイラ',type:'キャラクター',color:'白',civilizations:['白'],rarity:'UR',
   level:0,cost:M.cost(1),sideboardOnly:true,deckLimit:1,symbols:{},abilities:[],growthOnly:true,
