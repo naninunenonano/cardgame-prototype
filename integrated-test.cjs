@@ -46,7 +46,7 @@ function play(g,key,slot){
  assert.equal(g.effectiveCost(C.cards.wo1,'p1').generic,6);
  play(g,'wr6');settle(g);
  assert.equal(own.health,own.maxHealth);
- assert.equal(g.locate(foe.id).z,'trash');
+ assert.equal(foe.health,foe.maxHealth-2);
  const durable=add(g,'gn2','p2','signi-2');durable.health=durable.maxHealth=9;
  const sw=play(g,'wo1','signi-2');settle(g);
  assert.equal(g.locate(sw.id).z,'signi-2');

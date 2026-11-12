@@ -4,11 +4,11 @@
  const manaBoost={kind:'manaAdd',count:1};
  const defs=[
  {key:'life',name:'フェアリー・ライフ',type:'呪文',cost:M.cost(1,{緑:1}),onUse:[manaBoost],text:'通常デッキの上から1枚を未使用でマナゾーンへ。'},
- {key:'fortune',name:'豊潤フォージュン',type:'呪文',cost:M.cost(2,{緑:1}),onUse:[manaBoost,{kind:'drawIfManaMax',max:5,count:1}],text:'通常デッキの上から1枚を未使用でマナゾーンへ。追加後のマナが5枚以下なら1枚ドロー。'},
+ {key:'fortune',name:'豊潤フォージュン',type:'呪文',cost:M.cost(2,{緑:1}),onUse:[manaBoost,{kind:'drawIfManaMin',min:7,count:1}],text:'通常デッキの上から1枚を未使用でマナゾーンへ。追加後のマナが7枚以上なら1枚ドロー。'},
  {key:'touki',name:'竜の闘気',type:'呪文',cost:M.cost(4,{緑:1}),onUse:[{kind:'manaAdd',count:1},{kind:'draw',count:2},{kind:'healLife',count:3}],provisional:true,text:'通常デッキ上1枚を未使用でマナへ→2枚ドロー→ライフ3回復（最大30）。コストは仮値。'},
  {key:'bronze',name:'青銅の鎧',type:'通常',cost:M.cost(3,{緑:1}),attack:2,maxHealth:2,symbols:{緑:1},onEnter:[manaBoost],provisional:true,text:'登場時：通常デッキの上から1枚を未使用でマナゾーンへ。色指定は仮値。'},
- {key:'dragon',name:'グラディアン・レッド・ドラゴン',type:'通常',cost:M.cost(4,{緑:6}),attack:15,maxHealth:15,symbols:{緑:3},text:'緑カード。最大5軽減、最低不特定4＋緑1。'},
- {key:'trap',name:'ナチュラル・トラップ',type:'呪文',cost:M.cost(5,{緑:1}),onUse:[{kind:'trap'}],provisional:true,text:'相手ユニット1枚をトラッシュへ。その持ち主が通常デッキの上から1枚を未使用でマナゾーンへ。コストは仮値。'},
+ {key:'dragon',name:'グラディアン・レッド・ドラゴン',type:'通常',cost:M.cost(4,{緑:6}),attack:10,maxHealth:10,symbols:{緑:3},abilities:['マッハファイター','トランブル'],machFighter:{duration:'entryTurn'},trample:true,text:'マッハファイター。トランブル。最大5軽減、最低不特定4＋緑1。'},
+ {key:'trap',name:'ナチュラル・トラップ',type:'呪文',cost:M.cost(2,{緑:1}),onUse:[{kind:'trap'}],instant:true,text:'インスタント。相手クリーチャー1体を持ち主のマナゾーンに置く。'},
  {key:'repair',deckLimit:1,name:'修復',type:'呪文',cost:M.cost(0,{緑:3}),onUse:[{kind:'resetShield'},{kind:'healLife',count:3}],text:'自分の使用済みシールド1枚を裏向きに戻してもよい。その後ライフ3回復（最大30）。対象なしでも回復。'},
  {key:'bahamut',deckLimit:1,reduction:null,name:'バハムート',type:'通常',cost:M.cost(10,{緑:1}),attack:11,maxHealth:11,symbols:{緑:3},onEnter:[{kind:'wipe'}],text:'登場時：本人以外の両者のユニット・設置物をすべてトラッシュへ。マナ・キャラ・サイドは対象外。'},
  {key:'bird',name:'極楽鳥',type:'通常',cost:M.cost(0,{緑:1}),attack:1,maxHealth:1,symbols:{},manaAbility:{colors:COLORS,amount:1},provisional:true,text:'本人を横向きにして任意の1色1点を支払いに使用。召喚酔い中は不可。攻撃力・最大体力は仮値。'},
@@ -19,6 +19,7 @@
  ,{key:'zundoko',name:'Dの花道 ズンドコ晴れ舞台',type:'設置物',cost:M.cost(4,{緑:1}),symbols:{緑:1},onUnitEnter:[manaBoost],text:'自分のユニットが登場するたび、通常デッキ上1枚を未使用でマナへ。複数枚はそれぞれ誘発。Dスイッチなし。'}
  ];
  const cards=Object.fromEntries(defs.map(d=>[d.key,{color:'緑',symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:{minimum:{緑:1}},...d}]));
+ cards.gs6={key:'gs6',name:'統率するレオパルド・ホーン',color:'緑',type:'通常',cost:M.cost(6,{緑:1}),attack:2,maxHealth:2,symbols:{緑:1},deckLimit:3,abilities:['マッハファイター','トランブル'],machFighter:{duration:'entryTurn'},trample:true,gZero:{fieldCreatures:4},onEnter:[{kind:'leopardBuff'}],text:'G・ゼロ：自分の他のクリーチャーが4体以上。マッハファイター。トランブル。登場時、他の自分のクリーチャー1体につき＋1/＋1。'};
  const blueDefs=[
  {key:'walsura',name:'プラチナ・ワルスラS',type:'通常',cost:M.cost(0,{青:4}),attack:6,maxHealth:6,symbols:{青:1},evolution:{any:true,colorlessBaseDiscount:true},onAttack:[{kind:'optionalEffect',label:'3枚引いて手札1枚を捨てますか？',effects:[{kind:'draw',count:3},{kind:'handDiscard',count:1}]}],text:'自分のユニット1体の上に進化（文明不問）。無色の進化元の記載コスト分、このカードの青コストを軽減する（自分のキャラクターが青なら0まで、それ以外は最低青1）。攻撃時、3枚引いてもよい。そうしたら手札1枚を選びトラッシュへ。'},
  {key:'brain',name:'サイバー・ブレイン',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'draw',count:3}],text:'カードを3枚引く。'},
