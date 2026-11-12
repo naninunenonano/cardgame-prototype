@@ -131,7 +131,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(amount>0&&context.type!=='lifeLoss'&&!context.reflux){
    enqueue(state[p].structures.filter(c=>c.bloodReflux&&!c.abilitiesDisabled).map(c=>({kind:'bloodReflux',sourceId:c.id})),p,null);
   }
-  if(amount>0){
+  if(amount>0&&!context.selfDamage&&!context.characterSelf&&!context.reflux&&locate(activeEffectSource)?.p!==p){
    turn.lifeReduced[other(p)]+=amount;
    if(turn.lifeReduced[other(p)]>=5)for(const c of state[other(p)].structures.filter(x=>x.equipment==='twinhorn'&&x.hostId&&!x.abilitiesDisabled))enqueue([{kind:'dragonForm',form:'sbrs2-2'}],other(p),c.id);
   }
@@ -342,11 +342,14 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(effect.kind==='characterStart'){const c=character(p);if(c?.level>0){const data=characterLevelData(c);if(data.start)enqueue(data.start,p,c.id);else if(!c.growthOnly&&c.level>1&&(c.level<4||c.level4Start?.length))enqueue(c.level===4?c.level4Start:data.effects,p,c.id);}}
   else if(effect.kind==='cardStart'){if(effect.startEffects){enqueue(effect.startEffects,p,effect.id);return true;}const s=locate(effect.id);if(!s||!(isUnit(s.z)||s.z==='structures')||effect.generation!==s.card.entryGeneration)return true;const c=s.card;if(c.key==='sbbu1'&&!c.awakened&&state[p].trash.filter(c=>c.type==='呪文').length>=6)operation={kind:'sideChoice',choice:'awakeSpells',p,sourceId:c.id,selected:[]};else enqueue((c.onStart||[]).map(e=>({...e,generation:c.entryGeneration})),p,c.id);}
   else if(effect.kind==='sideEnd'){
-   for(const c of [...state[p].structures]){
+   for(const owner of PLAYERS)for(const c of [...state[owner].structures]){
     const host=locate(c.hostId);
     if(c.abilitiesDisabled||!host||!isUnit(host.z))continue;
-    if(c.equipment==='batblade'&&turn.redEntries[p]>0){dragonForm(c.id,p,'sbru2-2');if(turn.redEntries[p]>=3)dragonForm(c.id,p,'sbru2-3');}
-    if(c.equipment==='greasy'&&host.card.rest)dragonForm(c.id,p,'sbrr2-2');
+    if(c.equipment==='batblade'&&turn.redEntries[owner]>0){
+     dragonForm(c.id,owner,'sbru2-2');
+     if(turn.redEntries[owner]>=3)dragonForm(c.id,owner,'sbru2-3');
+    }
+    if(owner===p&&c.equipment==='greasy'&&host.card.rest)dragonForm(c.id,p,'sbrr2-2');
    }
    for(const owner of PLAYERS)for(const c of fieldCards(owner))if(c.key==='almar_sbbu1'&&!c.awakened&&owner!==p&&state[p].hand.length===0)applyForm(c,owner,'almar_sbbu1-2');}
   else if(effect.kind==='vtBounceLock'){const q=other(p);summonLocks.push({id:++lockSerial,p:q,turn:turn.counts[q]+1,sourceId});for(const owner of PLAYERS)for(const c of [...fieldCards(owner)])if(c.type==='通常'&&attack(c,owner)<=5&&!c.bounceImmune&&!c.untargetable)rawMove(locate(c.id),owner,'hand');record(`${label(q)}の次の第${turn.counts[q]+1}ターン中、攻撃力5以下の登場を禁止。`);}
@@ -672,7 +675,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function unitEntered(c,p,returning=false){
   if(replaceWeakEntry(locate(c.id),p))return;
   if(Mana.hasColor(c,'赤'))turn.redEntries[p]++;
-  const commander=character(p),speed=hasSpeed(c,p);
+  const commander=character(p),speed=hasSpeed(c,p)||c.graveSummonMethod==='abyss';
   const redTriggers=commander?.key==='redcaptain'&&speed?[{kind:'commanderStack',sourceId:commander.id},...(baseAbility(commander,'redcaptain')&&commander.level===2?[{kind:'draw',count:1,sourceId:commander.id},{kind:'damagePlayer',amount:1,sourceId:commander.id}]:[])]:[];
   if(turn.redEntries[p]===3)for(const b of state[p].structures.filter(x=>x.awakened==='sbru2-2'&&!x.abilitiesDisabled))enqueue([{kind:'dragonForm',form:'sbru2-3',sourceId:b.id}],p,b.id);
   if(c.key==='t12')for(const queen of fieldCards(p).filter(x=>x.key==='rs5'&&!x.bloodQueen&&!x.abilitiesDisabled))enqueue([{kind:'damagePlayer',amount:2}],p,queen.id);
@@ -1202,7 +1205,7 @@ if(o.choice==='ownLinkDestroy')return state[p].structures.filter(c=>c.shieldLink
   else if(kind==='celestiaBuff')expansionChoice('celestiaBuff',p,sourceId);
   else if(kind==='celestiaEnd')expansionChoice('celestiaHeal',p,sourceId);
   else if(kind==='lifeSaveOffer'){const s=locate(e.id);if(s&&isUnit(s.z)){if(life[p]>5)expansionChoice('lifeSave',p,sourceId,{id:e.id,reason:e.reason,suppressAbilities:e.suppressAbilities});else {delete s.card.pendingDestruction;destroyUnit(e.id,e.reason,true,e.suppressAbilities);}}}
-  else if(kind==='battleResult'){for(const [id,owner,won,survived] of [[e.a,e.ap,battleDeaths.has(e.combatId+':'+e.b),e.aSurvived],[e.b,e.bp,battleDeaths.has(e.combatId+':'+e.a),e.bSurvived]]){const loc=locate(id),c=loc?.card,alive=loc&&isUnit(loc.z);if(won){if(c)enqueue(c.onDefeat||[],owner,id);if(survived&&owner===turn.player){turn.battleWins=turn.battleWins||{};turn.battleWins[owner]=(turn.battleWins[owner]||0)+1;}if(survived&&owner===turn.player&&turn.battleWins[owner]===2)for(const equipment of state[owner].structures.filter(x=>x.equipment==='gaiou'&&x.hostId))enqueue([{kind:'dragonForm',form:'sbru3-2'}],owner,equipment.id);
+  else if(kind==='battleResult'){for(const [id,owner,won,survived] of [[e.a,e.ap,battleDeaths.has(e.combatId+':'+e.b),e.aSurvived],[e.b,e.bp,battleDeaths.has(e.combatId+':'+e.a),e.bSurvived]]){const loc=locate(id),c=loc?.card,alive=loc&&isUnit(loc.z);if(won){if(c)enqueue(c.onDefeat||[],owner,id);if(survived)turn.battleWins[owner]++;if(survived&&turn.battleWins[owner]===2)for(const equipment of state[owner].structures.filter(x=>x.equipment==='gaiou'&&x.hostId))enqueue([{kind:'dragonForm',form:'sbru3-2'}],owner,equipment.id);
  if(alive&&c){if(c.untapOnWin)untapUnit(c,owner);if(c.awakenOnKill&&!c.awakened){applyForm(c,owner,c.awakenOnKill);enqueue([{kind:'destroyEnemyField'}],owner,id);}}if(owner===turn.player&&(turn.battleWins?.[owner]||0)>=3)for(const d of fieldCards(owner))if(d.teamWinsAwaken&&!d.awakened)applyForm(d,owner,d.teamWinsAwaken);}}}
 
   else if(kind==='attackWrap'){const s=locate(e.id);activeCombat=null;if(e.afterDamage)enqueue([{kind:'selfDamage',amount:e.afterDamage}],p,sourceId);if(s&&isUnit(s.z)&&effectiveAttackCount(s.card)>1&&!s.card.abilitiesDisabled&&(s.card.attackCount||0)<effectiveAttackCount(s.card))untapUnit(s.card,p);if(e.hit&&s?.card.shieldSilence)expansionChoice('burnShield',p,sourceId);if(s&&isUnit(s.z)&&s.card.redUntap&&state[p].energy.length>0&&state[p].energy.every(c=>Mana.hasColor(c,'赤')))untapUnit(s.card,p);}

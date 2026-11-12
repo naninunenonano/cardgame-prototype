@@ -311,3 +311,19 @@ test('combined parallel card uses one selected face and inherits the attack',()=
   }
  }finally{definition.unavailable=unavailable;delete definition.stackCost;}
 });
+
+test('commander Lv4 reveal requires actual attack damage and fires once per turn',()=>{
+ const {g,advance}=ready();advanceToMain(g,advance);
+ g.state.p2.shields.length=0;g.character('p1').level=4;
+ const first=add(g,'nn5','p1','signi-1'),second=add(g,'nn5','p1','signi-2');
+ first.sick=second.sick=false;
+ const card=add(g,'nn3','p1','hand');ok(g.manualMove(card.id,'p1','main'));
+ ok(g.loseLife('p2',1,'カード効果'));assert.equal(g.operation,null);
+ advance();ok(g.declareAttack(first.id,'body'));ok(g.resolveAttack(null));pass(g);
+ assert.equal(g.operation.choice,'commanderReveal');choose(g,card.id);
+ ok(g.chooseSlot('signi-3'));ok(g.confirmSideFree());pass(g);
+ assert(g.hasSpeed(card,'p1'));
+ ok(g.declareAttack(second.id,'body'));ok(g.resolveAttack(null));pass(g);
+ assert.equal(g.operation,null);
+ assert.equal(g.battleLog().filter(e=>e.kind==='reveal').length,1);
+});
