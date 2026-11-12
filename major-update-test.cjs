@@ -186,6 +186,10 @@ test('unavailable cards stay out of construction and cannot be used',()=>{
  const deck=Decks.preset('redBeginner');
  assert(Decks.validate({...deck,main:[{key:'sbru1',count:1},...deck.main]}).some(e=>e.includes('モルトNEXT')));
  assert.equal(Decks.canonicalKey('sbnl1'),'sbnl4');
+ const legacy={sideboard:[{key:'sbnl4',count:1},{key:'sbnl1',count:1}]};
+ const migrated=Decks.migrateDeck(legacy);
+ assert.deepEqual(migrated.sideboard,[{key:'sbnl4',count:1}]);
+ assert.deepEqual(Decks.migrateDeck(migrated),migrated);
  assert.equal(Decks.canonicalKey('sbru1-2'),'sbru4');
  const disabled=g.fromDefinition('sbru1','p1');
  assert(!g.addCard('p1','hand',disabled).ok);

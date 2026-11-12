@@ -3,7 +3,30 @@
 'use strict';
 const Identity=typeof module==='object'&&module.exports?require('./identity.js'):globalThis.CardIdentity;
 const canonicalKey=Identity.canonicalKey;
-function migrateDeck(d){if(!d||typeof d!=='object'||Array.isArray(d))return d;const next={...d};for(const section of ['main','sideboard','shields','lands'])if(Array.isArray(d[section]))next[section]=d[section].filter(e=>!e||!Identity.removedLegacyKey(e.key)).map(e=>e&&typeof e==='object'?{...e,key:canonicalKey(e.key)}:e);const moved=(next.sideboard||[]).filter(e=>['bo1','sbru1'].includes(e?.key));if(moved.length){next.sideboard=next.sideboard.filter(e=>!['bo1','sbru1'].includes(e?.key));next.main=[...(next.main||[]),...moved];}return next;}
+function migrateDeck(d){
+ if(!d||typeof d!=='object'||Array.isArray(d))return d;
+ const next={...d};
+ for(const section of ['main','sideboard','shields','lands'])if(Array.isArray(d[section])){
+  next[section]=d[section].filter(e=>!e||!Identity.removedLegacyKey(e.key)).map(e=>e&&typeof e==='object'?{...e,key:canonicalKey(e.key)}:e);
+ }
+ if(Array.isArray(d.sideboard)){
+  const paired=d.sideboard.filter(e=>e&&canonicalKey(e.key)==='sbnl4');
+  const isBack=e=>['sbnl1','dogiragon'].includes(e.key);
+  const sum=entries=>entries.reduce((n,e)=>n+e.count,0);
+  if(paired.some(isBack)&&paired.some(e=>!isBack(e))&&paired.every(e=>Number.isInteger(e.count)&&e.count>=0)){
+   const index=next.sideboard.findIndex(e=>e?.key==='sbnl4');
+   const copies=Math.max(sum(paired.filter(isBack)),sum(paired.filter(e=>!isBack(e))));
+   next.sideboard=next.sideboard.filter(e=>e?.key!=='sbnl4');
+   next.sideboard.splice(index,0,{key:'sbnl4',count:copies});
+  }
+ }
+ const moved=(next.sideboard||[]).filter(e=>['bo1','sbru1'].includes(e?.key));
+ if(moved.length){
+  next.sideboard=next.sideboard.filter(e=>!['bo1','sbru1'].includes(e?.key));
+  next.main=[...(next.main||[]),...moved];
+ }
+ return next;
+}
 function evolutionErrors(deck,owned=null){
  const id=deck.sideboard?.find(e=>e.count>0&&C.cards[e.key]?.type==='キャラクター')?.key;
  if(!id)return [];
