@@ -168,7 +168,7 @@ test('Twin Horn makes two attacks and Gaiburn destroys itself before burning',()
  stack(g,'p1','赤',3);
  const unit=add(g,'nn5','p1','signi-1');unit.sick=false;
  const horn=g.state.p1.extra.find(c=>c.key==='sbrs2');
- play(g,horn.id);choose(g,unit.id);
+ play(g,horn.id,'signi-7');choose(g,unit.id);
  advance();
  ok(g.declareAttack(unit.id,'body'));ok(g.resolveAttack(null));pass(g);
  assert.equal(g.life.p2,17);assert.equal(unit.rest,false);
@@ -203,7 +203,7 @@ test('Batrai Blade and Tower reveal, transform, and retain the same physical sid
  g.character('p1').level=3;stack(g,'p1','赤',3);
  const attacker=add(g,'rs2','p1','signi-1');
  const blade=g.state.p1.extra.find(c=>c.key==='sbru2');
- play(g,blade.id);choose(g,attacker.id);
+ play(g,blade.id,'signi-7');choose(g,attacker.id);
  const reveal=add(g,'rn15','p1','hand');
  ok(g.manualMove(reveal.id,'p1','main'));
  advance();ok(g.declareAttack(attacker.id,'body'));pass(g);
@@ -212,10 +212,10 @@ test('Batrai Blade and Tower reveal, transform, and retain the same physical sid
  ok(g.resolveAttack(null));pass(g);
  ok(g.declareAttack(reveal.id,'body'));ok(g.resolveAttack(null));pass(g);
  advance();advance();
- assert.equal(blade.awakened,'sbru2-2');
+ assert.equal(blade.awakened,'sbru2-2');assert.equal(g.locate(blade.id).z,'signi-7');
  advance();advanceToMain(g,advance);
  add(g,'rn15','p1','signi-1');add(g,'rn16','p1','signi-3');add(g,'rs2','p1','signi-4');
- assert.equal(blade.awakened,'sbru2-3');assert(blade.used);
+ assert.equal(blade.awakened,'sbru2-3');assert.equal(g.locate(blade.id).z,'signi-7');assert(blade.used);
  assert.equal(g.attack(blade,'p1'),8);assert.equal(blade.health,8);assert(!g.hasSpeed(blade,'p1'));
 });
 
@@ -229,7 +229,7 @@ test('Gaiou Burn sets combat health to 1 and transforms after the second win',()
  const third=add(g,'nn3','p2','signi-3');third.rest=true;
  const ally=add(g,'nn5','p1','signi-2');ally.sick=false;
  const sword=g.state.p1.extra.find(c=>c.key==='sbru3');
- play(g,sword.id);choose(g,host.id);choose(g,first.id);
+ play(g,sword.id,'signi-7');choose(g,host.id);choose(g,first.id);
  assert.equal(host.health,1);assert.equal(g.attack(host),6);assert.equal(g.locate(first.id).z,'trash');
  advance();ok(g.declareAttack(ally.id,second.id));pass(g);
  assert.equal(sword.awakened,'sbru3-2');assert.equal(g.attack(host),3);
@@ -243,7 +243,7 @@ test('Greasy Horn gives Mach Fighter and changes at turn end when its host is ta
  const host=add(g,'nn5','p1','signi-1');
  const target=add(g,'nn3','p2','signi-1');
  const horn=g.state.p1.extra.find(c=>c.key==='sbrr2');
- play(g,horn.id);choose(g,host.id);
+ play(g,horn.id,'signi-7');choose(g,host.id);
  advance();
  assert(g.attackTargets(host.id).some(c=>c.id===target.id));
  assert(!g.attackTargets(host.id).some(c=>c.id==='body'));
@@ -257,7 +257,11 @@ test('Proto Gigaheart prevents opponent spell bounce and awakens once',()=>{
  g.character('p1').level=3;
  const host=add(g,'nn5','p1','signi-1');
  const giga=g.state.p1.extra.find(c=>c.key==='sbrr1');
- play(g,giga.id);choose(g,host.id);
+ play(g,giga.id,'signi-7');choose(g,host.id);
+ assert.equal(g.locate(giga.id).z,'signi-7');
+ for(let i=2;i<=6;i++)add(g,'nn3','p1','signi-'+i);
+ assert.equal(g.fieldCards('p1').length,7);
+ assert(!g.observe('p1').players.p1.units.some(c=>c.id===giga.id));
  const gate=add(g,'bn1','p2','hand');
  const {fund}=require('./test-fixtures.cjs');
  fund(g,'p2',3,'青');
@@ -265,7 +269,7 @@ test('Proto Gigaheart prevents opponent spell bounce and awakens once',()=>{
  ok(g.beginPayment(gate.id));ok(g.confirmPayment());pass(g);
  ok(g.resolveStarter(host.id));pass(g);
  assert.equal(g.locate(host.id).z,'signi-1');assert.equal(giga.awakened,'sbrr1-2');
- assert(g.hasSpeed(giga,'p1'));
+ assert(g.hasSpeed(giga,'p1'));assert.equal(g.locate(giga.id).z,'signi-7');assert.equal(g.fieldCards('p1').length,7);
 });
 
 test('new damage shields generate stacks and search the normal deck',()=>{
