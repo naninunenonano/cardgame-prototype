@@ -136,8 +136,8 @@
  }
 
  Object.assign(c.redcaptain,{provisional:false,growthOnly:true,characterEffects:{1:[{kind:'draw',count:1}],2:[],3:[],4:[]},
-  text:'Lv0：SAを持って登場した自分のクリーチャー1体につき赤スタック1個。成長後も有効。',
-  levelTexts:{1:'成長時：1枚引く。',2:'SAを持って登場した自分のクリーチャー1体につき1枚引き、相手に1ダメージ。',3:'自分のターンに1回、赤スタック1個で自分のクリーチャー1体にターン中SA。',4:'自分のターンに1回、赤1を含む4スタックで手札からコスト7以下のクリーチャーを無償登場。ターンに1回、攻撃で相手本体にダメージを与えた時、山札の一番上から攻撃クリーチャーのコスト以下のクリーチャーを任意で無償登場させ、SAを与える。'}
+  text:'Lv0：SAを持って登場した自分のクリーチャー1体につき赤ストック1個。成長後も有効。',
+  levelTexts:{1:'成長時：1枚引く。',2:'SAを持って登場した自分のクリーチャー1体につき1枚引き、相手に1ダメージ。',3:'自分のターンに1回、赤ストック1個で自分のクリーチャー1体にターン中SA。',4:'自分のターンに1回、赤1を含む4ストックで手札からコスト7以下のクリーチャーを無償登場。ターンに1回、攻撃で相手本体にダメージを与えた時、山札の一番上から攻撃クリーチャーのコスト以下のクリーチャーを任意で無償登場させ、SAを与える。'}
  });
  Object.assign(c.rn15,{speedAttacker:true,text:'スピードアタッカー。攻撃可能なら毎ターン必ず攻撃。'});
  Object.assign(c.rn16,{speedAttacker:true,cost:M.cost(1,{赤:2}),text:'スピードアタッカー。'+c.rn16.text});
@@ -160,24 +160,24 @@
  dragon('sbrr1-2','最強龍 オウギンガ・ゼロ',4,4,4,{speedAttacker:true,text:'スピードアタッカー。'});
  equip('sbrr2','熱血剣 グリージーホーン','R',1,'greasy','sbrr2-2','装備先にマッハファイター。自分の終了時に装備先が横向きなら龍解。');
  dragon('sbrr2-2','熱血龍 リトルビッグホーン',5,4,3,{machFighter:{duration:'entryTurn'},text:'マッハファイター。'});
- add('sbrn1',{name:'ネクスト・チャージャー',color:'赤',rarity:'N',type:'呪文',cardSection:'sideboard',sideboardOnly:true,charger:true,cost:M.cost(0),stackCost:M.cost(0),onUse:[{kind:'nextCharger'}],text:'任意で手札をすべて好きな順番で山札の下へ置き、同じ枚数引く。どちらの場合も使用後に赤スタック1個を獲得。'});
+ add('sbrn1',{name:'ネクスト・チャージャー',color:'赤',rarity:'N',type:'呪文',cardSection:'sideboard',sideboardOnly:true,charger:true,cost:M.cost(0),stackCost:M.cost(0),onUse:[{kind:'nextCharger'}],text:'任意で手札をすべて好きな順番で山札の下へ置き、同じ枚数引く。どちらの場合も使用後に赤ストック1個を獲得。'});
  for(const [key,name,event,effect,text] of [
-  ['shnr7','力の温存','damaged','reserveStacks','ダメージを受けた時、キャラクターと同じ色のスタックを2個得る。'],
-  ['shnr8','力の解放','attackDeclared','releaseStacks','相手の攻撃時、任意色のスタック5個で攻撃クリーチャーを破壊し、さらに相手のクリーチャー1体を任意で破壊。'],
+  ['shnr7','力の温存','damaged','reserveStacks','ダメージを受けた時、キャラクターと同じ色のストックを2個得る。'],
+  ['shnr8','力の解放','attackDeclared','releaseStacks','相手の攻撃時、任意色のストック5個で攻撃クリーチャーを破壊し、さらに相手のクリーチャー1体を任意で破壊。'],
   ['shnr9','水晶の記憶','damaged','crystalMemory','ダメージを受けた時、通常デッキから好きなカード1枚を手札に加える。']
  ]){add(key,{name,rarity:'R',type:'シールドカード',color:'無色',cardSection:'shields',deckSection:'shields',cost:null,shieldRule:{event,effect},text});catalog.shieldKeys.push(key);}
- forms.sbnl1={...c.sbnl1,faceId:'sbnl1',trample:true,abilities:['トランブル'],text:'パラレル革命：自分の攻撃力6以上のクリーチャーの攻撃時に、交換元を除外し、同じ枠で攻撃を引き継ぐ。スタック消費なし。トランブル。'};
+ forms.sbnl1={...c.sbnl1,faceId:'sbnl1',trample:true,abilities:['トランブル'],text:'パラレル革命：自分の攻撃力6以上のクリーチャーの攻撃時に、交換元を除外し、同じ枠で攻撃を引き継ぐ。ストック消費なし。トランブル。'};
  delete c.sbnl1;
- Object.assign(c.sbnl4,{faceIds:['sbnl4','sbnl1'],alternateFace:'sbnl1',revolutionMinimumAttack:6,stackCost:M.cost(0),text:c.sbnl4.text+' スタック消費なし。'});
- Object.assign(c.sbru1,{sideboardOnly:false,mainDeckOnly:true,cardSection:'main',unavailable:'単体通常カードへ移行。能力の確認・調整待ち。',text:'能力の確認・調整中。'});
- delete c.sbru1.awakenOnUntap;
+ Object.assign(c.sbnl4,{faceIds:['sbnl4','sbnl1'],alternateFace:'sbnl1',revolutionMinimumAttack:6,stackCost:M.cost(0),text:c.sbnl4.text+' ストック消費なし。'});
+ Object.assign(c.sbru1,{cardSection:'main',rarity:'OR',rarityProvisional:false});
  delete c.sbru1.faceIds;
- add('sbru4',{name:'ハートバーン',color:'赤',rarity:'UR',type:'設置物',cardSection:'sideboard',sideboardOnly:true,faceIds:['sbru4','sbru1-2'],unavailable:'ハートバーン／超戦覇龍 ガイNEXTの能力・支払い条件の確認待ち。',text:'裏面：超戦覇龍 ガイNEXT。能力の確認・調整中。'});
- forms['sbru1-2'].text='ハートバーンの裏面。能力の確認・調整中。';
+ add('sbru4',{name:'闘将銀河城 ハートバーン',color:'赤',rarity:'UR',type:'設置物',cardSection:'sideboard',sideboardOnly:true,
+  heartburn:true,redSpeedAura:true,cost:M.cost(0),stackCost:M.cost(0,{赤:4}),faceIds:['sbru4','sbru1-2'],
+  text:'自分の赤クリーチャーすべてにSA。自分の赤クリーチャーがアンタップした時、超戦覇龍 ガイNEXTへ龍解。'});
  const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','almar_sbnr1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
  for(const card of Object.values(c)){
   if(card.sideboardOnly&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
-   card.unavailable=eligibleLegacySide.has(card.key)?'色付きスタック支払い条件が未確定。':'新しいサイド採用条件の対象外。通常デッキへの移行を確認中。';
+   card.unavailable=eligibleLegacySide.has(card.key)?'色付きストック支払い条件が未確定。':'新しいサイド採用条件の対象外。通常デッキへの移行を確認中。';
   }
  }
  catalog.sideboardPreset=catalog.sideboardPreset.filter(e=>c[e.key]&&!c[e.key].unavailable);

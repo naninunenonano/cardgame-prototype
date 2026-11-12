@@ -184,14 +184,14 @@ test('Twin Horn makes two attacks and Gaiburn destroys itself before burning',()
 test('unavailable cards stay out of construction and cannot be used',()=>{
  const {g,advance}=ready();advanceToMain(g,advance);
  const deck=Decks.preset('redBeginner');
- assert(Decks.validate({...deck,main:[{key:'sbru1',count:1},...deck.main]}).some(e=>e.includes('モルトNEXT')));
+ assert(Decks.validate({...deck,main:[{key:'sbru1',count:1},...deck.main]}).some(e=>e.includes('40枚')));
  assert.equal(Decks.canonicalKey('sbnl1'),'sbnl4');
  const legacy={sideboard:[{key:'sbnl4',count:1},{key:'sbnl1',count:1}]};
  const migrated=Decks.migrateDeck(legacy);
  assert.deepEqual(migrated.sideboard,[{key:'sbnl4',count:1}]);
  assert.deepEqual(Decks.migrateDeck(migrated),migrated);
  assert.equal(Decks.canonicalKey('sbru1-2'),'sbru4');
- const disabled=g.fromDefinition('sbru1','p1');
+ const disabled=g.fromDefinition('nl1','p1');
  assert(!g.addCard('p1','hand',disabled).ok);
  assert(Cards.awakened.sbnl1.trample);
  assert.equal(Cards.cards.sbnl4.revolutionMinimumAttack,6);
@@ -332,4 +332,77 @@ test('commander Lv4 reveal requires actual attack damage and fires once per turn
  ok(g.declareAttack(second.id,'body'));ok(g.resolveAttack(null));pass(g);
  assert.equal(g.operation,null);
  assert.equal(g.battleLog().filter(e=>e.kind==='reveal').length,1);
+});
+
+function moltMatch(){
+ const preset=Decks.preset('redBeginner');
+ const deck={...preset,id:'molt-test',main:preset.main.flatMap(e=>e.key==='nn9'?[{...e,count:1},{key:'sbru1',count:1}]:[e]),
+  sideboard:preset.sideboard.map(e=>e.key==='sbru2'?{...e,key:'sbru4'}:e)};
+ assert.deepEqual(Decks.validate(deck),[]);
+ const {g,advance}=ready(deck.id,'blueBeginner',[deck]);
+ advanceToMain(g,advance);g.state.p2.shields.length=0;
+ return {g,advance};
+}
+
+test('Molt NEXT is a standalone OR with printed costs and free own equipment deployment',()=>{
+ const {g}=moltMatch(),def=Cards.cards.sbru1;
+ assert.equal(def.rarity,'OR');assert.equal(def.faceIds,undefined);
+ assert.deepEqual(def.cost,Mana.cost(4,{赤:3}));
+ const molt=add(g,'sbru1','p1','hand'),ally=add(g,'nn5','p1','signi-1');
+ const horn=g.state.p1.extra.find(c=>c.key==='sbrr1');
+ horn.used=true;
+ const {fund}=require('./test-fixtures.cjs');
+ fund(g,'p1',3,'赤');fund(g,'p1',4,'青');
+ assert.equal(g.character('p1').level,0);
+ assert(!g.beginPayment(horn.id).ok);
+ const stock=g.state.p1.stacks.map(c=>c.id);
+ play(g,molt.id,'signi-2');
+ assert.equal(molt.attack,7);assert.equal(molt.health,7);
+ choose(g,horn.id);choose(g,'signi-3');
+ assert.equal(horn.hostId,molt.id);assert.notEqual(horn.hostId,ally.id);
+ assert(g.locate(horn.id).z==='signi-3');assert(horn.used);
+ assert.deepEqual(g.state.p1.stacks.map(c=>c.id),stock);assert(!g.sideSpent('p1'));
+});
+
+test('Molt NEXT ignores the spent side turn and does not mark a fresh Dragheart used',()=>{
+ const {g}=moltMatch();
+ g.character('p1').level=3;
+ const {fund}=require('./test-fixtures.cjs');fund(g,'p1',7,'赤');
+ const charger=g.state.p1.extra.find(c=>c.key==='sbrn1');
+ play(g,charger.id);choose(g,'done');assert(g.sideSpent('p1'));
+ const molt=add(g,'sbru1','p1','hand'),fort=g.state.p1.extra.find(c=>c.key==='sbru4');
+ play(g,molt.id,'signi-1');choose(g,fort.id);choose(g,'signi-2');
+ assert(!fort.used);assert(g.sideSpent('p1'));
+ assert.equal(g.locate(fort.id).z,'signi-2');
+});
+
+test('Heartburn costs four red stock, gives red-only SA, and awakens from Molt NEXT after attack',()=>{
+ const {g,advance}=moltMatch(),fort=g.state.p1.extra.find(c=>c.key==='sbru4');
+ const molt=add(g,'sbru1','p1','signi-1');
+ const choice=g.operation;
+ assert.equal(choice.choice,'moltDragheart');
+ // Resolve entry using a previously used weapon before testing paid Heartburn.
+ const horn=g.state.p1.extra.find(c=>c.key==='sbrr1');
+ choose(g,horn.id);choose(g,'signi-7');
+ const neutral=add(g,'nn5','p1','signi-2'),multi=add(g,'nn3','p1','signi-3');
+ multi.civilizations=['赤','青'];
+ g.character('p1').level=2;
+ stack(g,'p1','青',4);stack(g,'p1','赤',2);
+ assert(!g.beginPayment(fort.id).ok);
+ stack(g,'p1','赤',1);play(g,fort.id,'signi-4');
+ assert.equal(g.state.p1.stacks.length,4);assert(fort.used);assert(g.sideSpent('p1'));
+ assert(g.hasSpeed(molt,'p1'));assert(g.hasSpeed(multi,'p1'));assert(!g.hasSpeed(neutral,'p1'));
+ advance();
+ const enemy=add(g,'nn5','p2','signi-1');enemy.rest=true;
+ molt.canceledAttack=true;ok(g.declareAttack(molt.id,'body'));pass(g);
+ assert(molt.rest);assert(!fort.awakened);
+ molt.rest=false;
+ ok(g.declareAttack(molt.id,enemy.id));pass(g);
+ assert(!molt.rest);assert.equal(fort.awakened,'sbru1-2');assert.equal(g.locate(fort.id).z,'signi-4');
+ assert.equal(Mana.total(fort.cost),9);assert.equal(fort.attack,12);assert.equal(fort.health,12);
+ assert(fort.abilities.includes('T・ブレイカー'));assert(!fort.release);
+ assert(g.hasSpeed(fort,'p1'));assert(g.hasSpeed(multi,'p1'));assert(!g.hasSpeed(neutral,'p1'));
+ for(let i=0;i<2;i++){ok(g.declareAttack(molt.id,'body'));ok(g.resolveAttack(null));pass(g);assert(!molt.rest);}
+ assert(g.destroyUnit(fort.id));
+ assert.equal(g.locate(fort.id).z,'extra');assert(fort.used);
 });
