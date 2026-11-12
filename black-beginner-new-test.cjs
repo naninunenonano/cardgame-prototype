@@ -78,7 +78,33 @@ for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
 }
 {
  const g=fixture(), c=add(g,'ks15');add(g,'redmoonavenger','lrig').level=4;
- add(g,'redmoonavenger_shkl1','shields').faceUp=true;yes(g.setLife('p1',6));cast(g,c);A.equal(g.result.winner,'p2');
+ add(g,'redmoonavenger_shkl1','shields').faceUp=true;add(g,'ks13','structures');yes(g.setLife('p1',6));cast(g,c);A.equal(g.result,null);A.equal(g.life.p1,4);
+}
+{
+ const g=fixture();add(g,'redmoonavenger','lrig').level=4;
+ add(g,'ks13','structures');yes(g.setLife('p1',2));cast(g,add(g,'kn11'));
+ A.equal(g.life.p1,4);A.equal(g.life.p2,29);A.equal(g.result,null);
+}
+{
+ const g=fixture();add(g,'redmoonavenger','lrig').level=4;
+ add(g,'ks13','structures');add(g,'redmoonavenger_shkl1','shields').faceUp=true;
+ g.turn.counts.p1=19;g.turn.sequence=38;g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
+ A.equal(g.turn.number,20);A.equal(g.life.p1,30);A.equal(g.life.p2,30);
+ g.turn.sequence=40;g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
+ A.equal(g.turn.number,21);A.equal(g.life.p1,20);A.equal(g.life.p2,20);
+ A.equal(g.battleLog('p1',{detailed:true}).filter(e=>e.kind==='ruleDamage'&&e.reason==='41手番目以降').length,2);
+ g.turn.step='end';yes(g.soloNextPlayer('p2'));
+ A.equal(g.turn.sequence,42);A.equal(g.life.p1,20);A.equal(g.life.p2,20);
+ g.turn.step='end';yes(g.soloNextPlayer('p1'));
+ A.equal(g.turn.sequence,43);A.equal(g.life.p1,10);A.equal(g.life.p2,10);
+}
+for(const [p1,p2,winner] of [[8,11,'p2'],[9,7,'p1'],[8,8,null]]){
+ const g=fixture();add(g,'redmoonavenger','lrig').level=4;add(g,'ks13','structures');
+ const rested=add(g,'nn2','signi-1');rested.rest=true;
+ yes(g.setLife('p1',p1));yes(g.setLife('p2',p2));
+ g.turn.counts.p1=20;g.turn.sequence=40;g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
+ A.equal(g.life.p1,p1-10);A.equal(g.life.p2,p2-10);
+ A.equal(g.result.winner,winner);A.equal(rested.rest,true);
 }
 {
  const g=fixture();const m=add(g,'ks14'), ally=add(g,'nn2','trash');
