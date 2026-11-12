@@ -177,9 +177,13 @@
  const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','almar_sbnr1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
  for(const card of Object.values(c)){
   if(card.sideboardOnly&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
-   card.unavailable=eligibleLegacySide.has(card.key)?'色付きストック支払い条件が未確定。':'新しいサイド採用条件の対象外。通常デッキへの移行を確認中。';
+   if(eligibleLegacySide.has(card.key))card.unavailable='色付きストック支払い条件が未確定。';
+   else{
+    Object.assign(card,{sideboardOnly:false,mainDeckOnly:true,cardSection:'main',deckSection:'main'});
+    delete card.sideboardScope;
+   }
   }
  }
- catalog.sideboardPreset=catalog.sideboardPreset.filter(e=>c[e.key]&&!c[e.key].unavailable);
+ catalog.sideboardPreset=catalog.sideboardPreset.filter(e=>c[e.key]?.sideboardOnly&&!c[e.key].unavailable);
  return (typeof module==='object'&&module.exports?require('./character-series.js'):globalThis.CharacterSeries).install(catalog);
 });

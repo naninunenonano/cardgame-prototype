@@ -245,14 +245,20 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  }
  function effectiveAttackCount(c){return Math.max(c.attacksPerTurn||1,attached(c,'twinhorn')?2:1);}
  function sideSpent(p){return sideUse[p]===turn.sequence;}
+ function characterRestriction(c,p){
+  const leader=character(p);
+  if(c.requiredCharacterColor&&(!leader||leader.level<1||!Mana.hasColor(leader,c.requiredCharacterColor)))return '指定色のキャラクターLv1以上が必要です。';
+  if(c.requiredCharacter&&!(leader?.key===c.requiredCharacter&&leader.level>=1))return '指定キャラクターLv1以上が必要です。';
+  return '';
+ }
  function canSide(p,c){if(c.type==='キャラクター')return 'キャラクターは成長操作を使ってください。';if(c.unavailable)return c.unavailable;
  if((character(p)?.level||0)<Math.max(2,c.minCharacterLevel||0))return 'キャラクターLv2以上が必要です。';
  if(!c.stackCost)return 'ストック支払い条件が未確定です。';
  if(c.parallelInvasion||c.revolution)return '攻撃時のみ使用できます。';
- if(c.equipment&&!equipTargets(c,p).length)return '装備できるクリーチャーが必要です。';if(c.used)return 'このサイドカードは使用済みです。';if(sideSpent(p))return 'このターンのサイドボードは使用済みです。';if(c.requiredCharacterColor&&(!character(p)||character(p).level<1||!Mana.hasColor(character(p),c.requiredCharacterColor)))return '指定色のキャラクターLv1以上が必要です。';if(c.requiredCharacter&&!(character(p)?.key===c.requiredCharacter&&character(p).level>=1))return '指定キャラクターLv1以上が必要です。';if(c.viceOnly)return 'Lv2への成長直後の追加処理だけで使用できます。';return '';}
+ if(c.equipment&&!equipTargets(c,p).length)return '装備できるクリーチャーが必要です。';if(c.used)return 'このサイドカードは使用済みです。';if(sideSpent(p))return 'このターンのサイドボードは使用済みです。';const restriction=characterRestriction(c,p);if(restriction)return restriction;if(c.viceOnly)return 'Lv2への成長直後の追加処理だけで使用できます。';return '';}
  function activeLocks(p){return summonLocks.filter(l=>l.p===p&&turn.player===p&&turn.counts[p]===l.turn);}
- function summonError(c,p){if(c.unavailable)return '使用不可：'+c.unavailable;if(c.type==='設置物'&&c.shieldLink&&shieldLinkCount(p)>=5&&!state[p].structures.some(x=>x.id===c.id))return 'シールドリンクは最大5枚・上書き不可です。';return c.type==='通常'&&attack(c,p)<=5&&activeLocks(p).length?'5000VT：このターンは攻撃力5以下を場に出せません。':'';}
- function costBreakdown(c,p){const side=locate(c.id)?.z==='extra',base=c.cost||Mana.cost(0);return {vengeance:c.vengeanceGenericReduction&&life[p]<=15?c.vengeanceGenericReduction:0,field:fieldReduction(c),level4:0,allBlue:side&&c.allBlueReduction&&manaCount(p)>0&&state[p].energy.every(c=>Mana.producedColors(c).length===1&&Mana.producedColors(c)[0]==='青')?c.allBlueReduction:0,base:clone(base),final:effectiveCost(c,p)};}
+ function summonError(c,p){if(c.unavailable)return '使用不可：'+c.unavailable;if(c.mainDeckOnly){const restriction=characterRestriction(c,p);if(restriction)return restriction;}if(c.type==='設置物'&&c.shieldLink&&shieldLinkCount(p)>=5&&!state[p].structures.some(x=>x.id===c.id))return 'シールドリンクは最大5枚・上書き不可です。';return c.type==='通常'&&attack(c,p)<=5&&activeLocks(p).length?'5000VT：このターンは攻撃力5以下を場に出せません。':'';}
+ function costBreakdown(c,p){const base=c.cost||Mana.cost(0);return {vengeance:c.vengeanceGenericReduction&&life[p]<=15?c.vengeanceGenericReduction:0,field:fieldReduction(c),level4:0,allBlue:c.allBlueReduction&&manaCount(p)>0&&state[p].energy.every(c=>Mana.producedColors(c).length===1&&Mana.producedColors(c)[0]==='青')?c.allBlueReduction:0,base:clone(base),final:effectiveCost(c,p)};}
  function makeStack(p,color,token=false){const c=card(color+'ストック','ストック',color,null,false,p);return {...c,token,faceUp:true};}
  function gainStacks(p,color,count){
   if(!Mana.colors.includes(color))return;
@@ -370,12 +376,12 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function symbols(p){const sum=Object.fromEntries(Mana.colors.map(c=>[c,0]));for(const c of fieldCards(p))if(c.type==='通常'||c.type==='設置物')for(const color of Mana.colors)sum[color]+=(c.symbols?.[color]||0)+(c.turnSymbols?.[color]||0);return sum;}
  function effectiveCost(c,p,base=c.cost,discountLog=null){
   if(c.usageCostOverride)return clone(c.usageCostOverride);
-  const cost={...base},side=locate(c.id)?.z==='extra';
+  const cost={...base};
   if(c.bothLinkReduction)cost.generic=Math.max(0,cost.generic-shieldLinkCount(p)-shieldLinkCount(other(p)));
   if(c.linkReductionPerCard)cost.generic=Math.max(0,cost.generic-c.linkReductionPerCard*shieldLinkCount(p));
   if(c.fieldReduction)cost.generic=Math.max(0,cost.generic-fieldReduction(c));
   if(c.shieldLinkReduction&&state[p].structures.some(x=>x.shieldLink))cost.generic=Math.max(0,cost.generic-c.shieldLinkReduction);
-  if(side&&c.allBlueReduction&&manaCount(p)>0&&state[p].energy.every(c=>Mana.producedColors(c).length===1&&Mana.producedColors(c)[0]==='青'))cost.generic=Math.max(0,cost.generic-c.allBlueReduction);
+  if(c.allBlueReduction&&manaCount(p)>0&&state[p].energy.every(c=>Mana.producedColors(c).length===1&&Mana.producedColors(c)[0]==='青'))cost.generic=Math.max(0,cost.generic-c.allBlueReduction);
   if(turn.scramble?.p===p&&turn.scramble.sequence===turn.sequence&&c.type==='通常'&&Mana.hasColor(c,'赤')){
    let n=5;
    for(const k of ['赤',...Mana.colors.filter(k=>k!=='赤')]){
@@ -594,7 +600,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   const choices=purpose==='normal'?evolutionPaymentOptions(c,p):[];
   return choices.length?choices.reduce((a,b)=>Mana.total(a.cost)<=Mana.total(b.cost)?a:b).cost:useCost(c,p,purpose);
  }
- function useError(c,p,purpose='normal'){if(c.unavailable)return '使用不可：'+c.unavailable;if(c.key==='gr5'&&!targetOptions({kind:'trap'},p).length)return '有効な相手クリーチャーが必要です。';if(c.key==='wr7'&&(!shieldLinkCount(p)||!fieldCards(other(p)).some(x=>x.type==='通常'&&!targetProtected(x,p)&&!(x.spellImmune&&!x.abilitiesDisabled))))return 'シールドリンクと有効な相手クリーチャーが必要です。';if(c.type==='呪文'&&spellsLocked(p,c))return '相手のスペル・デル・フィンにより呪文を唱えられません。';const extra=grave?.useError(c,p,purpose);if(extra!==null&&extra!==undefined)return extra;if(c.type==='設置物'&&summonError(c,p))return summonError(c,p);if(!['normal','gzero','growth','instant','counter','enhance'].includes(purpose))return 'この使用方法は廃止されました。';
+ function useError(c,p,purpose='normal'){if(c.unavailable)return '使用不可：'+c.unavailable;if(c.mainDeckOnly){const restriction=characterRestriction(c,p);if(restriction)return restriction;}if(c.key==='gr5'&&!targetOptions({kind:'trap'},p).length)return '有効な相手クリーチャーが必要です。';if(c.key==='wr7'&&(!shieldLinkCount(p)||!fieldCards(other(p)).some(x=>x.type==='通常'&&!targetProtected(x,p)&&!(x.spellImmune&&!x.abilitiesDisabled))))return 'シールドリンクと有効な相手クリーチャーが必要です。';if(c.type==='呪文'&&spellsLocked(p,c))return '相手のスペル・デル・フィンにより呪文を唱えられません。';const extra=grave?.useError(c,p,purpose);if(extra!==null&&extra!==undefined)return extra;if(c.type==='設置物'&&summonError(c,p))return summonError(c,p);if(!['normal','gzero','growth','instant','counter','enhance'].includes(purpose))return 'この使用方法は廃止されました。';
   if(purpose==='instant'||purpose==='counter'){if(operation?.kind!=='response'||operation.p!==p||!instantCards(p).some(x=>x.id===c.id))return '応答可能なインスタントを選んでください。';return '';}
   if(c.instant&&locate(c.id)?.z==='hand'&&!operation&&status==='ready'&&!result){if(c.responseOnly)return '無効にできる使用・登場がありません。';return '';}
   const e=mainError(p);if(e)return e;if(purpose==='growth'){return 'レベルアップ操作を使ってください。';}
@@ -722,7 +728,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function announce(event,after){const publicEvent={id:++eventSerial,...event};{const c=locate(event.cardId)?.card;if(c)publicEvent.card=clone(c);}events.push(publicEvent);if(events.length>80)events.shift();const duration=typeof presentationMs==='function'?presentationMs(publicEvent):presentationMs;if(duration>0){operation={kind:'presentation',event:publicEvent,until:clock()+duration,after};}else continueAnnouncement(after);}
  function continueAnnouncement(after){if(after==='window')responseWindow();else if(after==='stack')resolveStack();else pump();}
  function finishPresentation(expected=operation){const o=operation;if(o!==expected||o?.kind!=='presentation'||result)return fail('以前の演出です。');if(clock()<o.until)return fail('カード表示中です。');operation=null;continueAnnouncement(o.after);return ok('公開行動を表示しました。');}
- function prepareFreeUse(source,options){if(source.card.unavailable||source.z==='extra'){record('使用条件を満たさないカードです。');return;}if(source.card.type==='呪文'&&spellsLocked(options.p,source.card)){record('スペル・デル・フィンにより無料使用も禁止。');pump();return;}const c=source.card,e=c.onUse?.find(e=>['bounce','unitBounce','trap','mother','buffUnit'].includes(e.kind));if(strictTargets&&e&&targetOptions(e,options.p).length)operation={kind:'freeCast',id:c.id,p:options.p,options,targetId:null};else declareUse(source,options);}
+ function prepareFreeUse(source,options){if(source.card.unavailable||source.z==='extra'||source.card.mainDeckOnly&&characterRestriction(source.card,options.p)){record('使用条件を満たさないカードです。');return;}if(source.card.type==='呪文'&&spellsLocked(options.p,source.card)){record('スペル・デル・フィンにより無料使用も禁止。');pump();return;}const c=source.card,e=c.onUse?.find(e=>['bounce','unitBounce','trap','mother','buffUnit'].includes(e.kind));if(strictTargets&&e&&targetOptions(e,options.p).length)operation={kind:'freeCast',id:c.id,p:options.p,options,targetId:null};else declareUse(source,options);}
  function confirmFreeCast(expected=operation){const o=operation;if(o!==expected||o?.kind!=='freeCast')return fail('以前の無料使用です。');const s=locate(o.id),e=s?.card.onUse?.find(e=>['bounce','unitBounce','trap','mother','buffUnit'].includes(e.kind));if(!s||!targetOptions(e,o.p).some(c=>c.id===o.targetId))return fail('対象を確定してください。');operation=null;declareUse(s,{...o.options,targetId:o.targetId});return ok('無料使用を宣言しました。');}
  function declareUse(source,options){if(source.card.unavailable)return;if(source.card.type==='呪文'&&spellsLocked(options.p,source.card)){record('呪文使用禁止のため宣言を中止。');pump();return;}const c=source.card,p=options.p;enemyUseTriggers(c,p);grave.declared(c,source,options);if(c.type==='通常'&&Mana.hasColor(c,'赤')&&turn.scramble?.p===p&&turn.scramble.sequence===turn.sequence){options.scramble=true;delete turn.scramble;}trace('cardUse',label(p)+'が《'+c.name+'》を使用。',{card:publicRef(c,'check'),from:source.z,sourcePlayer:p,target:options.targetId?refId(options.targetId):null,cost:options.paidCost||Mana.cost(0),method:options.method,...(options.amaterasuZone?{amaterasuZone:options.amaterasuZone,handBefore:state[p].hand.length}:{})},p);if(source.z==='extra'&&!options.sideAdditional){sideUse[p]=turn.sequence;c.used=true;}if(options.cleanupDestination)c.cleanupDestination=options.cleanupDestination;if(c.type==='呪文')enqueue(fieldCards(p).filter(x=>x.drawOnUse).map(()=>({kind:'draw',count:1})),p,c.id);rawMove(source,p,'check');c.faceUp=true;c.resolving=true;const frame={id:++frameSerial,cardId:c.id,...options,responded:false,canceled:false};stack.push(frame);record(`${label(p)}が${c.name}を${frame.method}で使用宣言。`);announce({kind:'use',p,cardId:c.id,method:frame.method,cost:frame.paidCost||Mana.cost(0),text:'使用宣言・解決待ち'},'window');}
  function responseWindow(){const f=stack.at(-1);if(!f)return pump();openPriority({type:'spell',frameId:f.id,cardId:f.cardId},other(f.p));}

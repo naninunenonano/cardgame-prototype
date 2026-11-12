@@ -400,9 +400,44 @@ test('Heartburn costs four red stock, gives red-only SA, and awakens from Molt N
  ok(g.declareAttack(molt.id,enemy.id));pass(g);
  assert(!molt.rest);assert.equal(fort.awakened,'sbru1-2');assert.equal(g.locate(fort.id).z,'signi-4');
  assert.equal(Mana.total(fort.cost),9);assert.equal(fort.attack,12);assert.equal(fort.health,12);
- assert(fort.abilities.includes('T・ブレイカー'));assert(!fort.release);
+ assert(!fort.abilities.includes('T・ブレイカー'));assert(!fort.release);
  assert(g.hasSpeed(fort,'p1'));assert(g.hasSpeed(multi,'p1'));assert(!g.hasSpeed(neutral,'p1'));
  for(let i=0;i<2;i++){ok(g.declareAttack(molt.id,'body'));ok(g.resolveAttack(null));pass(g);assert(!molt.rest);}
  assert(g.destroyUnit(fort.id));
  assert.equal(g.locate(fort.id).z,'extra');assert(fort.used);
+});
+
+test('all 19 retired side cards are available in main and saved copies migrate once',()=>{
+ const keys=['almar_sbbs1','sbbr1','sbbu2','almar_sbbu2','sbnn1','sbnr1','sbnr2','sbnr3','sbns1','sbnu1','sbrl1','sbrs1','sbgu2','sbgs1','sbgl1','sbgu3','sbgu4','lumiere_sbwl1','sbwu1'];
+ const main=new Set(Decks.available('main').map(c=>c.key));
+ const side=new Set(Decks.available('sideboard').map(c=>c.key));
+ for(const key of keys){
+  assert(main.has(key),key);
+  assert(!side.has(key),key);
+ }
+ const entries=keys.map(key=>({key,count:2}));
+ const old={main:[{key:'nn3',count:4}],sideboard:[{key:'almar',count:1},...entries]};
+ const migrated=Decks.migrateDeck(old);
+ assert.deepEqual(migrated.main,[...old.main,...entries]);
+ assert.deepEqual(migrated.sideboard,[{key:'almar',count:1}]);
+ assert.deepEqual(Decks.migrateDeck(migrated),migrated);
+ assert(side.has('sbnl4'));
+ assert(Cards.cards.almar_sbnr1.sideboardOnly);
+});
+
+test('retired side spells use mana from hand and preserve card-specific conditions',()=>{
+ const {fund}=require('./test-fixtures.cjs');
+ const {g,advance}=ready();
+ advanceToMain(g,advance);
+ fund(g,'p1',5,'青');
+ const tech=add(g,'sbbu2','p1','hand');
+ assert.deepEqual(g.effectiveCost(tech,'p1'),Mana.cost(9,{青:1}));
+ const dedicated=add(g,'almar_sbbs1','p1','hand');
+ assert.match(g.beginPayment(dedicated.id).message,/指定キャラクターLv1以上/);
+ const spring=add(g,'sbnr3','p1','hand');
+ const stock=g.state.p1.stacks.length;
+ play(g,spring.id);
+ assert.equal(g.life.p1,26);
+ assert.equal(g.state.p1.stacks.length,stock);
+ assert(!g.sideSpent('p1'));
 });

@@ -20,10 +20,10 @@ function migrateDeck(d){
    next.sideboard.splice(index,0,{key:'sbnl4',count:copies});
   }
  }
- const moved=(next.sideboard||[]).filter(e=>['bo1','sbru1'].includes(e?.key));
+ const moved=Array.isArray(next.sideboard)?next.sideboard.filter(e=>C.cards[e?.key]?.mainDeckOnly):[];
  if(moved.length){
-  next.sideboard=next.sideboard.filter(e=>!['bo1','sbru1'].includes(e?.key));
-  next.main=[...(next.main||[]),...moved];
+  next.sideboard=next.sideboard.filter(e=>!C.cards[e?.key]?.mainDeckOnly);
+  next.main=[...(Array.isArray(next.main)?next.main:[]),...moved];
  }
  return next;
 }
@@ -83,7 +83,7 @@ Object.assign(official,{
 
 });
 for(const d of Object.values(official)){
- d.sideboard=d.sideboard.filter(e=>C.cards[e.key]&&!C.cards[e.key].unavailable);
+ d.sideboard=d.sideboard.filter(e=>C.cards[e.key]?.sideboardOnly&&!C.cards[e.key].unavailable);
  d.stacks=stackColors(d);
 }
 const hasPreset=id=>Object.hasOwn(official,id);
@@ -96,7 +96,8 @@ function available(section=null){return Object.values(C.cards).filter(c=>c&&c.de
 function adoptionError(c,d){if(!c?.requiredCharacter)return '';const chars=(d.sideboard||[]).filter(e=>e.count>0&&C.cards[e.key]?.type==='キャラクター');return chars.length===1&&chars[0].count===1&&chars[0].key===c.requiredCharacter?'':(C.cards[c.requiredCharacter]?.name||c.requiredCharacter)+'専用：対応キャラクターをサイドボードに1枚採用してください。';}
 function validate(d){d=migrateDeck(d);const errors=[],allow=new Map(available().map(c=>[c.key,c]));if(!d||typeof d!=='object')return ['デッキデータが不正です。'];const stacks=stackColors(d);if(!Array.isArray(stacks)||stacks.length!==STACK_SIZE||stacks.some(c=>!stackPalette.includes(c)))errors.push('ストック山は5色のストック15枚です。');
  const check=(a,section,title,expected)=>{if(!Array.isArray(a)){errors.push(title+'の構成が不正です。');return;}let n=0;const counts=new Map();for(const e of a){const c=allow.get(e?.key);if(C.cards[e?.key]?.unavailable&&e.count>0){errors.push(C.cards[e.key].name+'は使用不可：'+C.cards[e.key].unavailable);continue;}if(!c||!Number.isInteger(e.count)||e.count<0||e.count>10000){errors.push(title+'に使用できないカード・枚数があります。');continue;}if(sectionOf(c)!==section){errors.push(title+'に種類の異なるカードがあります。');continue;}n+=e.count;const item=counts.get(c.name)||{count:0,cap:Infinity};item.count+=e.count;item.cap=Math.min(item.cap,limit(c));counts.set(c.name,item);}if(expected!==null&&n!==expected)errors.push(`${title}は${expected}枚です（現在${n}枚）。`);if(section==='sideboard'&&n>SIDE_SIZE)errors.push(`サイドボードは最大${SIDE_SIZE}枚です。`);if(section==='shields'&&![SHIELD_SIZE,5].includes(n))errors.push('シールドデッキは4枚または5枚です。');for(const [name,{count,cap}]of counts)if(count>cap)errors.push(`${name}は同名${cap}枚までです（現在${count}枚）。`);};
- const char=(d.sideboard||[]).find(e=>C.cards[e.key]?.type==='キャラクター'&&e.count>0)?.key;if((d.sideboard||[]).some(e=>e.count>0&&C.cards[e.key]?.requiredCharacterColor&&!(C.cards[char]?.civilizations||[C.cards[char]?.color]).includes(C.cards[e.key].requiredCharacterColor)))errors.push('専用カードのキャラクター色が一致しません。');if((d.sideboard||[]).some(e=>e.count>0&&C.cards[e.key]?.requiredCharacter&&C.cards[e.key].requiredCharacter!==char))errors.push('専用カードの使用キャラクターが一致しません。');
+ const deckCards=[...(Array.isArray(d.main)?d.main:[]),...(d.sideboard||[])];
+ const char=(d.sideboard||[]).find(e=>C.cards[e.key]?.type==='キャラクター'&&e.count>0)?.key;if(deckCards.some(e=>e?.count>0&&C.cards[e.key]?.requiredCharacterColor&&!(C.cards[char]?.civilizations||[C.cards[char]?.color]).includes(C.cards[e.key].requiredCharacterColor)))errors.push('専用カードのキャラクター色が一致しません。');if(deckCards.some(e=>e?.count>0&&C.cards[e.key]?.requiredCharacter&&C.cards[e.key].requiredCharacter!==char))errors.push('専用カードの使用キャラクターが一致しません。');
  if((d.sideboard||[]).reduce((n,e)=>n+(C.cards[e.key]?.type==='キャラクター'?e.count:0),0)>1)errors.push('成長型キャラクターはサイドに1枚までです。');
  for(const e of d.shields||[]){if(e.count>0){const why=adoptionError(C.cards[e.key],d);if(why)errors.push(why);}}
  check(d.main,'main','通常デッキ',MAIN_SIZE);check(d.sideboard||[],'sideboard','サイドボード',null);check(d.shields??defaultShields(),'shields','シールドデッキ',null);return [...new Set([...errors,...evolutionErrors(d)])];}
