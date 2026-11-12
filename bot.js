@@ -292,7 +292,21 @@ function decide(v){
   if(o.kind==='discard')return {type:'discard',ids:me.hand.slice().sort((a,b)=>keepScore(v,a)-keepScore(v,b)||a.id.localeCompare(b.id)).slice(0,o.required).map(c=>c.id)};
   return {type:'wait'};
  }
- if(v.turn.step==='charge'){const cards=me.hand.filter(c=>!c.generated&&!c.token&&!c.sideboardOnly);if(!cards.length||me.manaCount>=Math.max(10,...me.hand.map(c=>total(c))))return {type:'skipCharge'};const c=best(cards,c=>{const colorCount=me.mana.filter(m=>m.color===c.color).length,need=me.hand.filter(x=>x.id!==c.id&&x.cost&&(x.cost[c.color]||0)>colorCount).length;return need*12+(colorCount===0?8:0)+(total(c)>me.manaCount+3?10:0)-keepScore(v,c)*.4-(me.hand.filter(x=>x.key===c.key).length===1&&['gn1','gr1','br1','bn7'].includes(c.key)?15:0);});return c?{type:'charge',id:c.id}:{type:'skipCharge'};}
+ if(v.turn.step==='charge'){
+  const cards=me.hand.filter(c=>!c.generated&&!c.token&&!c.sideboardOnly);
+  if(!cards.length||me.manaCount>=Math.max(10,...me.hand.map(c=>total(c))))return {type:'skipCharge'};
+  const protectReflux=me.blackBeginner&&enemy.character?.key==='redcaptain'&&
+   !me.structures.some(c=>c.key==='ks13')&&cards.filter(c=>c.key==='ks13').length===1&&
+   me.mana.some(c=>c.color==='黒')&&cards.some(c=>c.color==='黒'&&c.key!=='ks13');
+  const c=best(cards,c=>{
+   const colorCount=me.mana.filter(m=>m.color===c.color).length;
+   const need=me.hand.filter(x=>x.id!==c.id&&x.cost&&(x.cost[c.color]||0)>colorCount).length;
+   const protectKey=me.hand.filter(x=>x.key===c.key).length===1&&['gn1','gr1','br1','bn7'].includes(c.key);
+   return need*12+(colorCount===0?8:0)+(total(c)>me.manaCount+3?10:0)-keepScore(v,c)*.4
+    -(protectKey?15:0)-(protectReflux&&c.key==='ks13'?18:0);
+  });
+  return c?{type:'charge',id:c.id}:{type:'skipCharge'};
+ }
  if(['main1','main2'].includes(v.turn.step)){
   // Preserve an immediate direct win rather than tapping its mana creature to deploy more cards.
   if(v.turn.step==='main1'&&enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))&&!enemy.units.some(c=>c.lure)&&me.units.some(c=>!c.rest&&!c.sick&&!c.cannotAttack))return {type:'advance'};
