@@ -149,7 +149,7 @@ assert(!Decks.available().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
  const token=g.fieldCards('p1').find(c=>c.key==='t11');
  assert(token);assert.equal(token.attack,1);assert(!g.beginCharacterAbility('p1').ok);
  g.destroyUnit(token.id);assert.equal(g.life.p2,16);assert.equal(g.life.p1,12);
- g.destroyUnit(next.id);assert.equal(g.life.p2,13);assert.equal(g.life.p1,15);
+ g.destroyUnit(next.id);assert.equal(g.life.p2,16);assert.equal(g.life.p1,12);
  for(let n=0;n<6;n++){yes(g.setLife('p1',10));heal();}
  assert.equal(eira.eiraTokens,5);
  const before=g.life.p2;

@@ -58,7 +58,7 @@ function play(g,key,slot){
  play(g,'wr1');
  assert.equal(g.operation.kind,'tokens');
  yes(g.placeToken('signi-3'));settle(g);
- assert(!g.fieldCards('p1').some(c=>c.key==='t7'));
+ assert(g.fieldCards('p1').some(c=>c.key==='t7'));
  assert(!g.state.p1.trash.some(c=>c.token));
 }
 {

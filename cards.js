@@ -64,7 +64,7 @@
  // 成長コストLv3/Lv4・未記載の覚醒前数値はデータで調整できる試作値。
  const characterLevels={1:{cost:1,text:'成長時・開始時：1ドロー。',effects:[{kind:'draw',count:1}]},2:{cost:3,text:'成長時・開始時：相手ランダム1捨て。成長直後のみメモリー・フラスコを任意使用。',effects:[{kind:'randomDiscard',count:1}]},3:{cost:5,text:'成長時・開始時：相手の場1枚をバウンス（マナ不可）→ランダム1捨て。',effects:[{kind:'enemyBounce'},{kind:'randomDiscard',count:1}]},4:{cost:7,text:'成長時：相手2捨て。常時：自分の効果で相手が実際に1枚捨てるごと1ドロー＋アクア・ガード。サイドの不特定3軽減。',effects:[{kind:'randomDiscard',count:2}]}};
  const sideDefs=[
- {key:'almar',name:'アルマー',type:'キャラクター',cost:M.cost(1),level:0,text:'Lv1→Lv4へ順番に成長。成長もサイド使用1ターン1枚に含む。通常の攻撃・ブロックは行わない。'},
+ {key:'almar',name:'アルマー',type:'キャラクター',cost:M.cost(1),level:0,text:'Lv1→Lv4へ順番に成長。通常の攻撃・ブロックは行わない。'},
  {key:'gunveet',name:'記憶の管理者 リゼット',type:'通常',cost:M.cost(4,{青:3}),attack:7,maxHealth:7,symbols:{青:1},requiredCharacter:'almar',provisional:true,onEnter:[{kind:'destroyTapped'}],awaken:'darkGunveet',text:'登場時：相手の横向き1体を破壊。相手ターン終了時、相手手札0なら覚醒。覚醒前7/7・青1は仮設定。'},
  {key:'alegre',name:'ルナ・アレグル',type:'通常',cost:M.cost(5,{青:2}),attack:5,maxHealth:5,symbols:{青:1},provisional:true,onEnd:[{kind:'draw',count:1},{kind:'handDiscard',count:1}],awaken:'alegria',text:'終了時1ドロー→自分の手札1捨て。自分の開始時、トラッシュの呪文6枚を山札へ戻して覚醒可能。5/5・青1は仮設定。'},
  {key:'dogiragon',name:'蒼き覚醒 ドギラゴンX',type:'通常',cost:M.cost(8),attack:13,maxHealth:13,symbols:{},revolution:true,text:'通常支払い不可。自分の元コスト5以上のクリーチャーの攻撃時に革命チェンジ。交換元を除外し同じ枠で攻撃を引き継ぐ。サイド使用1回。'},
@@ -155,10 +155,10 @@
  white('wn6',{name:'リアクティブ・シールド',rarity:'N',type:'設置物',shieldLink:true,cost:whiteMana(1),
   onStructureDestroy:[{kind:'reactiveShield'}],text:'破壊時、ランダムな相手クリーチャー1体に3ダメージ。'});
  white('wr9',{name:'ギャラクシー・シールド',rarity:'R',type:'設置物',shieldLink:true,cost:whiteMana(4),
-  unavailable:'山札上2枚からシールドリンクを設置できない場合の処理が未確定。',
-  text:'登場時、山札上2枚からシールドリンク1枚を設置する。その後、残りから1枚を手札に加え、残りをトラッシュに置く。'});
+  onEnter:[{kind:'galaxyShield'}],
+  text:'登場時、山札上2枚を見る。設置できるシールドリンクがあれば1枚を選び設置する。その後、残ったカードから1枚を手札に加え、さらに残ったカードをトラッシュに置く。'});
  white('wu3',{name:'蛇眼の大蛇（仮称）',rarity:'UR',type:'通常',snakeEye:true,cost:whiteMana(8),attack:4,maxHealth:7,
-  serpentAbility:true,onEnter:[{kind:'serpentRecycle'}],text:'登場時、自分のトラッシュからクリーチャーを任意の枚数山札に戻し、その枚数以下の合計コストとなるようトラッシュからシールドリンクを設置する。自分のターンに自身を除外して、山札からコスト2以下のスネークアイを最大2体出す。'});
+  serpentAbility:true,onEnter:[{kind:'serpentRecycle'}],text:'登場時、自分のトラッシュからクリーチャーを任意の枚数戻し（サイド由来はサイドボードへ）、その枚数以下の合計コストとなるようトラッシュからシールドリンクを設置する。自分のターンに自身を除外して、山札からコスト2以下のスネークアイを最大2体出す。'});
  const whiteSide=(key,definition)=>white(key,{sideboardOnly:true,cardSection:'sideboard',...definition});
  whiteSide('sbws1',{name:'スネークアイ・チャージャー',rarity:'SR',type:'呪文',snakeEye:true,charger:true,cost:M.cost(0),stackCost:M.cost(0),
   onUse:[{kind:'snakeCharger'}],text:'白ストックトークン1個を得る。山札上3枚を公開し、スネークアイとシールドリンクを手札へ、残りを山札の下へ。'});

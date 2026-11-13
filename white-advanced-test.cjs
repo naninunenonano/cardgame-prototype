@@ -91,7 +91,7 @@ for(const [damage,life] of [[29,1],[30,0]]){
  choose(g,a.id);choose(g,b.id);
  assert.deepEqual(g.state.p1.structures.map(c=>c.type),['設置物','設置物']);
  assert(g.state.p1.structures.every(c=>c.shieldLink&&!c.onEnter));
- const next=put(g,'sbws3','extra');assert(!g.playStatus(next,'p1').ok);
+ const next=put(g,'sbws3','extra');assert(g.playStatus(next,'p1').ok);
  g.turn.sequence++;
  const stocks=g.state.p1.stacks.length;
  const original=summon(g,'sbws3','links',[a,b],'signi-2');
@@ -146,7 +146,7 @@ for(const [damage,life] of [[29,1],[30,0]]){
  assert(!g.beginWhiteAbility(baronne.id,'baronneDestroy').ok);
  const used=put(g,'wn2','trash');
  yes(g.beginWhiteAbility(baronne.id,'baronneRecover'));choose(g,used.id);
- assert.equal(g.locate(baronne.id).z,'extra');
+ assert.equal(g.locate(baronne.id).z,'trash');
  assert.equal(g.locate(used.id).z,'structures');
 }
 {
@@ -180,7 +180,111 @@ for(const [damage,life] of [[29,1],[30,0]]){
  const n=(section)=>design[section].reduce((sum,e)=>sum+e.count,0);
  assert.equal(n('main'),40);assert.equal(n('sideboard'),11);assert.equal(n('shields'),5);
  assert(design.stacks.every(c=>c==='白'));assert.equal(design.stacks.length,15);
- assert(Decks.validate(design).some(error=>error.includes('ギャラクシー・シールド')));
- assert(!Decks.advancedBotIds.includes('whiteAdvanced'));
+ assert.deepEqual(Decks.validate(design),[]);
+ assert(Decks.advancedBotIds.includes('whiteAdvanced'));
 }
 console.log('PASS white advanced draft deck, payment colors, lethal shields, link effects and synchro/fusion chain');
+
+for(const [top,install,full] of [
+ [['nn3','nn5'],false,false],
+ [['wn2','nn5'],true,false],
+ [['wn2','wn6'],true,false],
+ [['wn2','nn5'],false,true],
+ [['wn2'],true,false],
+ [[],false,false]
+]){
+ const g=fixture();g.state.p1.main=[];
+ if(full)for(let i=0;i<4;i++)put(g,'wn2','structures');
+ const [a,b]=top.map(key=>put(g,key,'main'));
+ const galaxy=put(g,'wr9');use(g,galaxy);
+ if(install){
+  assert.equal(g.operation.choice,'galaxyInstall');choose(g,a.id);
+  assert.equal(g.locate(a.id).z,'structures');
+  if(b){choose(g,b.id);assert.equal(g.locate(b.id).z,'hand');}
+ }else if(a){
+  assert.equal(g.operation.choice,'galaxyHand');choose(g,a.id);
+  assert.equal(g.locate(a.id).z,'hand');assert.equal(g.locate(b.id).z,'trash');
+ }
+ assert.equal(g.operation,null);
+}
+{
+ const g=fixture(),baronne=put(g,'sbwo1','signi-1');
+ const fortress=put(g,'sbru4','trash'),charger=put(g,'sbws1','extra');
+ g.state.p1.main=[];
+ use(g,charger);assert(g.sideSpent('p1'));
+ const stocks=g.state.p1.stacks.length, mana=g.paymentSources('p1').length;
+ yes(g.beginWhiteAbility(baronne.id,'baronneRecover'));choose(g,fortress.id);
+ assert(g.expansionCandidates().some(c=>c.id==='front'));
+ choose(g,'sbru1-2');choose(g,'signi-1');
+ assert.equal(fortress.name,'超戦覇龍 ガイNEXT');assert.equal(fortress.attack,12);
+ assert.equal(g.state.p1.stacks.length,stocks);assert.equal(g.paymentSources('p1').length,mana);
+ g.destroyUnit(fortress.id,'テスト');
+ assert.equal(g.locate(fortress.id).z,'extra');assert.equal(fortress.key,'sbru4');assert(!fortress.awakened);
+}
+{
+ const g=fixture();put(g,'wo1','signi-7','p2');
+ const hand=put(g,'wn4');use(g,hand,'signi-1');assert.equal(g.locate(hand.id).z,'trash');
+ const strong=put(g,'nn5');strong.attack=4;use(g,strong,'signi-1');assert.equal(g.locate(strong.id).z,'signi-1');
+ const baronne=put(g,'sbwo1','signi-2');
+ yes(g.beginWhiteAbility(baronne.id,'baronneRecover'));choose(g,hand.id);choose(g,'signi-2');
+ assert.equal(g.locate(hand.id).z,'signi-2');
+ const a=put(g,'wn4','signi-3'),b=put(g,'wn5','signi-4');
+ summon(g,'sbws4','synchro',[a,b],'signi-3');choose(g,'done');
+}
+{
+ const g=fixture();g.state.p1.main=[];
+ const fox=put(g,'wn4','trash'),rabbit=put(g,'wn5','trash');
+ const links=[put(g,'wn6','trash'),put(g,'wn6','trash')];
+ const phantom=put(g,'sbws4','trash'),original=put(g,'sbws3','extra'),judgment=put(g,'sbwu2','trash');
+ function reSummon(card,mode,materials,slot){
+  yes(g.beginPayment(card.id));choose(g,mode);
+  for(const m of materials)choose(g,m.id);
+  choose(g,slot);assert.equal(g.locate(card.id).z,slot);
+ }
+ for(let round=0;round<2;round++){
+  g.turn.sequence++;g.state.p1.energy.forEach(c=>c.rest=false);
+  const serpent=put(g,'wu3');use(g,serpent,'signi-1');
+  for(const card of [fox,rabbit,phantom,judgment])choose(g,card.id);
+  assert.equal(g.locate(phantom.id).z,'extra');assert.equal(g.locate(judgment.id).z,'extra');
+  assert.deepEqual(new Set(g.state.p1.main),new Set([fox,rabbit]));
+  choose(g,'done');for(const link of links)choose(g,link.id);choose(g,'done');
+  yes(g.beginSerpent(serpent.id));
+  for(const [i,card] of [rabbit,fox].entries()){
+   choose(g,card.id);yes(g.chooseSlot('signi-'+(i+1)));yes(g.confirmSideFree());choose(g,links[i].id);
+  }
+  assert.equal(g.life.p1,22+round*2);
+  reSummon(phantom,'synchro',[fox,rabbit],'signi-1');
+  choose(g,fox.id);choose(g,rabbit.id);
+  assert(g.state.p1.structures.every(c=>c.shieldLink&&!c.onEnter));
+  const stocks=g.state.p1.stacks.length;
+  reSummon(original,'links',[fox,rabbit],'signi-2');choose(g,'done');
+  assert.equal(g.state.p1.stacks.length,stocks);
+  reSummon(judgment,'synchro',[phantom,original],'signi-1');
+  assert(!g.sideSpent('p1'));
+  g.destroyUnit(judgment.id,'テスト');
+  assert.equal(g.locate(judgment.id).z,'trash');assert.equal(g.locate(original.id).z,'extra');
+  for(const card of [fox,rabbit,...links,phantom,original,judgment,serpent]){
+   assert.equal(Object.values(g.state.p1).flat().filter(c=>c.id===card.id).length,1);
+  }
+ }
+}
+console.log('PASS Galaxy Shield, Baronne back face, hand-only 5000SW, and two same-instance Judgment Dragon chains');
+{
+ const g=fixture(),leader=g.character('p1'),before=g.state.p1.stacks.length;
+ leader.level=0;
+ yes(g.healLife('p1',1));yes(g.healLife('p1',1));
+ assert.equal(g.state.p1.stacks.length,before+1);
+ g.turn.sequence++;leader.level=4;
+ yes(g.healLife('p1',1));
+ assert.equal(g.state.p1.stacks.length,before+2);
+ const enemy=put(g,'nn5','signi-1','p2'),life=g.life;
+ g.destroyUnit(enemy.id,'テスト');
+ assert.deepEqual(g.life,life);
+ assert.equal(g.costBreakdown(cards.ws10,'p1').level4,0);
+}
+{
+ const g=fixture(),fusion=put(g,'sbws3','extra');
+ for(let i=1;i<=7;i++)put(g,'nn3','signi-'+i);
+ put(g,'wn2','structures');put(g,'wn2','structures');
+ assert(!g.playStatus(fusion,'p1').ok,'リンクだけでは満杯の盤面に空き枠を作れない');
+}

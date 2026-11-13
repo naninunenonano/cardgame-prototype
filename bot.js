@@ -89,6 +89,7 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
  else if(c.key==='nr5')score=me.units.length?35+(me.units.some(c=>c.key==='nl1')&&canRefill?20:0):-100;
  else if(c.key==='nr6')score=me.units.some(c=>c.key==='nl1')?75:enemy.units.length<me.units.length?35:5;
  else if(c.key==='br2')score=me.structures.length<3?20:3;
+ else if(c.key==='wr9')score=me.counts.main>3?(me.shieldLinkCount<4?43:20):-100;
  else if(c.key==='br1'||c.key==='bl1'||c.key==='bn7')score=canRefill?(me.hand.some(x=>x.key==='bs1')&&me.hand.length<10?45:me.hand.length<6?35:8):-100;
  else if(c.key==='bn5')score=me.units.length<5?40:5;
  else if(c.key==='bn1')score=enemy.units.length||enemy.structures.length?(danger?65:12):-100;
@@ -247,7 +248,7 @@ function decide(v){
   if(o.kind==='gravePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card)+(o.miseryTrigger&&me.blackBeginner&&!s.card.rest?50:0)-(o.miseryTrigger&&s.card.key==='ks14'?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'gravePlace'};}
 
   if(o.kind==='rulePayment')return {type:'rulePay'};
-  if(o.kind==='expansionChoice'&&['judgmentConvert','judgmentStop','baronneDestroy','baronneRecover','baronneSlot'].includes(o.choice)){
+  if(o.kind==='expansionChoice'&&['judgmentConvert','judgmentStop','baronneDestroy','baronneRecover','baronneFace','baronneSlot','galaxyInstall','galaxyHand'].includes(o.choice)){
    const choices=o.candidates.filter(c=>c.id!=='done'&&(!['judgmentConvert','baronneDestroy'].includes(o.choice)||c.owner!==p||o.choice==='judgmentConvert'&&c.zone==='trash'));
    return {type:'expansion',id:best(choices,c=>o.choice==='judgmentStop'?-total(c):unitValue(c)+total(c))?.id||'done'};
   }
@@ -366,7 +367,7 @@ function decide(v){
   if(me.redAbilityReady&&(me.character.level===4||v.turn.step==='main1'&&me.units.some(c=>c.sick&&!c.speedAttacker&&!c.rest&&!c.cannotAttack)))return {type:'characterAbility'};
   if(me.rituelReady?.length&&v.turn.step==='main2'&&(me.counts.main>2||me.life<me.maxLife))return {type:'rituel',id:me.rituelReady[0]};
   if(me.whiteAdvanced){
-   const ability=me.whiteAbilities?.find(a=>a.ability==='judgmentConvert'&&me.shieldLinkCount<4||a.ability==='baronneDestroy'&&(enemy.units.length||enemy.structures.length));
+   const ability=me.whiteAbilities?.find(a=>a.ability==='judgmentConvert'&&a.hasEnemyOrTrash&&me.shieldLinkCount<4||a.ability==='baronneDestroy'&&a.hasEnemyOrTrash);
    if(ability)return {type:'whiteAbility',...ability};
    const serpent=me.units.find(c=>c.serpentAbility);
    if(serpent&&me.units.length<=6&&me.counts.main>2)return {type:'serpent',id:serpent.id};
