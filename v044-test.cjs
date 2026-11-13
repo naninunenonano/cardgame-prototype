@@ -1,4 +1,3 @@
-const { holdUnavailable }=require('./test-fixtures.cjs');
 'use strict';
 const assert=require('node:assert/strict');
 const {create}=require('./game');
@@ -38,12 +37,14 @@ function use(g,c,slot,target){
  pass(g);
 }
 assert.equal(cards.sbwl1.cost.白,4);
-assert.equal(awakened['sbwl1-2'].attack,7);
+assert.equal(awakened['sbwl1-2'].attack,9);
 assert.deepEqual(awakened['sbwl1-2'].symbols,{白:1});
 assert(!Packs.pool().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
 assert(!Decks.available().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
-holdUnavailable(['sbwl1'],'Crest token creation, awakening, and escape',()=>{
+{
  const g=setup();
+ const leader=put(g,'eira','p1','lrig');leader.level=2;
+ for(let i=0;i<4;i++)g.state.p1.stacks.push(g.card('白ストック','ストック','白',null,false,'p1'));
  const crest=put(g,'sbwl1','p1','extra');
  use(g,crest);
  assert.equal(g.locate(crest.id).z,'structures');
@@ -53,17 +54,17 @@ holdUnavailable(['sbwl1'],'Crest token creation, awakening, and escape',()=>{
  const tokens=g.fieldCards('p1').filter(c=>c.key==='t10');
  assert.equal(tokens.length,2);
  for(const t of tokens)assert(t.cannotAttack&&t.abilities.includes('ブロッカー'));
- for(const key of ['wn1','wn2','ws5','wl2'])use(g,put(g,key));
+ for(const key of ['wn1','wn2','ws5','wl2','wn6'])use(g,put(g,key));
  assert.equal(g.locate(crest.id).card.faceId,'sbwl1-2');
  assert.equal(g.shieldLinkCount('p1'),0);
  assert.equal(g.symbols('p1').白,1);
- assert.equal(crest.health,7);
+ assert.equal(crest.health,9);
  const link=put(g,'wn2','p1','structures');
  crest.health=1;
  g.destroyUnit(crest.id);
  assert.equal(g.operation.choice,'neverendEscape');
  yes(g.resolveExpansion(link.id));
- assert.equal(crest.health,7);
+ assert.equal(crest.health,9);
  assert.equal(g.locate(link.id).z,'trash');
  put(g,'wn2','p1','structures');
  g.destroyUnit(crest.id);
@@ -72,7 +73,7 @@ holdUnavailable(['sbwl1'],'Crest token creation, awakening, and escape',()=>{
  assert.equal(crest.name,'始まりの紋章');
  g.destroyUnit(tokens[0].id);
  assert(!g.locate(tokens[0].id));
-});
+}
 {
  const g=setup();
  const target=put(g,'nn3','p2','signi-1');

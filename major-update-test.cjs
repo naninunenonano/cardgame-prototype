@@ -104,7 +104,7 @@ test('symbols and level 4 give no common discount; 5000VT keeps its own',()=>{
  const c=add(g,'nn3','p1','signi-1');c.symbols={青:10,赤:10};
  g.character('p1').level=4;
  const rage=g.fromDefinition('rn16','p1');
- assert.deepEqual(g.effectiveCost(rage,'p1'),Mana.cost(1,{赤:2}));
+ assert.deepEqual(g.effectiveCost(rage,'p1'),Mana.cost(2,{赤:1}));
  const vt=g.fromDefinition('bo1','p1');
  assert.deepEqual(g.effectiveCost(vt,'p1'),Mana.cost(6,{青:1}));
 });
@@ -347,7 +347,7 @@ function moltMatch(){
 test('Molt NEXT is a standalone OR with printed costs and free own equipment deployment',()=>{
  const {g}=moltMatch(),def=Cards.cards.sbru1;
  assert.equal(def.rarity,'OR');assert.equal(def.faceIds,undefined);
- assert.deepEqual(def.cost,Mana.cost(4,{赤:3}));
+ assert.deepEqual(def.cost,Mana.cost(6,{赤:1}));
  const molt=add(g,'sbru1','p1','hand'),ally=add(g,'nn5','p1','signi-1');
  const horn=g.state.p1.extra.find(c=>c.key==='sbrr1');
  horn.used=true;
@@ -443,7 +443,7 @@ test('retired side spells use mana from hand and preserve card-specific conditio
 });
 
 test('all ten unavailable cards stay rejected in saved decks and battle',()=>{
- const keys=['nl1','almar_sbbu1','sbbu1','almar_sbnr1','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','sbwl1'];
+ const keys=['nl1','almar_sbbu1','sbbu1','almar_sbnr1','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','wr9'];
  assert.deepEqual(Object.values(Cards.cards).filter(c=>c.unavailable).map(c=>c.key).sort(),keys.slice().sort());
  const {g,advance}=ready();
  advanceToMain(g,advance);

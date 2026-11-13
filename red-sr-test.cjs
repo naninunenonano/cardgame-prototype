@@ -12,8 +12,8 @@ function cast(g,key,method){const c=add(g,key);yes(g.beginPayment(c.id,method));
 const deck=D.preset('redBeginner');
 A.deepEqual(D.validate(deck),[]);
 A.deepEqual(deck.main.filter(x=>cards[x.key].rarity==='SR').map(x=>[x.key,x.count]),[['rs4',3],['rs5',2],['rs2',4],['rs1',3]]);
-A.deepEqual(cards.rs5.enhanceCost,require('./mana').cost(6,{赤:2}));
-A.deepEqual(cards.rs4.cost,require('./mana').cost(4,{赤:2}));
+A.deepEqual(cards.rs5.enhanceCost,require('./mana').cost(7,{赤:1}));
+A.deepEqual(cards.rs4.cost,require('./mana').cost(5,{赤:1}));
 {
  const g=fixture(), c=cast(g,'rs5');
  A.equal(c.name,'カインドクイーン・ヴァンピィ');

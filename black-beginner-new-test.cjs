@@ -33,9 +33,9 @@ for(let n=1;n<=3;n++){
 }
 for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
  const g=fixture();add(g,key,'signi-1');const hand=add(g,'ks14'),trash=add(g,'ks14','trash');
- A.equal(g.evolutionPaymentOptions(hand,'p1')[0].cost.黒,n);
- A.equal(g.evolutionPaymentOptions(trash,'p1')[0].cost.黒,n-2);
- g.state.p1.lrig.length=0;add(g,'bluesage','lrig');A.equal(g.evolutionPaymentOptions(trash,'p1')[0].cost.黒,Math.max(1,n-2));
+ A.equal(M.total(g.evolutionPaymentOptions(hand,'p1')[0].cost),n);
+ A.equal(M.total(g.evolutionPaymentOptions(trash,'p1')[0].cost),n-2);
+ g.state.p1.lrig.length=0;add(g,'bluesage','lrig');A.equal(M.total(g.evolutionPaymentOptions(trash,'p1')[0].cost),Math.max(1,n-2));
 }
 {
  const g=fixture();const a=add(g,'ks14'),b=add(g,'ks14','trash'),c=add(g,'ks14','trash');

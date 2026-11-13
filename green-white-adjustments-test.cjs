@@ -27,8 +27,8 @@ const zone=(g,c)=>g.locate(c.id)?.z;
 
 {
  const g=game(),dragon=put(g,'gs1','p1','signi-1'),foe=put(g,'nn4','p2','signi-1');
- A.equal(dragon.attack,10);A.equal(dragon.maxHealth,10);A.deepEqual(dragon.cost,M.cost(4,{緑:6}));
- A.deepEqual(g.effectiveCost(put(g,'gs1'),'p1'),M.cost(4,{緑:6}));
+ A.equal(dragon.attack,10);A.equal(dragon.maxHealth,10);A.deepEqual(dragon.cost,M.cost(9,{緑:1}));
+ A.deepEqual(g.effectiveCost(put(g,'gs1'),'p1'),M.cost(9,{緑:1}));
  g.turn.step='attack';dragon.sick=true;dragon.enteredTurn=g.turn.counts.p1;
  A(!g.attackTargets(dragon.id).some(x=>x.id==='body'));
  yes(g.declareAttack(dragon.id,foe.id));settle(g);A.equal(g.life.p2,20-(10-foe.maxHealth));

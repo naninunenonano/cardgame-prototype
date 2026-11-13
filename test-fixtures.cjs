@@ -48,10 +48,10 @@ module.exports.growthFixture=function growthFixture(game,player='p1'){
 
 module.exports.checkCardPool=function checkCardPool(){
  const assert=require('node:assert/strict'),{cards,evolutionSeries}=require('./cards'),{pool}=require('./packs'),registry=require('./id-registry');
- const added=['sbru2','sbrs2','sbru3','sbrr1','sbrr2','sbrn1','shnr7','shnr8','shnr9','sbru4'];
+ const added=['sbru2','sbrs2','sbru3','sbrr1','sbrr2','sbrn1','shnr7','shnr8','shnr9','sbru4','shnu1','ws10','wr8','ws11','wn6','wr9','wu3','sbws1','sbws2','sbws3','sbwo1','sbws4','sbwu2'];
  const base=registry.entries.filter(e=>!e.retired&&e.baseId!=='sbnl1').map(e=>e.baseId).concat(added);
  assert.deepEqual(Object.keys(cards).sort(),base.sort());
- const excluded=['nl1','nr1','nr4','nr5','nr6','almar_sbbu1','sbbu1','almar_sbnr1','nn2','nn3','nn4','nn5','nn6','nn7','nn8','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','sbwl1'];
+ const excluded=['nl1','nr1','nr4','nr5','nr6','almar_sbbu1','sbbu1','almar_sbnr1','nn2','nn3','nn4','nn5','nn6','nn7','nn8','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','wr9'];
  const expected=base.filter(key=>!key.match(/^t\d+$/)&&!excluded.includes(key));
  for(const series of Object.values(evolutionSeries))if(series.key!==series.characterId)expected.push(series.key);
  assert.deepEqual(pool().map(c=>c.key).sort(),expected.sort());

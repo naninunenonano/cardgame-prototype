@@ -61,7 +61,7 @@ function install(M,cards,awakened){
   cost:M.cost(0,{白:1})
  };
  cards.wn4={
-  key:"wn4", name:"クラッシュ・フォックス", rarity:"N", color:"白", type:"通常",
+  key:"wn4", name:"スネークアイ・フォックス", rarity:"N", color:"白", type:"通常",
   civilizations:["白"], deckLimit:3, symbols:{},
   attack:1, maxHealth:2,
   abilities:[],
@@ -73,7 +73,7 @@ function install(M,cards,awakened){
   cost:M.cost(1,{白:1})
  };
  cards.wn5={
-  key:"wn5", name:"クラッシュ・ラビット", rarity:"N", color:"白", type:"通常",
+  key:"wn5", name:"スネークアイ・ラビット", rarity:"N", color:"白", type:"通常",
   civilizations:["白"], deckLimit:3, symbols:{},
   attack:1, maxHealth:2,
   abilities:[],
@@ -210,7 +210,7 @@ function install(M,cards,awakened){
  cards.t14={...white,key:'t14',name:'レ・フィーエ専用シールドリンク・トークン',type:'設置物',cost:M.cost(4),symbols:{白:1},token:true,shieldLink:true,indestructible:true,untargetable:true,onEnter:[{kind:'refieLinkEnter'}],onBattleStart:[{kind:'healTeam',count:1}],text:'設置時、自分のライフと全クリーチャーを1回復。同名が既にあれば新しいトークンを消滅させ1ドロー。自分のバトルフェイズ開始時、自分のライフと全クリーチャーを1回復。破壊されず、相手の効果で選ばれない。'};
  cards.wr7={...white,key:'wr7',name:'聖域の審判',type:'呪文',cost:M.cost(0,{白:1}),onUse:[{kind:'sanctuaryJudgment'}],text:'自分のシールドリンク1枚を選び、そのコストの2倍のダメージを相手クリーチャー1体に与える。'};
  cards.eira={
-  key:'eira',name:'エイラ',type:'キャラクター',color:'白',civilizations:['白'],rarity:'UR',
+  key:'eira',name:'蛇眼姫 リゼリア',type:'キャラクター',color:'白',civilizations:['白'],rarity:'UR',
   level:0,cost:M.cost(1),sideboardOnly:true,deckLimit:1,symbols:{},abilities:[],growthOnly:true,
   onUse:[],onEnter:[],onDefeat:[],
   characterEffects:{1:[{kind:'draw',count:1}],2:[],3:[],4:[]},
@@ -221,7 +221,7 @@ function install(M,cards,awakened){
    4:'自分のターンに1回、ライフを1回復できる。回復時に1/1・マッハファイターのトークンを出す（各ターン最大5回）。そのトークンが破壊されると相手に1ダメージ、自分を1回復。相手クリーチャーの破壊時は相手に3ダメージ、自分を3回復。トークンはターン終了時に消滅。サイドボードの不特定コスト3軽減。'
   },text:'回復に連動するキャラクター。現在レベルの能力のみ有効。'
  };
- cards.t11={key:'t11',name:'エイラのトークン',type:'通常',color:'白',civilizations:['白'],cost:null,
+ cards.t11={key:'t11',name:'蛇眼姫 リゼリアのトークン',type:'通常',color:'白',civilizations:['白'],cost:null,
   attack:1,maxHealth:1,symbols:{},abilities:['マッハファイター'],machFighter:{duration:'entryTurn'},
   token:true,eiraToken:true,onEnter:[],text:'ターン終了時に消滅する。'};
 

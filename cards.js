@@ -143,6 +143,40 @@
  Object.assign(c.rn16,{speedAttacker:true,cost:M.cost(1,{赤:2}),text:'スピードアタッカー。'+c.rn16.text});
  c.rn20.cost=M.cost(2,{赤:1});
  const add=(key,definition)=>c[key]={key,baseId:key,faceId:key,abilities:[],symbols:{},onEnter:[],onUse:[],onDeath:[],onDefeat:[],...definition};
+ const white=(key,definition)=>add(key,{color:'白',civilizations:['白'],...definition});
+ const whiteMana=n=>M.cost(n-1,{白:1});
+ for(const key of ['wn4','wn5'])c[key].snakeEye=true;
+ white('ws10',{name:'スネークアイ・キャット',rarity:'SR',type:'通常',snakeEye:true,cost:whiteMana(4),attack:3,maxHealth:4,
+  onEnter:[{kind:'ownLinkDestroy'},{kind:'destroyUnitTarget'}],text:'登場時、自分のシールドリンク1枚を破壊。その後、相手クリーチャー1体を破壊。'});
+ white('wr8',{name:'スネークアイ・ドッグ',rarity:'R',type:'通常',snakeEye:true,cost:whiteMana(2),attack:1,maxHealth:2,
+  onEnter:[{kind:'ownLinkDestroy'},{kind:'damagePlayer',amount:2}],text:'登場時、自分のシールドリンク1枚を破壊。その後、相手に2ダメージ。'});
+ white('ws11',{name:'蛇眼神殿',rarity:'SR',type:'設置物',shieldLink:true,cost:whiteMana(3),
+  onStructureDestroy:[{kind:'templeRestore'}],text:'破壊時、自分のトラッシュから蛇眼神殿以外のシールドリンク1枚を設置する。'});
+ white('wn6',{name:'リアクティブ・シールド',rarity:'N',type:'設置物',shieldLink:true,cost:whiteMana(1),
+  onStructureDestroy:[{kind:'reactiveShield'}],text:'破壊時、ランダムな相手クリーチャー1体に3ダメージ。'});
+ white('wr9',{name:'ギャラクシー・シールド',rarity:'R',type:'設置物',shieldLink:true,cost:whiteMana(4),
+  unavailable:'山札上2枚からシールドリンクを設置できない場合の処理が未確定。',
+  text:'登場時、山札上2枚からシールドリンク1枚を設置する。その後、残りから1枚を手札に加え、残りをトラッシュに置く。'});
+ white('wu3',{name:'蛇眼の大蛇（仮称）',rarity:'UR',type:'通常',snakeEye:true,cost:whiteMana(8),attack:4,maxHealth:7,
+  serpentAbility:true,onEnter:[{kind:'serpentRecycle'}],text:'登場時、自分のトラッシュからクリーチャーを任意の枚数山札に戻し、その枚数以下の合計コストとなるようトラッシュからシールドリンクを設置する。自分のターンに自身を除外して、山札からコスト2以下のスネークアイを最大2体出す。'});
+ const whiteSide=(key,definition)=>white(key,{sideboardOnly:true,cardSection:'sideboard',...definition});
+ whiteSide('sbws1',{name:'スネークアイ・チャージャー',rarity:'SR',type:'呪文',snakeEye:true,charger:true,cost:M.cost(0),stackCost:M.cost(0),
+  onUse:[{kind:'snakeCharger'}],text:'白ストックトークン1個を得る。山札上3枚を公開し、スネークアイとシールドリンクを手札へ、残りを山札の下へ。'});
+ Object.assign(c.sbwl1,{rarity:'OR',shieldLink:false,stackCost:M.cost(0,{白:4}),
+  text:'設置時、ラ・ウラ・ギガを2体出す。自分のシールドリンクが5枚あればすべて破壊し、真・天命王 ネバーエンドへ龍解。'});
+ Object.assign(forms['sbwl1-2'],{rarity:'OR',cost:whiteMana(13),attack:9,maxHealth:9,speedAttacker:true,
+  text:'スピードアタッカー。ブロッカー。破壊される時、代わりに自分のシールドリンク1枚を破壊し、全回復してアンタップしてもよい。'});
+ c.t10.cost=whiteMana(1);
+ const special=(key,name,rarity,cost,attack,maxHealth,specialSummon,extra)=>whiteSide(key,
+  {name,rarity,cost:whiteMana(cost),attack,maxHealth,specialSummon,type:'通常',...extra});
+ special('sbws2','フォーミュラ・シンクロン','SR',2,2,2,'synchro',{onEnter:[{kind:'draw',count:1}],text:'シンクロ。登場時に1枚引く。'});
+ special('sbws3','蛇眼の原罪龍','SR',8,6,6,'fusion',{snakeEye:true,onEnter:[{kind:'fusionRecover'}],
+  text:'融合。スネークアイ2体と無色ストック1個、またはシールドリンク2枚。登場時、自分のトラッシュのシールドリンク1枚を任意で回収。'});
+ special('sbwo1','フルール・ド・バロネス','OR',10,7,9,'synchro',{
+  baronne:true,text:'シンクロ。自分のターンに各1回、自身を破壊してトラッシュのカードを無料使用、または場の1枚を破壊。場にいる間1回、対抗魔術と同様に相手の行動を無効にできる。'});
+ special('sbws4','スネークアイ・ファントム','SR',4,2,4,'synchro',{snakeEye:true,onEnter:[{kind:'phantomLinks',remaining:2}],text:'シンクロ。登場時、トラッシュのスネークアイ・クリーチャーを最大2枚、能力のないシールドリンクとして設置。'});
+ special('sbwu2','蛇眼の断罪龍','UR',12,7,15,'synchro',{snakeEye:true,
+  judgmentDragon:true,text:'シンクロ。お互いのターンに各1回、場・トラッシュの1枚を能力のないシールドリンクとして設置。相手ターンに1回、攻撃時にリンクを破壊して攻撃クリーチャーを破壊。離場時、トラッシュの蛇眼の原罪龍をサイドへ戻す。'});
  const equip=(key,name,rarity,count,equipment,face,description)=>{
   add(key,{name,rarity,color:'赤',type:'設置物',sideboardOnly:true,cardSection:'sideboard',cost:M.cost(0),stackCost:M.cost(0,{赤:count}),equipment,faceIds:[key,face],text:description});
  };
@@ -161,6 +195,9 @@
  equip('sbrr2','熱血剣 グリージーホーン','R',1,'greasy','sbrr2-2','装備先にマッハファイター。自分の終了時に装備先が横向きなら龍解。');
  dragon('sbrr2-2','熱血龍 リトルビッグホーン',5,4,3,{machFighter:{duration:'entryTurn'},text:'マッハファイター。'});
  add('sbrn1',{name:'ネクスト・チャージャー',color:'赤',rarity:'N',type:'呪文',cardSection:'sideboard',sideboardOnly:true,charger:true,cost:M.cost(0),stackCost:M.cost(0),onUse:[{kind:'nextCharger'}],text:'任意で手札をすべて好きな順番で山札の下へ置き、同じ枚数引く。どちらの場合も使用後に赤ストック1個を獲得。'});
+ add('shnu1',{name:'反撃の一手',rarity:'UR',type:'シールドカード',color:'無色',cardSection:'shields',deckSection:'shields',cost:null,
+  shieldRule:{event:'lethal',effect:'counterMove'},text:'ライフが0以下になるダメージを受けた時、ライフを1にし、キャラクターと同じ色のストックを5個得る。このターン、ライフは減少しない。'});
+ catalog.shieldKeys.push('shnu1');
  for(const [key,name,event,effect,text] of [
   ['shnr7','力の温存','damaged','reserveStacks','ダメージを受けた時、キャラクターと同じ色のストックを2個得る。'],
   ['shnr8','力の解放','attackDeclared','releaseStacks','相手の攻撃時、任意色のストック5個で攻撃クリーチャーを破壊し、さらに相手のクリーチャー1体を任意で破壊。'],
@@ -176,7 +213,7 @@
   text:'自分の赤クリーチャーすべてにSA。自分の赤クリーチャーがアンタップした時、超戦覇龍 ガイNEXTへ龍解。'});
  const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','almar_sbnr1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
  for(const card of Object.values(c)){
-  if(card.sideboardOnly&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
+  if(card.sideboardOnly&&card.type!=='キャラクター'&&!card.specialSummon&&!card.stackCost&&!card.unavailable){
    if(eligibleLegacySide.has(card.key))card.unavailable='色付きストック支払い条件が未確定。';
    else{
     Object.assign(card,{sideboardOnly:false,mainDeckOnly:true,cardSection:'main',deckSection:'main'});
@@ -185,5 +222,11 @@
   }
  }
  catalog.sideboardPreset=catalog.sideboardPreset.filter(e=>c[e.key]?.sideboardOnly&&!c[e.key].unavailable);
+ for(const card of Object.values(c)){
+  if(card.type==='キャラクター'||card.sideboardOnly)continue;
+  for(const field of ['cost','enhanceCost','flashbackCost','fushigiCost']){
+   if(card[field])card[field]=M.cardCost(card[field],card);
+  }
+ }
  return (typeof module==='object'&&module.exports?require('./character-series.js'):globalThis.CharacterSeries).install(catalog);
 });

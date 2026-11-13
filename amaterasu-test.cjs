@@ -10,8 +10,8 @@ assert.equal(cards.bs2.attack,2);
 assert.equal(cards.bs2.maxHealth,2);
 assert.deepEqual(cards.bs2.abilities,['ブロッカー']);
 assert.equal(cards.bs2.rarity,'SR');
-assert.equal(cards.bs2.cost.青,2);
-assert.equal(cards.bs2.cost.generic,2);
+assert.equal(cards.bs2.cost.青,1);
+assert.equal(cards.bs2.cost.generic,3);
 assert.deepEqual(cards.bs2.symbols,{青:1});
 assert.deepEqual(Decks.validate(Decks.preset('blueBeginner')),[]);
 function fixture(){
