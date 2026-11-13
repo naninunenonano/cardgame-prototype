@@ -43,7 +43,7 @@ assert(!Packs.pool().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
 assert(!Decks.available().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
 {
  const g=setup();
- const leader=put(g,'eira','p1','lrig');leader.level=2;
+ const leader=put(g,'eira','p1','lrig');leader.level=3;
  for(let i=0;i<4;i++)g.state.p1.stacks.push(g.card('白ストック','ストック','白',null,false,'p1'));
  const crest=put(g,'sbwl1','p1','extra');
  use(g,crest);
@@ -124,38 +124,15 @@ assert(!Decks.available().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
 }
 {
  const g=setup({p1:'whiteBeginner',p2:'blueBeginner'});
- const eira=g.character('p1')||put(g,'eira','p1','lrig');
- assert.equal(eira.level,0);
- const grow=level=>{
-  g.turn.counts.p1++;g.turn.sequence++;
-  for(const mana of g.state.p1.energy)mana.rest=false;
-  yes(require('./test-fixtures.cjs').growthFixture(g));pass(g);g.turn.step='main1';
-  while(g.operation){const actor=g.decisionPlayer();yes(g.dispatch(Bot.decide(g.observe(actor)),actor));}
-  assert.equal(g.character('p1').level,level);
- };
- const heal=()=>use(g,put(g,'nr1'));
- yes(g.setLife('p1',15));
- grow(1);heal();assert.equal(g.life.p2,20);
- grow(2);heal();assert.equal(g.life.p2,18);
- const first=put(g,'nn9','p2','signi-1');
- heal();assert.equal(g.operation.choice,'enemyDamage');yes(g.resolveStarter(first.id));
- assert.equal(first.health,2);
- grow(3);heal();assert.equal(g.operation.choice,'eiraDestroy');yes(g.resolveStarter(first.id));
- assert.equal(g.locate(first.id).z,'trash');assert.equal(g.life.p2,17);
- const next=put(g,'nn9','p2','signi-1');
- yes(g.setLife('p1',20));heal();assert.equal(g.locate(next.id).z,'signi-1');
- grow(4);
- yes(g.setLife('p1',10));yes(g.beginCharacterAbility('p1'));
- const token=g.fieldCards('p1').find(c=>c.key==='t11');
- assert(token);assert.equal(token.attack,1);assert(!g.beginCharacterAbility('p1').ok);
- g.destroyUnit(token.id);assert.equal(g.life.p2,16);assert.equal(g.life.p1,12);
- g.destroyUnit(next.id);assert.equal(g.life.p2,16);assert.equal(g.life.p1,12);
- for(let n=0;n<6;n++){yes(g.setLife('p1',10));heal();}
- assert.equal(eira.eiraTokens,5);
- const before=g.life.p2;
- g.turn.step='main2';g.turn.notBefore=0;yes(g.advance());
- assert(!g.fieldCards('p1').some(c=>c.key==='t11'));assert.equal(g.life.p2,before);
- console.log('PASS エイラ Lv0〜Lv4、回復誘発、5回上限、終了時消滅');
+ const eira=g.character('p1');
+ for(const [index,cost] of [1,2,3,4].entries()){
+  g.turn.sequence++;
+  g.turn.step='levelUp';
+  assert.equal(g.growStatus('p1').nextCost,cost);
+  yes(require('./test-fixtures.cjs').growthFixture(g));pass(g);
+  assert.equal(eira.level,index+1);
+ }
+ console.log('PASS リゼリアの成長コストとLv0〜Lv4');
 }
 console.log('PASS Mother, Apache, character abilities and beginner decks');
 for(const id of Decks.selectableBeginnerBotIds){

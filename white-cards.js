@@ -211,20 +211,20 @@ function install(M,cards,awakened){
  cards.wr7={...white,key:'wr7',name:'聖域の審判',type:'呪文',cost:M.cost(0,{白:1}),onUse:[{kind:'sanctuaryJudgment'}],text:'自分のシールドリンク1枚を選び、そのコストの2倍のダメージを相手クリーチャー1体に与える。'};
  cards.eira={
   key:'eira',name:'蛇眼姫 リゼリア',type:'キャラクター',color:'白',civilizations:['白'],rarity:'UR',
-  level:0,cost:M.cost(1),sideboardOnly:true,deckLimit:1,symbols:{},abilities:[],growthOnly:true,
+  level:0,growthCosts:{1:1,2:2,3:3,4:4},cost:M.cost(1),sideboardOnly:true,deckLimit:1,symbols:{},abilities:[],growthOnly:true,
   onUse:[],onEnter:[],onDefeat:[],
   characterEffects:{1:[{kind:'draw',count:1}],2:[],3:[],4:[]},
   levelTexts:{
    0:'自分のターンに1回、自分のライフが回復した時、白ストックトークン1個を得る。成長後も有効。',
    1:'成長時、1ドロー。',
-   2:'自分のライフ回復時、相手クリーチャー1体に2ダメージ。相手の場にクリーチャーがいなければ相手に2ダメージ。',
-   3:'各ターン1回、ライフ回復時に相手クリーチャー1体を破壊し、その攻撃力の半分（切り捨て）のダメージを相手に与える。',
-   4:'自分のターンに1回、ライフを1回復できる。回復時に1/1・マッハファイターのトークンを出す（各ターン最大5回）。そのトークンが破壊されると相手に1ダメージ、自分を1回復。トークンはターン終了時に消滅。'
+   2:'自身以外の効果でライフが回復した時、白ストック1個を支払ってもよい。支払ったらライフを2回復し、相手クリーチャー1体に2ダメージ。相手の場にクリーチャーがなければ相手に2ダメージ。この能力で破壊したら白ストック1個を得る。',
+   3:'自分のシールドリンク設置時、白ストック3個を支払ってもよい。支払ったら相手クリーチャー1体を破壊し、その攻撃力の半分（切り捨て）を相手に与える。',
+   4:'自分のメインフェイズに白ストック3個を支払い、自分のシールドリンク1枚と相手クリーチャー1体を破壊する。リンクのマナまたはストックのコスト分を相手に与え、実際に与えたダメージの半分（切り捨て）を回復する。'
   },text:'自分のターンに1回、自分のライフが回復した時、白ストックトークン1個を得る。成長後も有効。'
  };
  cards.t11={key:'t11',name:'蛇眼姫 リゼリアのトークン',type:'通常',color:'白',civilizations:['白'],cost:null,
   attack:1,maxHealth:1,symbols:{},abilities:['マッハファイター'],machFighter:{duration:'entryTurn'},
-  token:true,eiraToken:true,onEnter:[],text:'ターン終了時に消滅する。'};
+  token:true,unavailable:'旧リゼリア専用トークン。新能力では生成されません。',onEnter:[],text:'旧能力の記録。'};
 
 }
 root.WhiteCards={install};

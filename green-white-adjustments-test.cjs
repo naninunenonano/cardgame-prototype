@@ -109,9 +109,9 @@ for(const allies of [3,4]){
  const g=game();const eira=put(g,'eira','p1','lrig');eira.level=2;
  const firstAid=put(g,'shnr3','p1','shields');firstAid.faceUp=false;
  yes(g.loseLife('p1',4));settle(g);
- A(firstAid.faceUp);A.equal(g.life.p1,20);A.equal(g.life.p2,18);
+ A(firstAid.faceUp);A.equal(g.life.p1,22);A.equal(g.life.p2,18);
  const castle=put(g,'wn1','p1','structures');
- yes(g.loseLife('p1',4));settle(g);A.equal(zone(g,castle),'trash');A.equal(g.life.p1,20);
+ yes(g.loseLife('p1',4));settle(g);A.equal(zone(g,castle),'trash');A.equal(g.life.p1,22);
 }
 {
  const g=game();fund(g,'p1',8,'白');

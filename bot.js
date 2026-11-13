@@ -248,6 +248,11 @@ function decide(v){
   if(o.kind==='gravePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card)+(o.miseryTrigger&&me.blackBeginner&&!s.card.rest?50:0)-(o.miseryTrigger&&s.card.key==='ks14'?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'gravePlace'};}
 
   if(o.kind==='rulePayment')return {type:'rulePay'};
+  if(o.kind==='expansionChoice'&&o.choice.startsWith('rizeria')){
+   const choices=o.candidates.filter(c=>c.id!=='done');
+   const target=best(choices,c=>o.choice==='rizeriaLink'?total(c):unitValue(c)+(o.choice==='rizeriaLv2'&&c.health<=2?25:0));
+   return {type:'expansion',id:target?.id||'done'};
+  }
   if(o.kind==='expansionChoice'&&['judgmentConvert','judgmentStop','baronneDestroy','baronneRecover','baronneFace','baronneSlot','galaxyInstall','galaxyHand'].includes(o.choice)){
    const choices=o.candidates.filter(c=>c.id!=='done'&&(!['judgmentConvert','baronneDestroy'].includes(o.choice)||c.owner!==p||o.choice==='judgmentConvert'&&c.zone==='trash'));
    return {type:'expansion',id:best(choices,c=>o.choice==='judgmentStop'?-total(c):unitValue(c)+total(c))?.id||'done'};
@@ -361,7 +366,7 @@ function decide(v){
   if(warsla?.action)return warsla.action;
   if(me.character?.key==='lumiere'&&me.shieldLinkCount<5){if(me.character.level===3&&me.character.activeTurn!==v.turn.counts[p]&&me.hand.some(c=>c.shieldLink))return {type:'characterAbility'};if(me.character.level===4&&v.sources.length&&me.lumiereUsed.length<5)return {type:'characterAbility'};}
   if(me.guardianReady)return {type:'characterAbility'};
-  if(me.character?.key==='eira'&&me.character.level===4&&me.life<me.maxLife&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
+  if(me.rizeriaReady)return {type:'characterAbility'};
   if(me.character?.key==='ereshthianox'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
   if(me.units.some(c=>c.cardcarAbility)&&me.hand.length<3&&me.counts.main>=4){const c=me.units.find(c=>c.cardcarAbility);return {type:'cardcar',id:c.id};}
   if(me.redAbilityReady&&(me.character.level===4||v.turn.step==='main1'&&me.units.some(c=>c.sick&&!c.speedAttacker&&!c.rest&&!c.cannotAttack)))return {type:'characterAbility'};

@@ -134,6 +134,7 @@ for(const [damage,life] of [[29,1],[30,0]]){
  assert.equal(g.locate(link.id).z,'structures');
  yes(g.beginSerpent(serpent.id));choose(g,rabbit.id);yes(g.chooseSlot('signi-1'));yes(g.confirmSideFree());
  choose(g,link.id);
+ choose(g,'done');
  choose(g,fox.id);yes(g.chooseSlot('signi-2'));yes(g.confirmSideFree());
  assert.equal(g.locate(serpent.id).z,'exile');
  assert.equal(g.locate(fox.id).z,'signi-2');
@@ -251,6 +252,7 @@ for(const [top,install,full] of [
   yes(g.beginSerpent(serpent.id));
   for(const [i,card] of [rabbit,fox].entries()){
    choose(g,card.id);yes(g.chooseSlot('signi-'+(i+1)));yes(g.confirmSideFree());choose(g,links[i].id);
+   if(g.operation?.choice==='rizeriaLv2')choose(g,'done');
   }
   assert.equal(g.life.p1,22+round*2);
   reSummon(phantom,'synchro',[fox,rabbit],'signi-1');
@@ -288,3 +290,48 @@ console.log('PASS Galaxy Shield, Baronne back face, hand-only 5000SW, and two sa
  put(g,'wn2','structures');put(g,'wn2','structures');
  assert(!g.playStatus(fusion,'p1').ok,'リンクだけでは満杯の盤面に空き枠を作れない');
 }
+
+function whiteStock(g,count){
+ for(let i=0;i<count;i++)g.state.p1.stacks.push(g.card('白ストック','ストック','白',null,false,'p1'));
+}
+{
+ const g=fixture(),leader=g.character('p1');
+ leader.level=2;
+ g.state.p1.stacks=[];
+ const victim=put(g,'wn4','signi-1','p2');
+ use(g,put(g,'nr1'));assert.equal(g.operation.choice,'rizeriaLv2');
+ choose(g,victim.id);
+ assert.equal(g.locate(victim.id).z,'trash');
+ assert.equal(g.life.p1,26);
+ assert.equal(g.state.p1.stacks.length,1);
+ assert.equal(g.operation,null);
+ use(g,put(g,'nr1'));choose(g,'done');
+ assert.equal(g.life.p2,20);assert.equal(g.state.p1.stacks.length,1);
+ use(g,put(g,'nr1'));choose(g,'opponent');
+ assert.equal(g.life.p1,36);assert.equal(g.life.p2,18);
+ assert.equal(g.state.p1.stacks.length,0);
+}
+{
+ const g=fixture();g.character('p1').level=3;g.state.p1.stacks=[];whiteStock(g,6);
+ use(g,put(g,'nr1'));assert.equal(g.operation,null);
+ for(let n=0;n<2;n++){
+  const victim=put(g,'nn5','signi-1','p2');victim.attack=5;
+  use(g,put(g,'wn2'));assert.equal(g.operation.choice,'rizeriaLv3');choose(g,victim.id);
+  assert.equal(g.locate(victim.id).z,'trash');
+ }
+ assert.equal(g.life.p2,16);assert.equal(g.state.p1.stacks.length,1);
+}
+{
+ const g=fixture();g.character('p1').level=4;g.state.p1.stacks=[];whiteStock(g,6);
+ const link=put(g,'wr9','structures'),otherLink=put(g,'wn2','structures');
+ otherLink.stackCost=Mana.cost(0,{白:4});
+ for(const card of [link,otherLink]){
+  const victim=put(g,'nn5','signi-1','p2');
+  yes(g.beginCharacterAbility('p1'));choose(g,card.id);choose(g,victim.id);
+  assert.equal(g.locate(card.id).z,'trash');assert.equal(g.locate(victim.id).z,'trash');
+ }
+ assert.equal(g.life.p2,12);assert.equal(g.life.p1,24);
+ assert.equal(g.state.p1.stacks.length,1);
+ assert(!g.rizeriaReady('p1'));assert(!g.fieldCards('p1').some(c=>c.key==='t11'));
+}
+console.log('PASS リゼリアの新Lv2〜Lv4、任意発動・ストック・再誘発防止');
