@@ -124,5 +124,66 @@
  cards.gt5000.deckLimit=3;cards.vt5000.deckLimit=3;
  cards.vt5000.sideboardOnly=false;cards.vt5000.mainDeckOnly=true;delete cards.vt5000.sideboardScope;
  const catalog=(typeof module==='object'&&module.exports?require('./identity.js'):globalThis.CardIdentity).install({starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:Object.values(cards).filter(c=>c.type==='シールドカード').map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'});
+ for(const [i,cost] of [1,2,2,3].entries())characterLevels[i+1].cost=cost;
+ characterLevels[2].text='成長時・開始時：相手の手札をランダムに1枚捨てる。';
+ characterLevels[4].text='成長時：相手の手札をランダムに2枚捨てる。常時：自分の効果で相手が実際に1枚捨てるごとに1ドローし、アクア・ガードを出す。';
+ const c=catalog.cards, forms=catalog.awakened;
+ c.nl1.unavailable='個別軽減が旧シンボルを参照するため、新しい軽減条件の確認待ち。';
+ const updateText=text=>text?.replace(/（最大30）|（最大ライフまで）|。共通：サイドの不特定3軽減|。サイドの無色3軽減|。サイド無色3軽減/g,'');
+ for(const card of Object.values(c)){
+  if(card.text)card.text=updateText(card.text);
+  if(card.levelTexts)for(const level of Object.keys(card.levelTexts))card.levelTexts[level]=updateText(card.levelTexts[level]);
+ }
+
+ Object.assign(c.redcaptain,{provisional:false,growthOnly:true,characterEffects:{1:[{kind:'draw',count:1}],2:[],3:[],4:[]},
+  text:'Lv0：SAを持って登場した自分のクリーチャー1体につき赤ストック1個。成長後も有効。',
+  levelTexts:{1:'成長時：1枚引く。',2:'SAを持って登場した自分のクリーチャー1体につき1枚引き、相手に1ダメージ。',3:'自分のターンに1回、赤ストック1個で自分のクリーチャー1体にターン中SA。',4:'自分のターンに1回、赤1を含む4ストックで手札からコスト7以下のクリーチャーを無償登場。ターンに1回、攻撃で相手本体にダメージを与えた時、山札の一番上から攻撃クリーチャーのコスト以下のクリーチャーを任意で無償登場させ、SAを与える。'}
+ });
+ Object.assign(c.rn15,{speedAttacker:true,text:'スピードアタッカー。攻撃可能なら毎ターン必ず攻撃。'});
+ Object.assign(c.rn16,{speedAttacker:true,cost:M.cost(1,{赤:2}),text:'スピードアタッカー。'+c.rn16.text});
+ c.rn20.cost=M.cost(2,{赤:1});
+ const add=(key,definition)=>c[key]={key,baseId:key,faceId:key,abilities:[],symbols:{},onEnter:[],onUse:[],onDeath:[],onDefeat:[],...definition};
+ const equip=(key,name,rarity,count,equipment,face,description)=>{
+  add(key,{name,rarity,color:'赤',type:'設置物',sideboardOnly:true,cardSection:'sideboard',cost:M.cost(0),stackCost:M.cost(0,{赤:count}),equipment,faceIds:[key,face],text:description});
+ };
+ const dragon=(key,name,cost,attack,maxHealth,extra={})=>forms[key]={faceId:key,name,type:'通常',cost:M.cost(cost),attack,maxHealth,equipment:null,onEnter:[],...extra};
+ equip('sbru2','爆熱剣 バトライ刃','UR',2,'batblade','sbru2-2','赤クリーチャーに装備。装備先の攻撃時に山札上を公開し、コスト以下の赤クリーチャーなら登場。それ以外は山札の下へ。赤クリーチャーが登場したターンの終了時に龍解。');
+ c.sbru2.faceIds.push('sbru2-3');
+ forms['sbru2-2']={faceId:'sbru2-2',name:'爆熱天守 バトライ閣',equipment:null,text:'赤クリーチャーの攻撃時に山札上を公開し、コスト以下の赤クリーチャーなら登場。それ以外は山札の下へ。ターン中に赤クリーチャーが3体登場した時に龍解。'};
+ dragon('sbru2-3','爆熱DX バトライ武神',8,8,8,{onAttack:[{kind:'batdragon'}],text:'攻撃時、山札上3枚から赤クリーチャー1体を選びSAを与えて出す。残りをランダムな順で山札の下へ。'});
+ equip('sbrs2','ツインホーン','SR',3,'twinhorn','sbrs2-2','装備先はターン中に2回攻撃できる。ターン中に相手ライフを合計5以上減らした時に龍解。');
+ c.sbrs2.provisional=true;
+ dragon('sbrs2-2','ガイバーン',7,6,6,{speedAttacker:true,onEnter:[{kind:'gaiburn'}],text:'スピードアタッカー。龍解時、自身を破壊し、その後、相手に3ダメージ。'});
+ equip('sbru3','覇闘将龍剣 ガイオウバーン','UR',3,'gaiou','sbru3-2','装備先の攻撃力＋3。その後、相手クリーチャーとバトルし、装備先の体力は開始時に2以上なら1、1なら0になる。自軍のターン中2回目の戦闘勝利で龍解。');
+ dragon('sbru3-2','勝利の覇闘 ガイラオウ',7,7,7,{machFighter:{duration:'entryTurn'},onEnter:[{kind:'destroyUnitTarget'}],text:'マッハファイター。龍解時、相手クリーチャー1体を破壊。'});
+ equip('sbrr1','無敵剣 プロト・ギガハート','R',1,'gigaheart','sbrr1-2','相手のクリーチャー能力または呪文による装備先の離場を龍解で置換。');
+ dragon('sbrr1-2','最強龍 オウギンガ・ゼロ',4,4,4,{speedAttacker:true,text:'スピードアタッカー。'});
+ equip('sbrr2','熱血剣 グリージーホーン','R',1,'greasy','sbrr2-2','装備先にマッハファイター。自分の終了時に装備先が横向きなら龍解。');
+ dragon('sbrr2-2','熱血龍 リトルビッグホーン',5,4,3,{machFighter:{duration:'entryTurn'},text:'マッハファイター。'});
+ add('sbrn1',{name:'ネクスト・チャージャー',color:'赤',rarity:'N',type:'呪文',cardSection:'sideboard',sideboardOnly:true,charger:true,cost:M.cost(0),stackCost:M.cost(0),onUse:[{kind:'nextCharger'}],text:'任意で手札をすべて好きな順番で山札の下へ置き、同じ枚数引く。どちらの場合も使用後に赤ストック1個を獲得。'});
+ for(const [key,name,event,effect,text] of [
+  ['shnr7','力の温存','damaged','reserveStacks','ダメージを受けた時、キャラクターと同じ色のストックを2個得る。'],
+  ['shnr8','力の解放','attackDeclared','releaseStacks','相手の攻撃時、任意色のストック5個で攻撃クリーチャーを破壊し、さらに相手のクリーチャー1体を任意で破壊。'],
+  ['shnr9','水晶の記憶','damaged','crystalMemory','ダメージを受けた時、通常デッキから好きなカード1枚を手札に加える。']
+ ]){add(key,{name,rarity:'R',type:'シールドカード',color:'無色',cardSection:'shields',deckSection:'shields',cost:null,shieldRule:{event,effect},text});catalog.shieldKeys.push(key);}
+ forms.sbnl1={...c.sbnl1,faceId:'sbnl1',trample:true,abilities:['トランブル'],text:'パラレル革命：自分の攻撃力6以上のクリーチャーの攻撃時に、交換元を除外し、同じ枠で攻撃を引き継ぐ。ストック消費なし。トランブル。'};
+ delete c.sbnl1;
+ Object.assign(c.sbnl4,{faceIds:['sbnl4','sbnl1'],alternateFace:'sbnl1',revolutionMinimumAttack:6,stackCost:M.cost(0),text:c.sbnl4.text+' ストック消費なし。'});
+ Object.assign(c.sbru1,{cardSection:'main',rarity:'OR',rarityProvisional:false});
+ delete c.sbru1.faceIds;
+ add('sbru4',{name:'闘将銀河城 ハートバーン',color:'赤',rarity:'UR',type:'設置物',cardSection:'sideboard',sideboardOnly:true,
+  heartburn:true,redSpeedAura:true,cost:M.cost(0),stackCost:M.cost(0,{赤:4}),faceIds:['sbru4','sbru1-2'],
+  text:'自分の赤クリーチャーすべてにSA。自分の赤クリーチャーがアンタップした時、超戦覇龍 ガイNEXTへ龍解。'});
+ const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','almar_sbnr1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
+ for(const card of Object.values(c)){
+  if(card.sideboardOnly&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
+   if(eligibleLegacySide.has(card.key))card.unavailable='色付きストック支払い条件が未確定。';
+   else{
+    Object.assign(card,{sideboardOnly:false,mainDeckOnly:true,cardSection:'main',deckSection:'main'});
+    delete card.sideboardScope;
+   }
+  }
+ }
+ catalog.sideboardPreset=catalog.sideboardPreset.filter(e=>c[e.key]?.sideboardOnly&&!c[e.key].unavailable);
  return (typeof module==='object'&&module.exports?require('./character-series.js'):globalThis.CharacterSeries).install(catalog);
 });

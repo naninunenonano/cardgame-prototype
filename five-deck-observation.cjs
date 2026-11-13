@@ -10,7 +10,7 @@ function setup(game,ids){
  for(const p of sides){
   const deck=Decks.preset(ids[p]);
   stats[p]=Object.fromEntries(['main','sideboard','shields'].flatMap(z=>deck[z].map(e=>[e.key,row()])));
-  for(const c of [...state[p].main,...state[p].hand,...state[p].extra,...state[p].shields]){
+  for(const c of [...state[p].main,...state[p].hand,...state[p].extra,...state[p].lrig,...state[p].shields]){
    refs.set(c.id,{p,key:c.key,main:state[p].main.includes(c)||state[p].hand.includes(c)});
    if(c.type==='キャラクター')for(let i=1;i<=4;i++)stats[p][c.key+':'+i]=row();
   }
@@ -23,8 +23,8 @@ function setup(game,ids){
    const key=c.studyKey||refs.get(c.id).key,cur=byKey.get(key)||[false,false,false];
    byKey.set(key,[cur[0]||ready,cur[1]||chosen,cur[2]||cost]);
   }
-  if(!o&&['main1','main2'].includes(v.turn.step)&&v.actor===p){
-   for(const c of [...m.hand,...m.sideboard,...m.gravePlayable,...m.mana.filter(c=>c.castFromMana)]){
+  if(!o&&['main1','main2','levelUp'].includes(v.turn.step)&&v.actor===p){
+   if(v.turn.step!=='levelUp')for(const c of [...m.hand,...m.sideboard,...m.gravePlayable,...m.mana.filter(c=>c.castFromMana)]){
     const character=c.type==='キャラクター';
     if(character)continue;
     option(c,c.canPlay,a.id===c.id&&a.type==='play',Object.hasOwn(c,'paymentPlan')&&c.paymentPlan===null&&!!c.cost);

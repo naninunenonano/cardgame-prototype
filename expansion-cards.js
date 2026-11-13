@@ -13,9 +13,13 @@ make('redManaBreaker','野蛮な侵略者','N',1,1,'赤','通常',[3,2],{onEnter
 make('scrapper','地獄スクラッパー','N',3,1,'赤','呪文',null,{instant:true,onUse:[{kind:'scrapper',remaining:5}],text:'インスタント。敵の盤面のカード1枚に1ダメージを5回順番に処理。毎回対象を選び直す。相手プレイヤーは対象外。'});
 
 make('bolmeteus','エンシェント・シルバー・ドラゴン','UR',6,1,'赤','通常',[7,7],{sideboardOnly:true,symbols:{赤:2},shieldSilence:true,text:'攻撃中、相手はシールドを使用できない。本体のライフを減らした攻撃の終了時、相手の裏向きシールド1枚を発動させず表へ。ブロック可能。'});
-make('moltNext','超戦龍覇 モルトNEXT','SSR',2,5,'赤','通常',[5,6],{sideboardOnly:true,symbols:{赤:2},redUntap:true,awakenOnUntap:'gaiNext',text:'マナがすべて赤なら攻撃終了時アンタップ。アンタップした時ガイNEXTへ覚醒。状態を引き継ぐ。'});
-a.gaiNext={name:'超戦覇龍 ガイNEXT',cost:M.cost(14),attack:8,maxHealth:10,symbols:{赤:3},redUntap:false,awakenOnUntap:null,speedAura:true,release:true,onEnter:[],onAttack:[],onDeath:[],text:'自分の全クリーチャーにSA。解除：離場の代わりにモルトNEXTへ戻る。ダメージ・状態を維持。'};
-make('scrambleChange','スクランブル・チェンジ','SR',2,1,'赤','呪文',null,{sideboardOnly:true,onUse:[{kind:'scramble'}],text:'このターン次の赤クリーチャー召喚を5軽減（色指定を優先して最低1残し、残りを無色から軽減）。その個体にこのターンSA。サイド1ターン1枚制限を消費。'});
+make('moltNext','超戦龍覇 モルトNEXT','OR',4,3,'赤','通常',[7,7],{
+ mainDeckOnly:true,moltUntap:true,onEnter:[{kind:'moltDragheart'}],
+ text:'登場時：サイドからドラグハート1枚をストック消費なしで出す。ウェポンはこのカードに装備。通常のサイド使用制限の対象外。攻撃後、自身をアンタップ。'
+});
+a.gaiNext={name:'超戦覇龍 ガイNEXT',type:'通常',color:'赤',rarity:'UR',cost:M.cost(9),attack:12,maxHealth:12,
+ heartburn:false,redSpeedAura:true,abilities:[],onEnter:[],text:'自分の赤クリーチャーすべてにSA。'};
+make('scrambleChange','スクランブル・チェンジ','SR',2,1,'赤','呪文',null,{sideboardOnly:true,onUse:[{kind:'scramble'}],text:'このターン次の赤クリーチャー召喚を5軽減（色指定を優先して最低1残し、残りを無色から軽減）。その個体にこのターンSA。'});
 make('gaiaLord','大地の巨神 ガイアロード','SR',6,3,'緑','通常',[9,9],{symbols:{緑:2},castFromMana:true,gaiaRevive:true,onEnter:[{kind:'manaAdd',count:2},{kind:'recoverMana',count:2}],text:'マナから通常召喚可。場以外から相手の効果でトラッシュへ置かれた時、無料で出してもよい。登場時、山札上2枚をマナへ置き、マナから2枚を手札へ。'});
 make('celestia','セレスティア','UR',1,0,'緑','キャラクター',null,{sideboardOnly:true,civilizations:['緑'],symbols:{},level:0,characterEffects:{1:[{kind:'draw',count:1}],2:[{kind:'manaAdd',count:1}],3:[{kind:'celestiaBuff'}],4:[]},levelTexts:{1:'成長時・自分開始時：1ドロー。',2:'成長時・自分開始時：山札上1枚をマナへ。成長直後のみランプチャージャーを任意使用。',3:'成長時・自分開始時：自分の1体の攻撃力を永続+2。',4:'両者の終了時：自分の1体のダメージを全回復し最大体力を永続+1。サイド無色3軽減。'},text:'緑URキャラクター。Lv1〜3：成長時と自分開始時に現在レベルの能力。Lv4：各プレイヤー終了時に全回復＋最大体力+1。'});
 make('dravita','時空の精圧ドラヴィタ','SSR',5,2,'緑','通常',[3,10],{sideboardOnly:true,requiredCharacter:'celestia',machFighter:{duration:'entryTurn'},untapOnWin:true,teamWinsAwaken:'vermillion',text:'マッハファイター。戦闘勝利時アンタップ。自分のターン、自分の全クリーチャーの戦闘勝利が3回になると覚醒。'});

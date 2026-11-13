@@ -9,7 +9,12 @@ const characters={blueBeginner:'bluesage',redBeginner:'redcaptain',blackBeginner
 for(const id of Decks.beginnerBotIds){
  const deck=Decks.preset(id);
  assert.deepEqual(Decks.validate({...deck}),[]);
- assert.deepEqual(['main','sideboard','shields'].map(section=>deck[section].reduce((n,row)=>n+row.count,0)),[40,10,4]);
+ const sizes=['main','sideboard','shields'].map(section=>deck[section].reduce((n,row)=>n+row.count,0));
+ assert.equal(sizes[0],40);
+ assert.equal(deck.stacks.length,15);
+ assert(sizes[1]>=1&&sizes[1]<=10);
+ assert.equal(sizes[2],id==='redBeginner'?5:4);
+ if(id==='redBeginner')assert.equal(sizes[1],10);
  assert.equal(deck.sideboard.find(row=>Cards.cards[row.key].type==='キャラクター').key,characters[id]);
  assert(deck.main.every(row=>!Cards.cards[row.key].token));
 }
@@ -79,7 +84,7 @@ for(const [i,p1] of entrants.entries()){
      ...(impact?{impact:impact.assess(journal,{p1,p2},g.result.winner)}:{}),
      ...(usage?{usage:usage.collect(journal,original),corile}:{}),
      ruleDamage:journal.some(e=>e.kind==='ruleDamage'),
-     finish:lastLoss?.reason||(lastLoss?.kind==='ruleDamage'?'山札切れ':g.result.reason),
+     finish:g.result.reason.includes('山札切れ')?g.result.reason:lastLoss?.reason||g.result.reason,
      ...(observation?{cards:observation.finish(fullJournal)}:{} )};
     if(round)Object.assign(row,{startedAt,turns:roundLog.turns(g,fullJournal)});
     if(five)console.log(JSON.stringify(row));else rows.push(row);

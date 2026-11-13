@@ -106,7 +106,7 @@ for(const z of ['hand','main']){
   yes(g.beginPayment(spell.id));yes(g.confirmPayment());
   while(g.operation?.kind==='response')yes(g.passResponse());
   assert.equal(g.state.p1.hand.length,remaining);
-  assert.equal(g.life.p1,30-(2-remaining));
+  assert.equal(g.life.p1,20);
   assert.equal(g.locate(spell.id).z,'trash');
  }
 }

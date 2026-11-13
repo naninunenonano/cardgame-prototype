@@ -28,15 +28,15 @@ const zone=(g,c)=>g.locate(c.id)?.z;
 {
  const g=game(),dragon=put(g,'gs1','p1','signi-1'),foe=put(g,'nn4','p2','signi-1');
  A.equal(dragon.attack,10);A.equal(dragon.maxHealth,10);A.deepEqual(dragon.cost,M.cost(4,{緑:6}));
- A.deepEqual(g.effectiveCost(put(g,'gs1'),'p1'),M.cost(4,{緑:3}));
+ A.deepEqual(g.effectiveCost(put(g,'gs1'),'p1'),M.cost(4,{緑:6}));
  g.turn.step='attack';dragon.sick=true;dragon.enteredTurn=g.turn.counts.p1;
  A(!g.attackTargets(dragon.id).some(x=>x.id==='body'));
- yes(g.declareAttack(dragon.id,foe.id));settle(g);A.equal(g.life.p2,30-(10-foe.maxHealth));
+ yes(g.declareAttack(dragon.id,foe.id));settle(g);A.equal(g.life.p2,20-(10-foe.maxHealth));
 }
 {
  const g=game(),defender=put(g,'gs1','p2','signi-1'),attacker=put(g,'nn4','p1','signi-1');
  defender.rest=true;g.turn.step='attack';yes(g.declareAttack(attacker.id,defender.id));settle(g);
- A.equal(g.life.p1,30);A.equal(zone(g,attacker),'trash');
+ A.equal(g.life.p1,20);A.equal(zone(g,attacker),'trash');
 }
 for(const allies of [3,4]){
  const g=game();fund(g,'p1',7,'緑');
@@ -109,9 +109,9 @@ for(const allies of [3,4]){
  const g=game();const eira=put(g,'eira','p1','lrig');eira.level=2;
  const firstAid=put(g,'shnr3','p1','shields');firstAid.faceUp=false;
  yes(g.loseLife('p1',4));settle(g);
- A(firstAid.faceUp);A.equal(g.life.p1,30);A.equal(g.life.p2,28);
+ A(firstAid.faceUp);A.equal(g.life.p1,20);A.equal(g.life.p2,18);
  const castle=put(g,'wn1','p1','structures');
- yes(g.loseLife('p1',4));settle(g);A.equal(zone(g,castle),'trash');A.equal(g.life.p1,30);
+ yes(g.loseLife('p1',4));settle(g);A.equal(zone(g,castle),'trash');A.equal(g.life.p1,20);
 }
 {
  const g=game();fund(g,'p1',8,'白');
@@ -121,7 +121,7 @@ for(const allies of [3,4]){
 }
 for(const k of ['greenBeginner','whiteBeginner']){
  const d=D.preset(k);A.deepEqual(D.validate(d),[]);
- A.deepEqual(['main','sideboard','shields'].map(z=>d[z].reduce((n,c)=>n+c.count,0)),[40,10,4]);
+ A.deepEqual(['main','sideboard','shields'].map(z=>d[z].reduce((n,c)=>n+c.count,0)),[40,1,4]);
 }
 A.equal(D.preset('whiteBeginner').shields.find(c=>c.key==='shnr3').count,2);
 A.equal(C.cards.wr6.cost.generic,1);

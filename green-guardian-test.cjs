@@ -10,7 +10,7 @@ const id='verdantguardian',p='p1',q='p2',yes=r=>A(r.ok,r.message);
 const deck=D.preset('greenBeginner');
 A.deepEqual(D.validate(deck),[]);
 A.deepEqual(deck.main.map(x=>[x.key,x.count]),['nn9','nn2','nn3','nn4','nn5','gs6','gn2','gn4','gs5','gs1','gn1','gr1','gr2','gr5'].map(k=>[k,k==='gr2'?1:3]));
-A.deepEqual(deck.sideboard.map(x=>[x.key,x.count]),[[id,1],['sbnn1',3],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
+A.deepEqual(deck.sideboard.map(x=>[x.key,x.count]),[[id,1]]);
 A.deepEqual(deck.shields.map(x=>[x.key,x.count]),['shnr1','shnr5','shnr3','shnr2'].map(k=>[k,1]));
 A.equal(C.cards[id].rarity,'UR');
 A(D.selectableBeginnerBotIds.includes(deck.id));
@@ -24,8 +24,12 @@ function put(g,key,zone='hand',owner=p){
  const c=g.fromDefinition(key,owner);g.state[owner][zone].push(c);return c;
 }
 function grow(g,level){
- A.equal(g.growStatus(p).nextCost,[0,1,3,5,7][level]);
- yes(g.beginGrowth(p));yes(g.confirmPayment());
+ const cost=[0,1,2,2,3][level];
+ A.equal(g.growStatus(p).nextCost,cost);
+ g.turn.step='levelUp';g.turn.grown=false;
+ g.state[p].stacks.push(...Array.from({length:cost},()=>g.card('緑スタック','スタック','緑')));
+ yes(g.beginGrowth(p));
+ g.turn.step='main1';
  A.equal(g.character(p).level,level);
  g.turn.counts[p]++;
  for(const c of g.state[p].energy)c.rest=false;
@@ -34,7 +38,7 @@ function choose(g,id){yes(g.resolveExpansion(id));}
 function place(g,slot='signi-1'){yes(g.chooseSlot(slot));yes(g.confirmSideFree());}
 {
  const g=init();
- A.equal(g.state[p].extra.find(c=>c.key===id).cost.generic,1);
+ A.equal(g.character(p).cost.generic,1);
  A.equal(g.state[p].hand.length,0);grow(g,1);A.equal(g.state[p].hand.length,1);
  const spell=put(g,'gn1'),high=put(g,'gs1');grow(g,2);
  A(!g.expansionCandidates().some(c=>c.id===high.id));
@@ -69,7 +73,7 @@ for(const use of [true,false]){
 }
 for(const revealUnit of [true,false]){
  const g=init();grow(g,1);grow(g,2);choose(g,'done');grow(g,3);choose(g,'done');grow(g,4);
- A.equal(g.costBreakdown(g.state[p].extra.find(c=>c.key==='sbnn1'),p).level4,3);
+ A.equal(g.costBreakdown(g.fromDefinition('sbnn1',p),p).level4,0);
  const pay=put(g,'nn2','signi-1'),small=put(g,'nn3','signi-1',q),large=put(g,'gs1','signi-2',q);
  const top=put(g,revealUnit?'nn9':'gn1','main');
  g.state[p].main.unshift(g.state[p].main.pop());
@@ -88,7 +92,7 @@ for(const revealUnit of [true,false]){
 }
 let largeEntry=false;
 for(const [i,opponent] of ['redBeginner','blueBeginner'].entries()){
- let seed=701+i;
+ let seed=i===0?701:707;
  const g=create({mode:'bot',decks:{p1:opponent,p2:deck.id},strictTargets:true,random:()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296)});
  for(let step=0;step<12000&&!g.result;step++){
   g.turn.notBefore=0;

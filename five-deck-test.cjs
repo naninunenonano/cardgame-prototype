@@ -5,6 +5,7 @@ const os=require('node:os');
 const path=require('node:path');
 const {execFileSync}=require('node:child_process');
 const {report}=require('./five-deck-report.cjs');
+const Decks=require('./decks');
 function run(flag){
  return execFileSync(process.execPath,['beginner-matchup-test.cjs','2',flag],{
   cwd:__dirname,encoding:'utf8',env:{...process.env,BOT_PAIR:''}
@@ -23,7 +24,8 @@ try{
   assert.equal(second.games,4);
   const rows=data.cardsByDeck[id].all;
   assert.equal(rows.filter(r=>r.section==='characterLevel').length,4);
-  assert.equal(rows.reduce((n,r)=>n+(r.copies||0),0),54);
+  const deck=Decks.preset(id);
+  assert.equal(rows.reduce((n,r)=>n+(r.copies||0),0),['main','sideboard','shields'].flatMap(s=>deck[s]).reduce((n,e)=>n+e.count,0));
   assert(rows.every(r=>r.usedGames<=8&&r.skipped<=r.ready));
  }
  assert.throws(()=>report(measured.concat(measured[0]),folder,2));

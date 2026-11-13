@@ -85,8 +85,8 @@ function report(input,out,perPair=200){
    first:results(own.filter(g=>g[g.first]===id),id),second:results(own.filter(g=>g[g.first]!==id),id),
    ...(id!=='blueAdvanced'?{beginnerOnly:results(own.filter(g=>g.p2!=='blueAdvanced'),id)}:{})});
   const cardRows=[];
+  assert.deepEqual(Decks.validate(deck),[]);
   for(const section of ['main','sideboard','shields']){
-   assert.equal(deck[section].reduce((n,c)=>n+c.count,0),{main:40,sideboard:10,shields:4}[section]);
    for(const {key,count} of deck[section]){
     cardRows.push({copies:count,...evaluate(own,id,key,section)});
     if(cards[key].type==='キャラクター')for(let lv=1;lv<=4;lv++)

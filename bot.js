@@ -36,6 +36,8 @@ function miseryReviveScore(v,c,operation){
  return unitValue(c)+(apache?32:0);
 }
 function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.counts.main+me.counts.trash>0;let score=-100;
+ if(c.key==='sbrn1')return 55;
+ if(c.equipment)return c.equipment==='gaiou'&&enemy.units.length?42:25;
  if(me.blackBeginner){
   if(c.key==='ks13')return me.structures.filter(u=>u.key==='ks13').length<3?42:-100;
   if(c.key==='ks15'){
@@ -241,6 +243,11 @@ function decide(v){
   if(o.kind==='gravePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card)+(o.miseryTrigger&&me.blackBeginner&&!s.card.rest?50:0)-(o.miseryTrigger&&s.card.key==='ks14'?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'gravePlace'};}
 
   if(o.kind==='rulePayment')return {type:'rulePay'};
+  if(o.kind==='expansionChoice'&&o.choice==='parallelFaces')return {type:'expansion',id:['revolution','invasion','done'].find(id=>o.candidates.some(c=>c.id===id))};
+  if(o.kind==='expansionChoice'&&o.choice==='nextCharger')return {type:'expansion',id:me.hand.length&&me.hand.every(c=>keepScore(v,c)<8)?'exchange':'done'};
+  if(o.kind==='expansionChoice'&&['commanderReveal','batdragon','releaseSecond'].includes(o.choice))return {type:'expansion',id:best(o.candidates.filter(c=>!c.option),c=>unitValue(c,me.manaCount))?.id||'done'};
+  if(o.kind==='expansionChoice'&&o.choice==='redSpeed')return {type:'expansion',id:best(o.candidates,c=>(c.sick&&!c.speedAttacker&&!c.rest?100:0)+unitValue(c,me.manaCount))?.id};
+  if(o.kind==='expansionChoice'&&o.choice==='crystalMemory')return {type:'expansion',id:best(o.candidates,c=>keepScore(v,c))?.id};
   if(o.kind==='expansionChoice'&&o.choice.startsWith('guardian')){
    const choices=o.candidates.filter(c=>!c.option);
    const c=best(choices,c=>o.choice==='guardianPay'?-unitValue(c,me.manaCount):c.type==='通常'?unitValue(c,me.manaCount):playScore(v,c));
@@ -299,7 +306,7 @@ function decide(v){
   }
   if(o.kind==='inspectHand'){const c=best(o.candidates.filter(c=>c.cost&&total(c)<=o.max),c=>total(c)+unitValue(c,enemy.manaCount));return {type:'private',id:c?.id||null};}
   if(o.kind==='freeCast'){if(!o.targetId){const c=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:c.id};}return {type:'freeCast'};}
-  if(o.kind==='payment'){const c=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].find(c=>c.id===o.id);if(o.targets?.length&&!o.targetId){const target=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:target.id};}if(c?.type==='通常'&&o.purpose!=='set'&&!o.slot){if(c.key==='ks14'&&me.blackBeginner){const slot=best(o.slots,s=>-unitValue(s.card)+(s.card.rest?0:35)-(s.card.key==='ks14'?45:0)-M.total(c.evolutionOptions?.find(x=>x.slot===s.id)?.cost??c.cost)*4);if(slot)return {type:'slot',slot:slot.id};}if(c.evolution?.colorlessBaseDiscount&&me.blueBeginner){const planning={...v,operation:null},hand=me.hand.map(x=>x.id===c.id?{...x,canPlay:true}:x);planning.players={...v.players,[p]:{...me,hand}};const route=best(blueWarslaPlan(planning).routes.filter(r=>r.kind==='evolve'),r=>r.lethal?10000:r.score);if(route)return {type:'slot',slot:route.slot};}const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'pay'};}
+  if(o.kind==='payment'){const c=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].find(c=>c.id===o.id);if(o.targets?.length&&!o.targetId){const target=best(o.targets,c=>(o.effect==='buffUnit'?(c.owner===p?100:0):(c.owner!==p?100:0))+unitValue(c,enemy.manaCount));return {type:'useTarget',id:target.id};}if((c?.type==='通常'||c?.equipment||c?.heartburn)&&o.purpose!=='set'&&!o.slot){if(c.key==='ks14'&&me.blackBeginner){const slot=best(o.slots,s=>-unitValue(s.card)+(s.card.rest?0:35)-(s.card.key==='ks14'?45:0)-M.total(c.evolutionOptions?.find(x=>x.slot===s.id)?.cost??c.cost)*4);if(slot)return {type:'slot',slot:slot.id};}if(c.evolution?.colorlessBaseDiscount&&me.blueBeginner){const planning={...v,operation:null},hand=me.hand.map(x=>x.id===c.id?{...x,canPlay:true}:x);planning.players={...v.players,[p]:{...me,hand}};const route=best(blueWarslaPlan(planning).routes.filter(r=>r.kind==='evolve'),r=>r.lethal?10000:r.score);if(route)return {type:'slot',slot:route.slot};}const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'pay'};}
   if(['freePlace','returnPlace'].includes(o.kind)){const c=me.hand.find(x=>x.id===o.id);if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount)+(c?.evolution&&!s.card.rest?100:0):10000);return {type:'slot',slot:slot.id};}return {type:o.kind==='returnPlace'?'returnPlace':'freePlace'};}
   if(o.kind==='freeUnit'){const c=best(o.candidates,c=>(c.owner===p?1:-1)*unitValue(c,c.owner===p?me.manaCount:enemy.manaCount));return {type:'freeUnit',id:c?.id||null};}
   if(o.kind==='effectTarget'){const c=o.effect==='mother'?motherTarget(v,o.candidates):best(o.candidates,c=>(c.owner===p?-100:0)+unitValue(c,enemy.manaCount));return {type:'target',id:c.id};}
@@ -308,6 +315,7 @@ function decide(v){
   if(o.kind==='discard')return {type:'discard',ids:me.hand.slice().sort((a,b)=>keepScore(v,a)-keepScore(v,b)||a.id.localeCompare(b.id)).slice(0,o.required).map(c=>c.id)};
   return {type:'wait'};
  }
+ if(v.turn.step==='levelUp'&&me.growth?.ok)return {type:'grow'};
  if(v.turn.step==='charge'){
   const cards=me.hand.filter(c=>!c.generated&&!c.token&&!c.sideboardOnly);
   if(!cards.length||me.manaCount>=Math.max(10,...me.hand.map(c=>total(c))))return {type:'skipCharge'};
@@ -333,8 +341,7 @@ function decide(v){
   if(me.character?.key==='eira'&&me.character.level===4&&me.life<me.maxLife&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
   if(me.character?.key==='ereshthianox'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
   if(me.units.some(c=>c.cardcarAbility)&&me.hand.length<3&&me.counts.main>=4){const c=me.units.find(c=>c.cardcarAbility);return {type:'cardcar',id:c.id};}
-  if(me.character?.key==='redcaptain'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p]&&me.units.length<7&&me.hand.some(c=>c.canFreeSummon))return {type:'characterAbility'};
-  if(me.growth?.ok&&!me.holdBeginnerGrowth)return {type:'grow'};
+  if(me.redAbilityReady&&(me.character.level===4||v.turn.step==='main1'&&me.units.some(c=>c.sick&&!c.speedAttacker&&!c.rest&&!c.cannotAttack)))return {type:'characterAbility'};
   if(me.rituelReady?.length&&v.turn.step==='main2'&&(me.counts.main>2||me.life<me.maxLife))return {type:'rituel',id:me.rituelReady[0]};
   const usable=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].filter(c=>c.canPlay);
   const c=best(usable,c=>playScore(v,c));
