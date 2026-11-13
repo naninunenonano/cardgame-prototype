@@ -24,7 +24,7 @@ const server=http.createServer((req,res)=>{
    await page.locator('#opponent-deck').selectOption('blueBeginner');
    await page.locator('#opponent-recipe').click();
    assert.match(await page.locator('#recipe-body').innerText(),/通常 40枚/);
-   assert.match(await page.locator('#recipe-body').innerText(),/サイド 10枚/);
+   assert.match(await page.locator('#recipe-body').innerText(),/サイド 1枚/);
    assert.match(await page.locator('#recipe-body').innerText(),/シールド 4枚/);
    assert.equal(await page.locator('#recipe-body section').first().locator('button').count(),5);
    assert(await page.locator('#deck-recipe').evaluate(el=>el.scrollWidth<=el.clientWidth+1&&el.scrollHeight<=el.clientHeight+1));

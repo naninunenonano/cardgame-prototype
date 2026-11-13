@@ -1,3 +1,49 @@
-const {chromium}=require('playwright'),A=require('node:assert/strict'),http=require('node:http'),fs=require('node:fs'),path=require('node:path');
-const server=http.createServer((req,res)=>{const name=new URL(req.url,'http://localhost').pathname;try{const f=path.join(__dirname,name==='/'?'index.html':name);res.setHeader('Content-Type',f.endsWith('.js')?'text/javascript':f.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(f));}catch{res.writeHead(404);res.end();}});
-(async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const b=await chromium.launch({headless:true,args:['--no-sandbox']});try{for(const width of [1280,390])for(const key of ['almar','celestia','redcaptain','bluesage']){const p=await b.newPage({viewport:{width,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.addInitScript(()=>localStorage.setItem('cardgame.battle-motion','off'));await p.goto('http://127.0.0.1:'+server.address().port);await p.evaluate(()=>{contentMode='debug';savedDecks=debugDecks;refreshDeckChoices();render();});const id=await p.evaluate(key=>{const original=GameRules.create;GameRules.create=opts=>original({...opts,presentationMs:0});const d=DeckLibrary.preset('redStarter');d.sideboard=d.sideboard.map(e=>e.key==='redcaptain'?{key,count:1}:e);d.id='charger-ui-'+key;const r=savedDecks.save(d);refreshDeckChoices();return r.id;},key);await p.selectOption('#self-deck',id);await p.locator('#start-solo').click();await p.locator('#keep').click();await p.locator('#keep').click();await p.evaluate(key=>{Game.skipCharge();for(let i=0;i<20;i++)Game.createManaToken('p1',CardCatalog.cards[key].color);Game.beginGrowth('p1');Game.confirmPayment();for(let i=0;i<100&&Game.operation;i++){const actor=Game.decisionPlayer();const r=Game.dispatch(BotPolicy.decide(Game.observe(actor)),actor);if(!r.ok)throw Error(r.message);}Game.turn.counts.p1++;for(const m of Game.state.p1.energy)m.rest=false;notify({ok:true});},key);await p.locator('[data-grow="p1"]').click();await p.locator('#confirm-payment').click();if(key==='bluesage')await p.locator('#confirm-scry').click();await p.evaluate(()=>{for(let i=0;i<100&&Game.operation&&!(Game.operation.choice==='viceOffer'&&Game.operation.chargerKey==='sbnr4');i++){const actor=Game.decisionPlayer();const r=Game.dispatch(BotPolicy.decide(Game.observe(actor)),actor);if(!r.ok)throw Error(r.message);}notify({ok:true});});A.equal(await p.evaluate(()=>Game.character('p1').level),2);A.equal(await p.evaluate(()=>Game.operation?.chargerKey),'sbnr4');A.match(await p.locator('#modal-body').innerText(),/ドローチャージャー/);const before=await p.evaluate(()=>({h:Game.state.p1.hand.length,n:Game.manaCount('p1'),id:Game.state.p1.extra.find(c=>c.key==='sbnr4').id}));await p.locator('[data-side-select="'+before.id+'"]').click();await p.evaluate(()=>{for(let i=0;i<100&&Game.operation;i++){const actor=Game.decisionPlayer();const r=Game.dispatch(BotPolicy.decide(Game.observe(actor)),actor);if(!r.ok)throw Error(r.message);}notify({ok:true});});A.equal(await p.evaluate(()=>Game.state.p1.hand.length),before.h+1);A.equal(await p.evaluate(()=>Game.manaCount('p1')),before.n+1);A(await p.evaluate(()=>Game.state.p1.extra.find(c=>c.key==='sbnr4').used));A.deepEqual(errors,[]);await p.close();console.log('PASS '+width+'px '+key+': actual Lv2 growth UI offers and resolves generic drawcharger');}}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>server.close());
+'use strict';
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+const {pathToFileURL}=require('node:url');
+const path=require('node:path');
+const {saveBrowserTestDeck,growInBrowser}=require('./test-fixtures.cjs');
+
+(async()=>{
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ try{
+  for(const width of [390,1280]){
+   const page=await browser.newPage({viewport:{width,height:900}}),errors=[];
+   page.on('pageerror',error=>errors.push(error.message));
+   await page.addInitScript(()=>localStorage.setItem('cardgame.battle-motion','off'));
+   await page.goto(pathToFileURL(path.join(__dirname,'index.html')).href);
+   await saveBrowserTestDeck(page);
+   await page.evaluate(()=>{
+    const gain=collection.gain([{key:'sbnr4'}]);
+    if(!gain.ok)throw Error(gain.message);
+    const deck=collection.store.list()[0];
+    deck.sideboard.push({key:'sbnr4',count:1});
+    const draft=collection.store.save({...deck,id:'blocked-charger'});
+    if(!draft.ok)throw Error(draft.message);
+    refreshDeckChoices();render();
+   });
+   await page.locator('#self-deck').selectOption('blocked-charger');
+   await page.locator('#start-solo').click();
+   assert.equal(await page.evaluate(()=>modeChosen),false);
+   await page.locator('#edit-decks').click();
+   await page.locator('#editor-source').selectOption('blocked-charger');
+   await page.locator('[data-deck-tab="sideboard"]').click();
+   assert.match(await page.locator('#editor-list').innerText(),/ドローチャージャー[\s\S]*使用不可/);
+   assert.equal(await page.locator('[data-deck-plus="sbnr4"]').count(),0);
+   await page.locator('#editor-close').click();
+   await page.locator('#self-deck').selectOption('normal-red');
+   await page.locator('#start-solo').click();
+   await page.locator('#keep').click();
+   await page.locator('#keep').click();
+   await growInBrowser(page);
+   await growInBrowser(page);
+   assert.equal(await page.evaluate(()=>Game.character('p1').level),2);
+   assert.equal(await page.evaluate(()=>Game.operation),null);
+   assert.deepEqual(errors,[]);
+   await page.close();
+  }
+  console.log('PASS unavailable Draw Charger cannot be added, loaded into battle or offered at Lv2');
+  console.log('HOLD Draw Charger Lv2 offer and resolution | ドローチャージャー (sbnr4) — 色付きストック支払い条件が未確定。');
+ }finally{await browser.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});

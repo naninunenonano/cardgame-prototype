@@ -69,3 +69,15 @@ module.exports.saveBrowserTestDeck=async function saveBrowserTestDeck(page,color
   render();
  },color);
 };
+
+module.exports.growInBrowser=async function growInBrowser(page){
+ await page.evaluate(()=>{
+  Game.turn.step='levelUp';
+  Game.turn.grown=false;
+  const player=Game.turn.player,character=Game.character(player);
+  for(let i=0;i<Game.growStatus(player).nextCost;i++)Game.state[player].stacks.push(Game.card(character.color+'ストック','ストック',character.color,null,false,player));
+  render();
+ });
+ await page.locator('[data-grow="p1"]').click();
+ await page.evaluate(()=>{Game.turn.step='main1';render();});
+};
