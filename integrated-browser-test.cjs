@@ -20,7 +20,7 @@ const server=http.createServer((req,res)=>{
    page.on('pageerror',e=>errors.push(e.message));
    await page.addInitScript(()=>{Math.random=()=>.4;});
    await page.addInitScript(()=>localStorage.setItem('cardgame.battle-motion','off'));await page.goto('http://127.0.0.1:'+server.address().port);
-   await page.locator('[data-starter-color="red"]').click();
+   await require('./test-fixtures.cjs').saveBrowserTestDeck(page,'red');
    await page.locator('#edit-decks').click();
    assert.equal(await page.locator('[data-evolution-level]').count(),4);
    assert.match(await page.locator('#editor-evolution').innerText(),/基本進化系列（UR）/);

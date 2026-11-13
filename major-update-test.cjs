@@ -441,3 +441,32 @@ test('retired side spells use mana from hand and preserve card-specific conditio
  assert.equal(g.state.p1.stacks.length,stock);
  assert(!g.sideSpent('p1'));
 });
+
+test('all ten unavailable cards stay rejected in saved decks and battle',()=>{
+ const keys=['nl1','almar_sbbu1','sbbu1','almar_sbnr1','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','sbwl1'];
+ assert.deepEqual(Object.values(Cards.cards).filter(c=>c.unavailable).map(c=>c.key).sort(),keys.slice().sort());
+ const {g,advance}=ready();
+ advanceToMain(g,advance);
+ const packKeys=new Set(Packs.pool().map(c=>c.key));
+ const selectable=new Set(Decks.available().map(c=>c.key));
+ for(const key of keys){
+  const c=Cards.cards[key],d=Decks.preset('blueStarter');
+  d.id='unavailable-'+key;
+  if(c.sideboardOnly)d.sideboard.push({key,count:1});
+  else d.main[0]={key,count:d.main[0].count};
+  const saved=Decks.create({storage:{getItem:()=>JSON.stringify({version:1,decks:[d]})}}).get(d.id);
+  assert(saved);
+  assert(Decks.validate(saved).some(error=>error.includes(c.name+'は使用不可')));
+  g.setDeckLibrary([saved]);
+  const reset=g.reset('solo',{p1:d.id,p2:'blueStarter'});
+  assert(!reset.ok);
+  const instance=g.fromDefinition(key,'p1');
+  assert(!g.addCard('p1',c.sideboardOnly?'extra':'hand',instance).ok);
+  const zone=g.state.p1[c.sideboardOnly?'extra':'hand'];
+  zone.push(instance);
+  assert.match(g.beginPayment(instance.id).message,/使用不可/);
+  zone.pop();
+  assert(!selectable.has(key)&&!packKeys.has(key));
+ }
+ assert.equal(g.result,null);
+});

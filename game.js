@@ -480,7 +480,8 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
    lrig.evolutionRoute=clone(chosenSpecs[p].evolution?.[lrig.key]??Array(4).fill(lrig.key));
    rawMove(locate(lrig.id),p,'lrig');
   }state[p].stackDeck=Decks.stackColors(chosenSpecs[p]).map(color=>makeStack(p,color));shuffleRaw(p,'stackDeck');shuffleRaw(p,'main');drawRaw(p,INITIAL_HAND);}
-  trace('gameStart','対戦開始。初期ライフ20・初期手札5枚。',{mode,decks:Object.fromEntries(PLAYERS.map(p=>[p,{name:chosenSpecs[p].name,main:40,hand:state[p].hand.length,side:state[p].extra.length,shields:state[p].shields.length,life:life[p]}])),firstPlayer});record(`${mode==='bot'?'Bot戦':'壁打ち'}：先攻は${label(firstPlayer)}。選択したメインデッキから初期手札5枚を配りました。`);return ok('各プレイヤーのマリガンを選択してください。');
+  // Record the registered sideboard, including its character in the dedicated zone.
+  trace('gameStart','対戦開始。初期ライフ20・初期手札5枚。',{mode,decks:Object.fromEntries(PLAYERS.map(p=>[p,{name:chosenSpecs[p].name,main:40,hand:state[p].hand.length,side:sideRoster[p].length,shields:state[p].shields.length,life:life[p]}])),firstPlayer});record(`${mode==='bot'?'Bot戦':'壁打ち'}：先攻は${label(firstPlayer)}。選択したメインデッキから初期手札5枚を配りました。`);return ok('各プレイヤーのマリガンを選択してください。');
  }
  function completeMulligan(p,ids=[],skip=false) {
   if(status!=='mulligan'||mulligan[p]!=='pending'||result)return fail('このプレイヤーのマリガンは完了しています。');
@@ -523,6 +524,8 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(isUnit(source.z)&&!isUnit(z)){for(const marker of [...state[source.p].markers].filter(x=>x.hostId===source.card.id)){delete marker.hostId;rawMove(locate(marker.id),source.p,'trash');}}
 
   if((source.card.neverendCrest||source.card.escapeLink)&&isField(source.z)&&!isField(z)){z='extra';p=source.card.origin||source.p;preserveDestination=false;}
+  // Draghearts return to the sideboard even when an effect sends them to mana.
+  if(z==='energy'&&isUnit(source.z)&&(Catalog.cards[source.card.key]?.heartburn||Catalog.cards[source.card.key]?.equipment)&&isSideCard(source.card))preserveDestination=false;
   if(!preserveDestination&&isSideCard(source.card)&&source.card.type==='通常'&&isUnit(source.z)&&!isUnit(z)){z='extra';p=source.card.origin||source.p;}
   if(source.card.manaToken&&source.z==='energy'&&z!=='energy'){const [c]=state[source.p].energy.splice(source.index,1);vanishedIds.add(c.id);return c;}
   const [c]=state[source.p][source.z].splice(source.index,1),leaving=isUnit(source.z)&&!isUnit(z);
