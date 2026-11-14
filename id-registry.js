@@ -21,8 +21,8 @@
     {"oldId": "t13", "baseId": "t13", "id": "t13", "name": "ヴァンピィ専用トークンB", "oldRarity": null, "rarity": null, "color": "赤", "section": "token", "ownerCharacterId": null, "token": true, "generated": false, "faces": [], "oldForm": null, "serial": 13, "retired": false},
 
     {"oldId":"verdantguardian","baseId":"verdantguardian","id":"verdantguardian","name":"新緑の守護者","oldRarity":"UR","rarity":"UR","color":"緑","section":"character","ownerCharacterId":null,"token":false,"generated":false,"faces":[],"oldForm":null,"serial":null,"retired":false},
-    {"oldId": "eira", "baseId": "eira", "id": "eira", "name": "エイラ", "oldRarity": "UR", "rarity": "UR", "color": "白", "section": "character", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": null, "retired": false},
-    {"oldId": "t11", "baseId": "t11", "id": "t11", "name": "エイラのトークン", "oldRarity": null, "rarity": null, "color": "白", "section": "token", "ownerCharacterId": null, "token": true, "generated": false, "faces": [], "oldForm": null, "serial": 11, "retired": false},
+    {"oldId": "eira", "baseId": "eira", "id": "eira", "name": "蛇眼姫 リゼリア", "oldRarity": "UR", "rarity": "UR", "color": "白", "section": "character", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": null, "retired": false},
+    {"oldId": "t11", "baseId": "t11", "id": "t11", "name": "蛇眼姫 リゼリアのトークン", "oldRarity": null, "rarity": null, "color": "白", "section": "token", "ownerCharacterId": null, "token": true, "generated": false, "faces": [], "oldForm": null, "serial": 11, "retired": false},
 
     {
       "oldId": "life",
@@ -3210,7 +3210,7 @@
       "oldId": "wn4",
       "baseId": "wn4",
       "id": "wn4",
-      "name": "クラッシュ・フォックス",
+      "name": "スネークアイ・フォックス",
       "oldRarity": "N",
       "rarity": "N",
       "color": "白",
@@ -3227,7 +3227,7 @@
       "oldId": "wn5",
       "baseId": "wn5",
       "id": "wn5",
-      "name": "クラッシュ・ラビット",
+      "name": "スネークアイ・ラビット",
       "oldRarity": "N",
       "rarity": "N",
       "color": "白",

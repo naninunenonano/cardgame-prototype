@@ -43,7 +43,7 @@ function play(g,key,slot){
  const g=setup();
  const own=add(g,'nn4','p1','signi-1'),foe=add(g,'nn4','p2','signi-1');
  add(g,'wn2','p1','structures');add(g,'ws5','p1','structures');
- assert.equal(g.effectiveCost(C.cards.wo1,'p1').generic,6);
+ assert.equal(g.effectiveCost(C.cards.wo1,'p1').generic,7);
  play(g,'wr6');settle(g);
  assert.equal(own.health,own.maxHealth);
  assert.equal(foe.health,foe.maxHealth-2);
@@ -58,7 +58,7 @@ function play(g,key,slot){
  play(g,'wr1');
  assert.equal(g.operation.kind,'tokens');
  yes(g.placeToken('signi-3'));settle(g);
- assert(!g.fieldCards('p1').some(c=>c.key==='t7'));
+ assert(g.fieldCards('p1').some(c=>c.key==='t7'));
  assert(!g.state.p1.trash.some(c=>c.token));
 }
 {

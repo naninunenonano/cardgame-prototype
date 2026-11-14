@@ -56,6 +56,7 @@ function stackColors(d){
  if(d.id==='green'||d.id==='blue')return Array(STACK_SIZE).fill(d.id==='green'?'緑':'青');
  return stackPalette.flatMap(color=>Array(3).fill(color));
 }
+function sideCount(entries){return (entries||[]).reduce((n,e)=>n+(C.cards[e?.key]?.type==='キャラクター'?0:e.count),0);}
 const counts=(entries)=>entries.map(([key,count=3])=>({key,count}));
 const beginnerSide=key=>counts([[key,1],['sbnn1'],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
 Object.assign(official,{
@@ -79,14 +80,20 @@ Object.assign(official,{
  blueAdvanced:{id:'blueAdvanced',name:'青上級Bot／アルマー',difficulty:'advanced',preset:true,
   main:counts([['bo1'],['bs1'],['bl2',1],['bl3',1],['nl2',1],['br1'],['bn1'],['br3'],['br5'],['ns1'],['br4'],['nn1'],['bs5'],['bs3'],['nn7',4]]),
   sideboard:counts(['almar','almar_sbbu1','sbbu1','almar_sbbu2','almar_sbbs1','almar_sbnr1','sbbr1','sbbu2','sbnl4'].map(key=>[key,1])),
-  shields:counts(['shnl1','shnl2','shnr2','shnr5'].map(key=>[key,1]))}
+  shields:counts(['shnl1','shnl2','shnr2','shnr5'].map(key=>[key,1]))},
+ whiteAdvanced:{id:'whiteAdvanced',name:'白上級Bot／蛇眼姫 リゼリア',difficulty:'advanced',preset:true,
+  main:counts([['wn2',4],['ws5',4],['wn4',4],['wn5'],['ws10',1],['wr8',1],['ws11'],['ws3',4],['ws2',2],['wo1',2],['wr6'],['wr5',2],['wu3'],['wn6',2],['wr9',2]]),
+  sideboard:counts([['eira',1],['sbws1',4],...['sbwl1','sbws2','sbws3','sbwo1','sbws4','sbwu2'].map(key=>[key,1])]),
+  shields:counts(['shnu1','shnr7','shnl1','shnr9','shnl2'].map(key=>[key,1]))}
 
 });
 for(const d of Object.values(official)){
  d.sideboard=d.sideboard.filter(e=>C.cards[e.key]?.sideboardOnly&&!C.cards[e.key].unavailable);
  d.stacks=stackColors(d);
 }
-const hasPreset=id=>Object.hasOwn(official,id);
+// Keep the exact design available for inspection while the deck has blocked cards.
+const hasPreset=id=>Object.hasOwn(official,id)&&(id!=='whiteAdvanced'||!validate(official[id]).length);
+if(hasPreset('whiteAdvanced'))advancedBotIds.push('whiteAdvanced');
 const composition=d=>JSON.stringify([d.main,d.sideboard||[],d.shields||defaultShields(),stackColors(d)]);
 function preset(id){if(!hasPreset(id))return null;const d=copy(official[id]);trusted.add(d);return d;}
 function isOfficialPreset(d){return !!d&&trusted.has(d)&&hasPreset(d.id)&&composition(d)===composition(official[d.id]);}
@@ -95,7 +102,7 @@ function limit(c){return c.type==='キャラクター'?1:c.individualDeckLimit??
 function available(section=null){return Object.values(C.cards).filter(c=>c&&c.deckEligible!==false&&!c.unavailable&&!c.generated&&!c.token&&sectionOf(c)!=='legacy'&&(!section||sectionOf(c)===section));}
 function adoptionError(c,d){if(!c?.requiredCharacter)return '';const chars=(d.sideboard||[]).filter(e=>e.count>0&&C.cards[e.key]?.type==='キャラクター');return chars.length===1&&chars[0].count===1&&chars[0].key===c.requiredCharacter?'':(C.cards[c.requiredCharacter]?.name||c.requiredCharacter)+'専用：対応キャラクターをサイドボードに1枚採用してください。';}
 function validate(d){d=migrateDeck(d);const errors=[],allow=new Map(available().map(c=>[c.key,c]));if(!d||typeof d!=='object')return ['デッキデータが不正です。'];const stacks=stackColors(d);if(!Array.isArray(stacks)||stacks.length!==STACK_SIZE||stacks.some(c=>!stackPalette.includes(c)))errors.push('ストック山は5色のストック15枚です。');
- const check=(a,section,title,expected)=>{if(!Array.isArray(a)){errors.push(title+'の構成が不正です。');return;}let n=0;const counts=new Map();for(const e of a){const c=allow.get(e?.key);if(C.cards[e?.key]?.unavailable&&e.count>0){errors.push(C.cards[e.key].name+'は使用不可：'+C.cards[e.key].unavailable);continue;}if(!c||!Number.isInteger(e.count)||e.count<0||e.count>10000){errors.push(title+'に使用できないカード・枚数があります。');continue;}if(sectionOf(c)!==section){errors.push(title+'に種類の異なるカードがあります。');continue;}n+=e.count;const item=counts.get(c.name)||{count:0,cap:Infinity};item.count+=e.count;item.cap=Math.min(item.cap,limit(c));counts.set(c.name,item);}if(expected!==null&&n!==expected)errors.push(`${title}は${expected}枚です（現在${n}枚）。`);if(section==='sideboard'&&n>SIDE_SIZE)errors.push(`サイドボードは最大${SIDE_SIZE}枚です。`);if(section==='shields'&&![SHIELD_SIZE,5].includes(n))errors.push('シールドデッキは4枚または5枚です。');for(const [name,{count,cap}]of counts)if(count>cap)errors.push(`${name}は同名${cap}枚までです（現在${count}枚）。`);};
+ const check=(a,section,title,expected)=>{if(!Array.isArray(a)){errors.push(title+'の構成が不正です。');return;}let n=0;const counts=new Map();for(const e of a){const c=allow.get(e?.key);if(C.cards[e?.key]?.unavailable&&e.count>0){errors.push(C.cards[e.key].name+'は使用不可：'+C.cards[e.key].unavailable);continue;}if(!c||!Number.isInteger(e.count)||e.count<0||e.count>10000){errors.push(title+'に使用できないカード・枚数があります。');continue;}if(sectionOf(c)!==section){errors.push(title+'に種類の異なるカードがあります。');continue;}n+=e.count;const item=counts.get(c.name)||{count:0,cap:Infinity};item.count+=e.count;item.cap=Math.min(item.cap,limit(c));counts.set(c.name,item);}if(expected!==null&&n!==expected)errors.push(`${title}は${expected}枚です（現在${n}枚）。`);if(section==='sideboard'&&sideCount(a)>SIDE_SIZE)errors.push(`サイドボードは最大${SIDE_SIZE}枚です。`);if(section==='shields'&&![SHIELD_SIZE,5].includes(n))errors.push('シールドデッキは4枚または5枚です。');for(const [name,{count,cap}]of counts)if(count>cap)errors.push(`${name}は同名${cap}枚までです（現在${count}枚）。`);};
  const deckCards=[...(Array.isArray(d.main)?d.main:[]),...(d.sideboard||[])];
  const char=(d.sideboard||[]).find(e=>C.cards[e.key]?.type==='キャラクター'&&e.count>0)?.key;if(deckCards.some(e=>e?.count>0&&C.cards[e.key]?.requiredCharacterColor&&!(C.cards[char]?.civilizations||[C.cards[char]?.color]).includes(C.cards[e.key].requiredCharacterColor)))errors.push('専用カードのキャラクター色が一致しません。');if(deckCards.some(e=>e?.count>0&&C.cards[e.key]?.requiredCharacter&&C.cards[e.key].requiredCharacter!==char))errors.push('専用カードの使用キャラクターが一致しません。');
  if((d.sideboard||[]).reduce((n,e)=>n+(C.cards[e.key]?.type==='キャラクター'?e.count:0),0)>1)errors.push('成長型キャラクターはサイドに1枚までです。');
@@ -109,5 +116,5 @@ function create({storage=null}={}){let records=[],warning='',migrationRaw=null,l
  const id=()=>`custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
  return {list:()=>copy(records),get:id=>hasPreset(id)?preset(id):copy(records.find(d=>d.id===id)||null),save(d){d=migrateDeck(d);if(!d||hasPreset(d.id))return {ok:false,message:'プリセットは複製して編集してください。'};const item={id:d.id||id(),name:String(d.name||'自作デッキ').trim().slice(0,80)||'自作デッキ',main:copy(d.main||[]),sideboard:copy(d.sideboard||[]),shields:copy(d.shields??defaultShields()),stacks:copy(stackColors(d)),...(d.evolution?{evolution:copy(d.evolution)}:{})};const errors=validate(item),next=records.filter(x=>x.id!==item.id).concat(item),r=persist(next);return {...r,id:item.id,errors};},duplicate(source){const d=preset(source)||records.find(d=>d.id===source);return d?this.save({...copy(d),id:id(),name:d.name+' コピー'}):{ok:false,message:'複製元がありません。'};},remove(source){return hasPreset(source)?{ok:false,message:'プリセットは削除できません。'}:persist(records.filter(d=>d.id!==source));},get warning(){return warning;}};
 }
-return {beginnerBotIds,selectableBeginnerBotIds,advancedBotIds,evolutionErrors,canonicalKey,migrateDeck,migrateOwned,migrateProfile,adoptionError,VERSION,STORAGE_KEY,MAIN_SIZE,SIDE_SIZE,SHIELD_SIZE,STACK_SIZE,stackPalette,stackColors,defaultShields,available,sectionOf,limit,preset,isOfficialPreset,validate,resolve,create};
+return {sideCount,whiteAdvancedDesign:()=>copy(official.whiteAdvanced),beginnerBotIds,selectableBeginnerBotIds,advancedBotIds,evolutionErrors,canonicalKey,migrateDeck,migrateOwned,migrateProfile,adoptionError,VERSION,STORAGE_KEY,MAIN_SIZE,SIDE_SIZE,SHIELD_SIZE,STACK_SIZE,stackPalette,stackColors,defaultShields,available,sectionOf,limit,preset,isOfficialPreset,validate,resolve,create};
 });

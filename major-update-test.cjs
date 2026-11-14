@@ -104,7 +104,7 @@ test('symbols and level 4 give no common discount; 5000VT keeps its own',()=>{
  const c=add(g,'nn3','p1','signi-1');c.symbols={青:10,赤:10};
  g.character('p1').level=4;
  const rage=g.fromDefinition('rn16','p1');
- assert.deepEqual(g.effectiveCost(rage,'p1'),Mana.cost(1,{赤:2}));
+ assert.deepEqual(g.effectiveCost(rage,'p1'),Mana.cost(2,{赤:1}));
  const vt=g.fromDefinition('bo1','p1');
  assert.deepEqual(g.effectiveCost(vt,'p1'),Mana.cost(6,{青:1}));
 });
@@ -149,7 +149,7 @@ test('Next Charger requires Lv2 and tracks each physical copy independently',()=
  const before=g.state.p1.stacks.length;
  play(g,copies[0].id);assert.equal(g.operation.choice,'nextCharger');
  choose(g,'done');assert.equal(g.state.p1.stacks.length,before+1);
- assert(copies[0].used);assert(!copies[1].used);
+ assert.equal(g.locate(copies[0].id).z,'trash');assert(!copies[0].used);
  assert(!g.beginPayment(copies[1].id).ok);
  for(let i=0;i<4;i++)advance();
  advanceToMain(g,advance);
@@ -174,7 +174,7 @@ test('Twin Horn makes two attacks and Gaiburn destroys itself before burning',()
  assert.equal(g.life.p2,17);assert.equal(unit.rest,false);
  ok(g.declareAttack(unit.id,'body'));ok(g.resolveAttack(null));pass(g);
  assert.equal(g.life.p2,11);
- assert.equal(g.locate(horn.id).z,'extra');assert(horn.used);
+ assert.equal(g.locate(horn.id).z,'trash');assert(!horn.used);
  assert.equal(g.state.p1.stacks.filter(c=>c.token).length,1);
  const log=g.battleLog();
  assert(log.find(e=>e.kind==='unitDestroyed'&&e.card.instanceId===horn.id).number<
@@ -215,7 +215,7 @@ test('Batrai Blade and Tower reveal, transform, and retain the same physical sid
  assert.equal(blade.awakened,'sbru2-2');assert.equal(g.locate(blade.id).z,'signi-7');
  advance();advanceToMain(g,advance);
  add(g,'rn15','p1','signi-1');add(g,'rn16','p1','signi-3');add(g,'rs2','p1','signi-4');
- assert.equal(blade.awakened,'sbru2-3');assert.equal(g.locate(blade.id).z,'signi-7');assert(blade.used);
+ assert.equal(blade.awakened,'sbru2-3');assert.equal(g.locate(blade.id).z,'signi-7');assert(!g.sideSpent('p1'));
  assert.equal(g.attack(blade,'p1'),8);assert.equal(blade.health,8);assert(!g.hasSpeed(blade,'p1'));
 });
 
@@ -309,8 +309,8 @@ test('combined parallel card is attack-only and either face spends zero stacks',
   assert.match(g.beginPayment(card.id).message,/攻撃時のみ/);
   advance();ok(g.declareAttack(unit.id,'body'));pass(g);
   assert.deepEqual(g.expansionCandidates().map(c=>c.id),['invasion','revolution','done']);
-  choose(g,face);assert(card.used);assert.deepEqual(g.state.p1.stacks.map(c=>c.id),before);
-  assert(g.sideSpent('p1'));
+  choose(g,face);assert(!card.used);assert.deepEqual(g.state.p1.stacks.map(c=>c.id),before);
+  assert(!g.sideSpent('p1'));
   assert.equal(g.operation.kind,'combat');assert.equal(g.operation.id,card.id);
   ok(g.resolveAttack(null));pass(g);
   assert.equal(g.life.p2,face==='revolution'?7:14);
@@ -347,7 +347,7 @@ function moltMatch(){
 test('Molt NEXT is a standalone OR with printed costs and free own equipment deployment',()=>{
  const {g}=moltMatch(),def=Cards.cards.sbru1;
  assert.equal(def.rarity,'OR');assert.equal(def.faceIds,undefined);
- assert.deepEqual(def.cost,Mana.cost(4,{赤:3}));
+ assert.deepEqual(def.cost,Mana.cost(6,{赤:1}));
  const molt=add(g,'sbru1','p1','hand'),ally=add(g,'nn5','p1','signi-1');
  const horn=g.state.p1.extra.find(c=>c.key==='sbrr1');
  horn.used=true;
@@ -390,7 +390,7 @@ test('Heartburn costs four red stock, gives red-only SA, and awakens from Molt N
  stack(g,'p1','青',4);stack(g,'p1','赤',2);
  assert(!g.beginPayment(fort.id).ok);
  stack(g,'p1','赤',1);play(g,fort.id,'signi-4');
- assert.equal(g.state.p1.stacks.length,4);assert(fort.used);assert(g.sideSpent('p1'));
+ assert.equal(g.state.p1.stacks.length,4);assert(!fort.used);assert(g.sideSpent('p1'));
  assert(g.hasSpeed(molt,'p1'));assert(g.hasSpeed(multi,'p1'));assert(!g.hasSpeed(neutral,'p1'));
  advance();
  const enemy=add(g,'nn5','p2','signi-1');enemy.rest=true;
@@ -404,7 +404,7 @@ test('Heartburn costs four red stock, gives red-only SA, and awakens from Molt N
  assert(g.hasSpeed(fort,'p1'));assert(g.hasSpeed(multi,'p1'));assert(!g.hasSpeed(neutral,'p1'));
  for(let i=0;i<2;i++){ok(g.declareAttack(molt.id,'body'));ok(g.resolveAttack(null));pass(g);assert(!molt.rest);}
  assert(g.destroyUnit(fort.id));
- assert.equal(g.locate(fort.id).z,'extra');assert(fort.used);
+ assert.equal(g.locate(fort.id).z,'trash');assert.equal(fort.awakened,'sbru1-2');
 });
 
 test('all 19 retired side cards are available in main and saved copies migrate once',()=>{
@@ -442,8 +442,8 @@ test('retired side spells use mana from hand and preserve card-specific conditio
  assert(!g.sideSpent('p1'));
 });
 
-test('all ten unavailable cards stay rejected in saved decks and battle',()=>{
- const keys=['nl1','almar_sbbu1','sbbu1','almar_sbnr1','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','sbwl1'];
+test('all unavailable cards stay rejected in saved decks and battle',()=>{
+ const keys=['nl1','almar_sbbu1','sbbu1','almar_sbnr1','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','t11'];
  assert.deepEqual(Object.values(Cards.cards).filter(c=>c.unavailable).map(c=>c.key).sort(),keys.slice().sort());
  const {g,advance}=ready();
  advanceToMain(g,advance);

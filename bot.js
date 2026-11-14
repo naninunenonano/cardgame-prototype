@@ -60,6 +60,10 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
    if(damage>=me.life)return -100;
   }
   score=unitValue(c,me.manaCount)+8;
+  if(me.whiteAdvanced){
+   if(c.snakeEye&&total(c)<=4)score+=me.shieldLinkCount?12:0;
+   if(c.serpentAbility)score+=Math.min(30,me.trash.filter(x=>x.type==='通常').length*6);
+  }
   if(c.manaAbility)score+=me.manaCount<6?45:0;
   if(c.key==='gn2')score+=supply?(me.manaCount<8?35:10):0;
   if(c.evolution)score+=c.unblockable&&enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))?100:15;
@@ -85,6 +89,7 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
  else if(c.key==='nr5')score=me.units.length?35+(me.units.some(c=>c.key==='nl1')&&canRefill?20:0):-100;
  else if(c.key==='nr6')score=me.units.some(c=>c.key==='nl1')?75:enemy.units.length<me.units.length?35:5;
  else if(c.key==='br2')score=me.structures.length<3?20:3;
+ else if(c.key==='wr9')score=me.counts.main>3?(me.shieldLinkCount<4?43:20):-100;
  else if(c.key==='br1'||c.key==='bl1'||c.key==='bn7')score=canRefill?(me.hand.some(x=>x.key==='bs1')&&me.hand.length<10?45:me.hand.length<6?35:8):-100;
  else if(c.key==='bn5')score=me.units.length<5?40:5;
  else if(c.key==='bn1')score=enemy.units.length||enemy.structures.length?(danger?65:12):-100;
@@ -243,6 +248,29 @@ function decide(v){
   if(o.kind==='gravePlace'){if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card)+(o.miseryTrigger&&me.blackBeginner&&!s.card.rest?50:0)-(o.miseryTrigger&&s.card.key==='ks14'?100:0):10000);return {type:'slot',slot:slot.id};}return {type:'gravePlace'};}
 
   if(o.kind==='rulePayment')return {type:'rulePay'};
+  if(o.kind==='expansionChoice'&&o.choice.startsWith('rizeria')){
+   const choices=o.candidates.filter(c=>c.id!=='done');
+   const target=best(choices,c=>o.choice==='rizeriaLink'?total(c):unitValue(c)+(o.choice==='rizeriaLv2'&&c.health<=2?25:0));
+   return {type:'expansion',id:target?.id||'done'};
+  }
+  if(o.kind==='expansionChoice'&&['judgmentConvert','judgmentStop','baronneDestroy','baronneRecover','baronneFace','baronneSlot','galaxyInstall','galaxyHand'].includes(o.choice)){
+   const choices=o.candidates.filter(c=>c.id!=='done'&&(!['judgmentConvert','baronneDestroy'].includes(o.choice)||c.owner!==p||o.choice==='judgmentConvert'&&c.zone==='trash'));
+   return {type:'expansion',id:best(choices,c=>o.choice==='judgmentStop'?-total(c):unitValue(c)+total(c))?.id||'done'};
+  }
+  if(o.kind==='expansionChoice'&&o.choice==='specialMaterial'){
+   const order=['links','fusion','synchro'];
+   const material=best(o.candidates.filter(c=>!c.option),c=>-unitValue(c)+(c.rest?5:0)+(c.sick?4:0)+(c.shieldLink?10-total(c):0));
+   return {type:'expansion',id:order.find(id=>o.candidates.some(c=>c.id===id))||material?.id||'done'};
+  }
+  if(o.kind==='expansionChoice'&&o.choice==='specialSlot')return {type:'expansion',id:o.candidates.find(c=>c.id!=='done')?.id||'done'};
+  if(o.kind==='expansionChoice'&&['serpentRecycle','serpentRestore','serpentSummon','phantomLinks','fusionRecover','templeRestore'].includes(o.choice)){
+   const candidate=best(o.candidates.filter(c=>!c.option),c=>o.choice==='serpentRecycle'?-unitValue(c)+(c.snakeEye&&total(c)<=2?15:0):unitValue(c)+total(c));
+   return {type:'expansion',id:candidate?.id||'done'};
+  }
+  if(o.kind==='expansionChoice'&&o.choice==='ownLinkDestroy'){
+   const value={ws5:12,ws11:10,wn6:enemy.units.length?9:1};
+   return {type:'expansion',id:best(o.candidates,c=>(value[c.key]||0)-total(c))?.id};
+  }
   if(o.kind==='expansionChoice'&&o.choice==='parallelFaces')return {type:'expansion',id:['revolution','invasion','done'].find(id=>o.candidates.some(c=>c.id===id))};
   if(o.kind==='expansionChoice'&&o.choice==='nextCharger')return {type:'expansion',id:me.hand.length&&me.hand.every(c=>keepScore(v,c)<8)?'exchange':'done'};
   if(o.kind==='expansionChoice'&&['commanderReveal','batdragon','releaseSecond'].includes(o.choice))return {type:'expansion',id:best(o.candidates.filter(c=>!c.option),c=>unitValue(c,me.manaCount))?.id||'done'};
@@ -272,7 +300,7 @@ function decide(v){
   }
   if(o.kind==='sideFreePlace'){if(!o.slots?.length)return {type:'sideFree'};if(!o.slot){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount):10000);return {type:'slot',slot:slot.id};}return {type:'sideFree'};}
 
-  if(o.kind==='shieldWindow'){const c=o.candidates.find(c=>c.shieldRule.effect==='revive')||o.candidates.find(c=>!['draw'].includes(c.shieldRule.effect))||o.candidates.find(c=>c.shieldRule.effect==='destroyAttacker')||o.candidates.find(c=>c.shieldRule.effect==='draw'&&me.counts.main>=2);return {type:'shield',id:c?.id||null};}
+  if(o.kind==='shieldWindow'){const c=o.candidates.find(c=>c.shieldRule.effect==='counterMove')||o.candidates.find(c=>c.shieldRule.effect==='revive')||o.candidates.find(c=>!['draw'].includes(c.shieldRule.effect))||o.candidates.find(c=>c.shieldRule.effect==='destroyAttacker')||o.candidates.find(c=>c.shieldRule.effect==='draw'&&me.counts.main>=2);return {type:'shield',id:c?.id||null};}
   if(o.kind==='resetShield')return {type:'shieldEffect',id:o.candidates[0]?.id||null};
   if(o.kind==='inspectShield')return {type:'shieldEffect',id:o.candidates[0]?.id||null};
   if(o.kind==='shieldReveal')return {type:'shieldEffect'};
@@ -286,7 +314,7 @@ function decide(v){
    const trap=o.candidates.find(c=>c.key==='gr5');
    if(trap&&o.context?.type==='block'&&enemy.units.some(c=>c.id===o.context.combat?.id&&c.attack>=4))return {type:'play',id:trap.id,method:'instant'};
   const worthCountering=target?.owner!==p&&(target?.type==='呪文'||me.blueBeginner&&target?.type==='通常'&&(target.onEnter?.length||unitValue(target)>=9));
-  const c=o.candidates.find(c=>c.responseOnly&&worthCountering)||o.candidates.find(c=>!c.responseOnly&&enemy.units.length);return c?{type:'play',id:c.id,method:'instant'}:{type:'pass'};}
+  const c=o.candidates.find(c=>c.baronne&&target?.owner!==p&&(target?.type==='呪文'||unitValue(target)>=8))||o.candidates.find(c=>c.responseOnly&&worthCountering)||o.candidates.find(c=>!c.responseOnly&&enemy.units.length);return c?{type:'play',id:c.id,method:'instant'}:{type:'pass'};}
   if(o.kind==='optionalDraw')return {type:'optional',use:me.counts.main>0};
   if(o.kind==='tokens'){const slot=best(o.slots,s=>s.card?-unitValue(s.card,me.manaCount):10000);return {type:'token',slot:slot&&(!slot.card||unitValue(slot.card,me.manaCount)<10)?slot.id:null};}
   if(['reorder','stackOrder'].includes(o.kind)){if(o.scry)return {type:'order',bottom:keepScore(v,o.candidates[0])<8};const desired=o.candidates.slice().sort((a,b)=>keepScore(v,b)-keepScore(v,a)||a.id.localeCompare(b.id));const i=desired.findIndex((c,i)=>c.id!==o.order[i]);if(i>=0){const index=o.order.indexOf(desired[i].id);return {type:'orderMove',id:desired[i].id,delta:index>i?-1:1};}return {type:'order'};}
@@ -338,11 +366,19 @@ function decide(v){
   if(warsla?.action)return warsla.action;
   if(me.character?.key==='lumiere'&&me.shieldLinkCount<5){if(me.character.level===3&&me.character.activeTurn!==v.turn.counts[p]&&me.hand.some(c=>c.shieldLink))return {type:'characterAbility'};if(me.character.level===4&&v.sources.length&&me.lumiereUsed.length<5)return {type:'characterAbility'};}
   if(me.guardianReady)return {type:'characterAbility'};
-  if(me.character?.key==='eira'&&me.character.level===4&&me.life<me.maxLife&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
+  if(me.rizeriaReady)return {type:'characterAbility'};
   if(me.character?.key==='ereshthianox'&&me.character.level===4&&me.character.activeTurn!==v.turn.counts[p])return {type:'characterAbility'};
   if(me.units.some(c=>c.cardcarAbility)&&me.hand.length<3&&me.counts.main>=4){const c=me.units.find(c=>c.cardcarAbility);return {type:'cardcar',id:c.id};}
   if(me.redAbilityReady&&(me.character.level===4||v.turn.step==='main1'&&me.units.some(c=>c.sick&&!c.speedAttacker&&!c.rest&&!c.cannotAttack)))return {type:'characterAbility'};
   if(me.rituelReady?.length&&v.turn.step==='main2'&&(me.counts.main>2||me.life<me.maxLife))return {type:'rituel',id:me.rituelReady[0]};
+  if(me.whiteAdvanced){
+   const ability=me.whiteAbilities?.find(a=>a.ability==='judgmentConvert'&&a.hasEnemyOrTrash&&me.shieldLinkCount<4||a.ability==='baronneDestroy'&&a.hasEnemyOrTrash);
+   if(ability)return {type:'whiteAbility',...ability};
+   const serpent=me.units.find(c=>c.serpentAbility);
+   if(serpent&&me.units.length<=6&&me.counts.main>2)return {type:'serpent',id:serpent.id};
+   const side=best(me.sideboard.filter(c=>c.canPlay&&(c.key!=='sbws2'||me.counts.main>2)),c=>({sbwu2:90,sbws3:80,sbws4:70,sbwo1:60,sbwl1:55,sbws1:40,sbws2:10}[c.key]||0));
+   if(side&&(side.key!=='sbws2'||me.hand.length<2))return {type:'play',id:side.id};
+  }
   const usable=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].filter(c=>c.canPlay);
   const c=best(usable,c=>playScore(v,c));
   if(c&&playScore(v,c)>0)return {type:'play',id:c.id,...(c.canEnhance&&me.units.length<6?{method:'enhance'}:{})};
