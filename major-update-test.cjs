@@ -149,11 +149,12 @@ test('Next Charger requires Lv2 and tracks each physical copy independently',()=
  const before=g.state.p1.stacks.length;
  play(g,copies[0].id);assert.equal(g.operation.choice,'nextCharger');
  choose(g,'done');assert.equal(g.state.p1.stacks.length,before+1);
- assert.equal(g.locate(copies[0].id).z,'extra');assert(!copies[0].used);
+ assert.equal(g.locate(copies[0].id).z,'trash');assert(!copies[0].used);
  assert(!g.beginPayment(copies[1].id).ok);
  for(let i=0;i<4;i++)advance();
  advanceToMain(g,advance);
- play(g,copies[0].id);choose(g,'exchange');
+ assert(!g.beginPayment(copies[0].id).ok);
+ play(g,copies[1].id);choose(g,'exchange');
  const hand=g.state.p1.hand.map(c=>c.id);
  ok(g.reorderCard(hand[0],1));ok(g.confirmOrder());pass(g);
  assert.equal(g.state.p1.hand.length,hand.length);
@@ -173,7 +174,7 @@ test('Twin Horn makes two attacks and Gaiburn destroys itself before burning',()
  assert.equal(g.life.p2,17);assert.equal(unit.rest,false);
  ok(g.declareAttack(unit.id,'body'));ok(g.resolveAttack(null));pass(g);
  assert.equal(g.life.p2,11);
- assert.equal(g.locate(horn.id).z,'extra');assert(!horn.used);
+ assert.equal(g.locate(horn.id).z,'trash');assert(!horn.used);
  assert.equal(g.state.p1.stacks.filter(c=>c.token).length,1);
  const log=g.battleLog();
  assert(log.find(e=>e.kind==='unitDestroyed'&&e.card.instanceId===horn.id).number<
@@ -403,7 +404,7 @@ test('Heartburn costs four red stock, gives red-only SA, and awakens from Molt N
  assert(g.hasSpeed(fort,'p1'));assert(g.hasSpeed(multi,'p1'));assert(!g.hasSpeed(neutral,'p1'));
  for(let i=0;i<2;i++){ok(g.declareAttack(molt.id,'body'));ok(g.resolveAttack(null));pass(g);assert(!molt.rest);}
  assert(g.destroyUnit(fort.id));
- assert.equal(g.locate(fort.id).z,'extra');assert(!fort.used);
+ assert.equal(g.locate(fort.id).z,'trash');assert.equal(fort.awakened,'sbru1-2');
 });
 
 test('all 19 retired side cards are available in main and saved copies migrate once',()=>{

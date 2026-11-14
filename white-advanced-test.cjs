@@ -220,7 +220,7 @@ for(const [top,install,full] of [
  assert.equal(fortress.name,'超戦覇龍 ガイNEXT');assert.equal(fortress.attack,12);
  assert.equal(g.state.p1.stacks.length,stocks);assert.equal(g.paymentSources('p1').length,mana);
  g.destroyUnit(fortress.id,'テスト');
- assert.equal(g.locate(fortress.id).z,'extra');assert.equal(fortress.key,'sbru4');assert(!fortress.awakened);
+ assert.equal(g.locate(fortress.id).z,'trash');assert.equal(fortress.key,'sbru4');assert.equal(fortress.awakened,'sbru1-2');
 }
 {
  const g=fixture();put(g,'wo1','signi-7','p2');

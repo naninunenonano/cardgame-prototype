@@ -14,6 +14,7 @@ jobs:
         with:
           node-version: '22'
       - run: node white-advanced-test.cjs
+      - run: node sideboard-lifecycle-test.cjs
       - run: node major-update-test.cjs
       - run: node beginner-card-impact-test.cjs
       - run: node beginner-card-usage-test.cjs
