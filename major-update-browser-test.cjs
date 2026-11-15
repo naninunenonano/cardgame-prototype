@@ -44,6 +44,26 @@ const path=require('node:path');
   await page.waitForFunction(()=>document.querySelector('[data-grow="p1"]')?.disabled);
   await advance();
   assert.equal(await page.evaluate(()=>Game.turn.step),'main1');
+  const cards=await page.evaluate(()=>{
+   const psychic=Game.fromDefinition('sbbo1','p1');
+   Game.state.p1['signi-1'].push(psychic);
+   for(let i=0;i<2;i++)Game.state.p1.stacks.push(Game.card('青ストック','ストック','青'));
+   const previews=['bs6','bs7','bs8','almar_sbnr1'].map(key=>cardHTML(CardCatalog.cards[key],{full:true}));
+   const sandbox=document.createElement('div');
+   sandbox.innerHTML=previews.join('');
+   return [...sandbox.children].map(card=>card.textContent);
+  });
+  for(const [i,name] of ['超次元ストラテジー・ホール','超次元バイス・ホール','超次元ドラヴィタ・ホール'].entries()){
+   assert(cards[i].includes(name));
+   assert.match(cards[i],/通常呪文・青/);
+  }
+  assert.match(cards[3],/チャージャー/);
+  const before=await page.evaluate(()=>[Game.state.p1.hand.length,Game.state.p2.hand.length]);
+  await page.locator('[data-character="p1"]').first().tap();
+  const brain=page.locator('[data-blue-action="psychicBrainTouch"]');
+  assert(await brain.isEnabled());
+  await brain.tap();
+  assert.deepEqual(await page.evaluate(()=>[Game.state.p1.hand.length,Game.state.p2.hand.length]),[before[0]+1,before[1]-1]);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await page.setViewportSize({width:1280,height:1000});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

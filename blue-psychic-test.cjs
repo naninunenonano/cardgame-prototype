@@ -99,9 +99,9 @@ test('アルマーLv2のメイン開始とLv3の山札下送り',()=>{
 
 test('ドラヴィタ・ホールは解決中の自身を回収できず、別の同名カードを回収できる',()=>{
  const g=ready();
- fund(g,p,4,'白');
- const old=add(g,'ws12',p,'trash');
- const current=add(g,'ws12',p,'hand');
+ fund(g,p,4,'青');
+ const old=add(g,'bs8',p,'trash');
+ const current=add(g,'bs8',p,'hand');
  add(g,'sbbo1',p,'extra');
  play(g,current);
  assert.equal(g.locate(current.id).z,'check');
@@ -114,8 +114,8 @@ test('ドラヴィタ・ホールは解決中の自身を回収できず、別�
 
 test('超次元呪文のコスト、色、上限と1体召喚',()=>{
  assert.deepEqual(Cards.cards.bs6.cost,Mana.cost(6,{青:1}));
- assert.deepEqual(Cards.cards.ks16.cost,Mana.cost(4,{黒:1}));
- assert.deepEqual(Cards.cards.ws12.cost,Mana.cost(3,{白:1}));
+ assert.deepEqual(Cards.cards.bs7.cost,Mana.cost(4,{青:1}));
+ assert.deepEqual(Cards.cards.bs8.cost,Mana.cost(3,{青:1}));
  const g=ready();
  fund(g,p,7,'青');
  const card=add(g,'bs6',p,'hand');
@@ -211,7 +211,7 @@ test('パーフェクト・シールドは混色10支払いで攻撃を中断し
 });
 
 test('バイスとドラヴィタの上限は覚醒前の記載コストに適用される',()=>{
- for(const [key,color,cost,max] of [['ks16','黒',5,10],['ws12','白',4,7]]){
+ for(const [key,color,cost,max] of [['bs7','青',5,10],['bs8','青',4,7]]){
   const g=ready();
   fund(g,p,cost,color);
   const spell=add(g,key,p,'hand');
@@ -219,7 +219,7 @@ test('バイスとドラヴィタの上限は覚醒前の記載コストに適�
   atLimit.cost=Mana.cost(max);
   const aboveLimit=add(g,'sbbo1',p,'extra');
   aboveLimit.cost=Mana.cost(max+1);
-  const enemySpell=key==='ks16'?add(g,'bs6',q,'hand'):null;
+  const enemySpell=key==='bs7'?add(g,'bs6',q,'hand'):null;
   play(g,spell);
   if(enemySpell){
    assert.equal(g.operation.choice,'viceSpell');
@@ -246,4 +246,113 @@ test('Ωの処理は相手ドローフェイズだけを除外する',()=>{
   ok(g.draw(q,1));
   assert.equal(g.locate(unit.id).z,phase==='draw'?'hand':'trash',phase);
  }
+});
+
+test('青化した超次元呪文は青マナが必要で、旧IDのデッキと所持データを引き継ぐ',()=>{
+ const Decks=require('./decks');
+ const old={owned:{ks16:2,ws12:3},decks:[{main:[{key:'ks16',count:2},{key:'ws12',count:3}]}]};
+ const migrated=Decks.migrateProfile(old);
+ assert.deepEqual(migrated.owned,{bs7:2,bs8:3});
+ assert.deepEqual(migrated.decks[0].main,[{key:'bs7',count:2},{key:'bs8',count:3}]);
+ assert.deepEqual(Decks.migrateProfile(migrated),migrated);
+ for(const [key,oldKey,oldColor,total] of [['bs7','ks16','黒',5],['bs8','ws12','白',4]]){
+  const g=ready();
+  const spell=add(g,oldKey,p,'hand');
+  assert.equal(spell.key,key);
+  assert.equal(spell.color,'青');
+  fund(g,p,total-1,oldColor);
+  fund(g,p,1,oldColor);
+  assert.equal(g.beginPayment(spell.id).ok,false);
+  fund(g,p,1,'青');
+  play(g,spell);
+  if(g.operation?.choice==='viceSpell')ok(g.resolveSideChoice(g.sideChoiceCandidates()[0].id));
+  assert.equal(g.locate(spell.id).z,'trash');
+  assert.equal(g.state[p].energy.filter(c=>c.rest).length,total);
+  assert(g.state[p].energy.some(c=>c.rest&&c.mana.color==='青'));
+ }
+ assert.equal(Cards.cards.bs6.color,'青');
+ assert.equal(Cards.cards.ks16,undefined);
+ assert.equal(Cards.cards.ws12,undefined);
+});
+
+test('メモリー・フラスコは0ストックで使用し、同じ個体を3ターンにわたり回収・再使用できる',()=>{
+ const Decks=require('./decks'),d=Decks.preset('blueAdvanced');
+ assert(!d.sideboard.some(c=>c.key==='almar_sbnr1'));
+ d.id='flask-test';
+ d.preset=false;
+ d.sideboard.push({key:'almar_sbnr1',count:2});
+ const g=Game.create({decks:{p1:d.id,p2:'green'},records:[d],clock:()=>1000,random:()=>0.42});
+ ok(g.completeMulligan(p,[],true));ok(g.completeMulligan(q,[],true));
+ const [flask,other]=g.state[p].extra.filter(c=>c.key==='almar_sbnr1');
+ skipCharge(g);
+ assert(Cards.cards.almar_sbnr1.charger);
+ assert(!g.playStatus(flask,p).ok);
+ for(let level=1;level<=4;level++){
+  ok(growthFixture(g,p));
+  g.turn.step='main1';
+  if(level===1)assert(!g.playStatus(flask,p).ok);
+  if(level===2){
+   assert.equal(g.operation,null);
+   assert(g.playStatus(flask,p).ok);
+  }
+ }
+ for(let i=0;i<3;i++){
+  g.state[p].stacks.length=0;
+  const enemy=g.state[q].hand.length;
+  play(g,flask);
+  assert.equal(g.operation.kind,'tokens');
+  ok(g.placeToken(g.unitSlots(p)[i].id));
+  ok(g.resolveOptional(false));
+  assert.equal(g.state[q].hand.length,enemy-1);
+  assert.equal(g.state[p].stacks.length,2);
+  assert.equal(g.locate(flask.id).z,'trash');
+  assert(!flask.used);
+  ok(g.beginBlueAbility(p,'almarFlask'));
+  ok(g.resolveSideChoice(flask.id));
+  assert.equal(g.locate(flask.id).z,'extra');
+  assert(!g.beginBlueAbility(p,'almarFlask').ok);
+  assert(!g.beginPayment(flask.id).ok);
+  assert(!g.beginPayment(other.id).ok);
+  for(let phase=0;phase<4;phase++){
+   g.turn.notBefore=0;
+   ok(g.advance());
+  }
+  assert.equal(g.turn.step,'charge');
+  skipCharge(g);
+ }
+});
+
+test('ピルルクの青2起動は捨て札に反応し、相手手札が空でも1枚引き、覚醒で失われる',()=>{
+ const g=ready(),c=add(g,'sbbo1',p,'signi-1');
+ g.state[p].stacks.length=0;
+ stocks(g,p,'青',1);stocks(g,p,'黒',1);
+ assert(!g.beginBlueAbility(p,'psychicBrainTouch',c.id).ok);
+ stocks(g,p,'青',1);
+ assert(!g.beginBlueAbility(p,'psychicReorder',c.id).ok);
+ const enemy=g.state[q].hand.slice(),hand=g.state[p].hand.length;
+ ok(g.beginBlueAbility(p,'psychicBrainTouch',c.id));
+ assert.equal(g.locate(enemy[Math.floor(0.42*enemy.length)].id).z,'trash');
+ assert.equal(g.state[q].hand.length,enemy.length-1);
+ assert.equal(g.state[p].hand.length,hand+1);
+ assert.deepEqual(g.state[p].stacks.map(c=>c.color).sort(),['青','黒'].sort());
+ stocks(g,p,'青',3);
+ assert(!g.beginBlueAbility(p,'psychicBrainTouch',c.id).ok);
+ g.turn.player=q;
+ assert(!g.beginBlueAbility(p,'psychicBrainTouch',c.id).ok);
+ g.turn.player=p;g.turn.step='main2';g.turn.notBefore=0;
+ ok(g.advance());
+ g.turn.notBefore=0;
+ ok(g.advance());
+ skipCharge(g);
+ g.state[q].hand.length=0;
+ const before=g.state[p].hand.length;
+ ok(g.beginBlueAbility(p,'psychicBrainTouch',c.id));
+ assert.equal(g.state[p].hand.length,before+1);
+ g.turn.step='main2';g.turn.notBefore=0;
+ ok(g.advance());
+ assert.equal(c.awakened,'sbbo1-2');
+ assert.equal(c.psychicBrainTouch,false);
+ g.turn.step='main1';
+ stocks(g,p,'青',2);
+ assert(!g.beginBlueAbility(p,'psychicBrainTouch',c.id).ok);
 });
