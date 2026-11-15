@@ -57,20 +57,19 @@ function success(g,category){
  yes(g.passResponse());
  assert.equal(g.operation.kind,'graveChoice');
  yes(g.resolveGraveChoice(luna.id));yes(g.chooseSlot('signi-1'));yes(g.confirmGravePlacement());
- counter(g,c);
- assert.equal(g.locate(luna.id).z,'trash');
- assert.equal(g.state.p1.hand.length,0);
- success(g,'effectEntry');
+ assert.equal(g.operation,null);
+ assert.equal(g.locate(luna.id).z,'signi-1');
+ assert.equal(g.locate(c.id).z,'hand');
 }
 {
  const g=fixture(),c=give(g,'br3','p2');
  play(g,give(g,'bn5'));yes(g.passResponse());
- yes(g.placeToken('signi-1'));counter(g,c);
- assert.equal(g.state.p1['signi-1'].length,0);
- success(g,'effectEntry');
+ yes(g.placeToken('signi-1'));
+ assert.equal(g.state.p1['signi-1'].length,1);
+ assert.equal(g.locate(c.id).z,'hand');
  assert.equal(g.operation.kind,'tokens');
  yes(g.placeToken('signi-2'));yes(g.placeToken('signi-3'));
- assert.equal(g.fieldCards('p1').filter(c=>c.token).length,2);
+ assert.equal(g.fieldCards('p1').filter(c=>c.token).length,3);
 }
 {
  const g=fixture(),c=give(g,'br3','p2'),amaterasu=give(g,'bs2');
@@ -78,5 +77,12 @@ function success(g,category){
  assert.equal(g.locate(amaterasu.id).z,'trash');
  assert.equal(g.operation,null);
  success(g,'normalSummon');
+}
+{
+ const g=fixture(),c=give(g,'br3','p2'),spell=give(g,'bn7');
+ play(g,spell);counter(g,c);
+ assert.equal(g.locate(spell.id).z,'trash');
+ assert.equal(g.state.p1.hand.length,0);
+ success(g,'spell');
 }
 console.log('PASS counterspell and blue beginner deck regressions');

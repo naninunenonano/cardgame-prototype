@@ -71,8 +71,9 @@ function play(g,key,slot){
  const newLink=add(g,'wn1');
  play(g,'ws6');
  yes(g.resolveExpansion(echo.id));
- assert.equal(g.life.p1,22);
+ assert.equal(g.life.p1,20);
  yes(g.resolveExpansion(newLink.id));settle(g);
+ assert.equal(g.life.p1,22);
  assert.equal(g.locate(newLink.id).z,'structures');
  play(g,'wu2');settle(g);
  assert.equal(g.shieldLinkCount('p1'),3);
