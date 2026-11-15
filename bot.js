@@ -266,6 +266,7 @@ function decide(v){
 
   if(o.kind==='revolution')return {type:'revolution',use:true};
   if(o.kind==='sideChoice'){
+   if(o.choice==='almarDrawPick'||o.choice==='almarOrder')return {type:'sideChoice',id:o.candidates[0].id};
    if(o.choice==='viceOffer')return {type:'sideChoice',id:o.candidates[0]?.id||null};
    if(['technologySearch','awakeSpells'].includes(o.choice)){const limit=o.choice==='awakeSpells'?6:Math.min(8,Math.max(0,o.ids.length-2)),remaining=o.candidates.filter(c=>!o.selected.includes(c.id));if(o.selected.length<limit&&remaining.length)return {type:'sideSelect',id:best(remaining,c=>o.choice==='awakeSpells'?-total(c):keepScore(v,c)).id};return {type:'sideChoice'};}
    const candidates=o.candidates||[],c=best(candidates,c=>o.choice==='opponentDiscard'?-keepScore(v,c):o.choice==='darkHand'?total(c)*3+unitValue(c,enemy.manaCount):o.choice==='destroySame'?unitValue(c,enemy.manaCount):c.type==='通常'?unitValue(c,me.manaCount):Math.max(0,playScore(v,c))+total(c));return {type:'sideChoice',id:c?.id||null};

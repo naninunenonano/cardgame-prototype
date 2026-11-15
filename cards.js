@@ -143,6 +143,20 @@
  Object.assign(c.rn16,{speedAttacker:true,cost:M.cost(1,{赤:2}),text:'スピードアタッカー。'+c.rn16.text});
  c.rn20.cost=M.cost(2,{赤:1});
  const add=(key,definition)=>c[key]={key,baseId:key,faceId:key,abilities:[],symbols:{},onEnter:[],onUse:[],onDeath:[],onDefeat:[],...definition};
+ Object.assign(c.almar,{growthOnly:true,growthCosts:{1:1,2:2,3:2,4:4},characterEffects:{1:[{kind:'draw',count:1}],2:[],3:[],4:[]},
+  text:'Lv0：相手の手札からトラッシュに置かれたカード1枚につき青ストック1個。成長後も有効。',
+  levelTexts:{1:'成長時：1枚引く。',2:'自分のメインフェイズ開始時：2枚引き、手札1枚を選んで捨てる。',3:'自分のターンに1回、青ストック1個で相手手札1枚を選び山札の下へ。',4:'各ターン1回：互いに1枚か2枚を選んで引く／メモリー・フラスコをトラッシュからサイドへ／青ストック3個で手札差のダメージと相手山札の上1枚を上か下へ。相手が手札を捨てるたび、空き枠にアクア・ガード1体を生成し、任意で1枚引く。'}
+ });
+ delete c.almar_sbnr1.viceOnly;
+ Object.assign(c.almar_sbnr1,{text:'相手の手札をランダムに1枚捨てさせ、青ストック1個を得る。',onUse:[{kind:'randomDiscard',count:1},{kind:'blueStock'}]});
+ add('sbbo1',{name:'コード・ピルルク',color:'青',rarity:'OR',type:'通常',cost:M.cost(12),attack:0,maxHealth:20,sideboardOnly:true,cardSection:'sideboard',psychic:true,psychicLock:true,awaken:'sbbo1-2',faceIds:['sbbo1','sbbo1-2'],text:'相手は相手のドローフェイズ以外、手札にカードを加えられない。自分の終了時、自分の手札が相手より5枚以上多ければ覚醒。青ストック2でブレイン・タッチを使う能力は参照定義の確認待ち。'});
+ forms['sbbo1-2']={faceId:'sbbo1-2',name:'コード・ピルルクΩ',color:'青',type:'通常',rarity:'OR',cost:M.cost(16),attack:0,maxHealth:25,psychicLock:false,psychicIntercept:true,text:'相手のドローフェイズ以外の相手の手札追加に干渉。クリーチャーは捨てて攻撃力分ダメージ、呪文は無償使用、その他は山札の下。自分のターンに1回、青ストック2個で相手山札の上2枚を並べ替え、互いに1枚引く。'};
+ const hole=(key,name,color,generic,effects,filter,text)=>add(key,{name,color,rarity:'SR',type:'呪文',cardSection:'main',cost:M.cost(generic,{[color]:1}),onUse:[...effects,{kind:'psychicSummon',...filter}],text});
+ hole('bs6','超次元ストラテジー・ホール','青',6,[...c.sbbr1.onUse],{color:'青'},'相手1体を手札へ戻し、相手自身が手札1枚を捨てる。その後サイドから青サイキック1体を出す。コスト上限は未確定。');
+ hole('ks16','超次元バイス・ホール','黒',4,[{kind:'psychicChoice',choice:'viceSpell'}],{max:10},'相手の手札を確認し、呪文1枚を捨てさせる。その後サイドからコスト10以下のサイキック1体を出す。');
+ hole('ws12','超次元ドラヴィタ・ホール','白',3,[{kind:'psychicChoice',choice:'dravitaRecover'}],{max:7},'自分のトラッシュから呪文1枚を手札へ戻す。その後サイドからコスト7以下のサイキック1体を出す。');
+ add('shno1',{name:'パーフェクト・シールド',color:'無色',rarity:'OR',type:'シールドカード',deckSection:'shields',cardSection:'shields',cost:M.cost(10),shieldRule:{event:'attackDeclared',effect:'perfectShield'},text:'相手の攻撃時、任意色のストック合計10個を支払い、その攻撃を無効にして相手のターンを終了する。'});
+ catalog.shieldKeys.push('shno1');
  const equip=(key,name,rarity,count,equipment,face,description)=>{
   add(key,{name,rarity,color:'赤',type:'設置物',sideboardOnly:true,cardSection:'sideboard',cost:M.cost(0),stackCost:M.cost(0,{赤:count}),equipment,faceIds:[key,face],text:description});
  };
@@ -176,7 +190,7 @@
   text:'自分の赤クリーチャーすべてにSA。自分の赤クリーチャーがアンタップした時、超戦覇龍 ガイNEXTへ龍解。'});
  const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','almar_sbnr1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
  for(const card of Object.values(c)){
-  if(card.sideboardOnly&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
+  if(card.sideboardOnly&&!card.psychic&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
    if(eligibleLegacySide.has(card.key))card.unavailable='色付きストック支払い条件が未確定。';
    else{
     Object.assign(card,{sideboardOnly:false,mainDeckOnly:true,cardSection:'main',deckSection:'main'});
