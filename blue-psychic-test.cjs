@@ -388,7 +388,7 @@ test('Ωは応答先のない応答専用呪文を唱え、使用者の誘発を
   assert(!g.state[owner].hand.includes(response));
   assert.deepEqual(g.state[controller].check,[]);
   const trigger=g.battleLog(p,{detailed:true}).find(e=>e.kind==='draw'&&e.source?.instanceId===casterWatch.id);
-  assert(cast.number<trigger.number&&trigger.number<resolution.number);
+  assert(cast.number<resolution.number&&resolution.number<trigger.number);
   assert.equal(g.operation,null);
  }
 });
@@ -419,7 +419,7 @@ test('通常呪文の発動履歴と解決は使用者を基準にし、自分�
  }
 });
 
-test('Ωの対抗呪文は解決を待つ相手の呪文を打ち消し、次の対抗呪文は応答先がなければ不発になる',()=>{
+test('唱えた時のドローは呪文の完了を待ち、Ωが唱える2枚の対抗呪文は順番に不発になる',()=>{
  const g=ready();
  putOmega(g,p);
  const casterWatch=add(g,'nn3',p,'signi-2');
@@ -431,22 +431,32 @@ test('Ωの対抗呪文は解決を待つ相手の呪文を打ち消し、次の
  const initial=add(g,'bn7',q,'hand');
  const second=add(g,'br3',q,'main',true);
  const first=add(g,'br3',q,'main',true);
+ const bodyDraws=[add(g,'nn3',q,'main',true),add(g,'nn5',q,'main',true)];
+ const watchIds=new Set([ownerWatch.id,g.state[q]['signi-3'][0].id]);
  const before=g.state[p].hand.length,enemy=g.state[q].hand.length;
  assert(!g.beginPayment(add(g,'br3',q,'hand').id).ok);
  g.state[q].hand.pop();
+ // The spell itself draws two cards before its cast-triggered draws.
+ bodyDraws.forEach(c=>{c.type='設置物';});
  play(g,initial);
  assert.equal(g.state[q].hand.length,enemy-1);
  assert.equal(g.state[p].hand.length,before+2);
- assert.equal(castRecord(g,first)[1].resolution,'resolved');
+ const initialDone=castRecord(g,initial)[1];
+ assert.equal(initialDone.resolution,'resolved');
+ assert.equal(castRecord(g,first)[1].resolution,'fizzled');
  assert.equal(castRecord(g,second)[1].resolution,'fizzled');
- assert.equal(castRecord(g,initial)[1].resolution,'countered');
+ const log=g.battleLog(p,{detailed:true});
+ const watchedDraws=log.filter(e=>e.kind==='draw'&&watchIds.has(e.source?.instanceId));
+ assert.equal(watchedDraws.length,2);
+ assert(watchedDraws.every(e=>e.number>initialDone.number));
+ assert(watchedDraws.at(-1).number<castRecord(g,first)[0].number);
+ assert(castRecord(g,first)[1].number<castRecord(g,second)[0].number);
  for(const card of [first,second,initial]){
   assert.equal(g.locate(card.id).p,q);
   assert.equal(g.locate(card.id).z,'trash');
   assert.equal(card.origin,q);
  }
- const success=g.battleLog(p,{detailed:true}).find(e=>e.kind==='counterSuccess');
- assert.equal(success.target.instanceId,initial.id);
+ assert(!log.some(e=>e.kind==='counterSuccess'));
  assert.deepEqual(g.state[p].check,[]);
  assert.deepEqual(g.state[q].check,[]);
  assert.equal(g.operation,null);
@@ -479,4 +489,80 @@ test('Ωが唱えた通常呪文も合法な単独対象がなければ不発に
  assert.equal(castRecord(g,spell)[1].resolution,'fizzled');
  assert.equal(g.locate(spell.id).p,q);
  assert.equal(g.locate(spell.id).z,'trash');
+});
+
+test('エナジー・ホールのドローとサイキック召喚が両方終わるまでΩを待機させる',()=>{
+ const g=ready();
+ putOmega(g,p);
+ g.turn.player=q;
+ fund(g,q,7,'青');
+ // Reproduce the specified effect sequence without adding a production card.
+ const hole=add(g,'bs6',q,'hand');
+ hole.name='エナジー・ホール';
+ hole.onUse=[{kind:'draw',count:1},{kind:'psychicSummon',color:'青'}];
+ const counter=add(g,'br3',q,'main',true);
+ const psychic=add(g,'sbbo1',q,'extra');
+ psychic.onEnter=[{kind:'healLife',count:1}];
+ play(g,hole);
+ assert.equal(g.operation.choice,'psychicSummon');
+ assert.equal(g.locate(counter.id).z,'hand');
+ assert.equal(g.locate(hole.id).z,'check');
+ assert.deepEqual(castRecord(g,counter),[]);
+ ok(g.resolveSideChoice(psychic.id));
+ ok(g.chooseSlot('signi-1'));
+ ok(g.confirmSideFree());
+ assert.equal(g.locate(psychic.id).z,'signi-1');
+ assert.equal(g.locate(hole.id).z,'trash');
+ assert.equal(g.locate(counter.id).p,q);
+ assert.equal(g.locate(counter.id).z,'trash');
+ const [cast,done]=castRecord(g,counter),[holeCast,holeDone]=castRecord(g,hole);
+ const log=g.battleLog(p,{detailed:true});
+ const [queued]=log.filter(e=>e.kind==='triggerQueued'&&e.effects.includes('psychicIntercept'));
+ assert(queued.number<holeDone.number);
+ assert.equal(log.filter(e=>e.kind==='triggerQueued'&&e.effects.includes('psychicIntercept')).length,1);
+ const entry=log.find(e=>e.kind==='unitEntry'&&e.card.instanceId===psychic.id);
+ const move=log.find(e=>e.kind==='move'&&e.card.instanceId===hole.id&&e.to.zone==='trash');
+ const heal=log.find(e=>e.kind==='life'&&e.actor===q&&e.amount===1);
+ assert(holeCast.number<entry.number&&entry.number<holeDone.number);
+ assert(holeDone.number<move.number&&move.number<cast.number);
+ assert(holeDone.number<heal.number);
+ assert.equal(cast.caster,p);
+ assert.equal(done.resolution,'fizzled');
+ assert(!log.some(e=>e.kind==='counterSuccess'));
+});
+
+test('登場時能力のドローで誘発したΩは、残りの回復が完了してから解決する',()=>{
+ const g=ready();
+ putOmega(g,p);
+ const ability=g.fromDefinition('nn3',q);
+ ability.onEnter=[{kind:'draw',count:1},{kind:'healLife',count:2}];
+ const counter=add(g,'br3',q,'main',true);
+ ok(g.addCard(q,'signi-1',ability));
+ const log=g.battleLog(p,{detailed:true});
+ const draw=log.find(e=>e.kind==='draw'&&e.source?.instanceId===ability.id);
+ const heal=log.find(e=>e.kind==='life'&&e.actor===q&&e.amount===2);
+ const [cast,done]=castRecord(g,counter);
+ assert(draw.number<heal.number&&heal.number<cast.number);
+ assert.equal(done.resolution,'fizzled');
+ assert.equal(log.filter(e=>e.kind==='cardUse'&&e.card.instanceId===counter.id).length,1);
+});
+
+test('手札を捨てたイベントによるアルマーのストック獲得は呪文の残りの効果を待つ',()=>{
+ const g=ready();
+ fund(g,q,7,'青');
+ g.turn.player=q;
+ const spell=add(g,'bs6',q,'hand');
+ spell.onUse=[{kind:'handDiscard'},{kind:'psychicSummon',color:'青'}];
+ const psychic=add(g,'sbbo1',q,'extra');
+ const before=g.state[p].stacks.length;
+ play(g,spell);
+ assert.equal(g.operation.kind,'handPick');
+ ok(g.resolvePrivate(g.state[q].hand[0].id));
+ assert.equal(g.operation.choice,'psychicSummon');
+ assert.equal(g.state[p].stacks.length,before);
+ ok(g.resolveSideChoice(psychic.id));
+ ok(g.chooseSlot('signi-1'));
+ ok(g.confirmSideFree());
+ assert.equal(g.locate(spell.id).z,'trash');
+ assert.equal(g.state[p].stacks.length,before+1);
 });
