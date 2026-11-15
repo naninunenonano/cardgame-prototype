@@ -52,7 +52,7 @@ function create(x){const M=x.M;let urgent=[],suspended=[],sacrifices=new Map(),s
   else if(kind==='graveMill'){if(e.count>0&&x.state[p].main.length){if(e.count>1)push([{...e,count:e.count-1}],p,sourceId);const c=x.state[p].main[0];if(e.batch){const b=batches.get(e.batch);b[p]=(b[p]||0)+(c.cost?M.total(c.cost):0);}x.rawMove(x.locate(c.id),p,'trash');}}
   else if(kind==='graveReanimate')reanimate(p,e,sourceId);
   else if(kind==='graveRecover')choice('recover',p,sourceId);
-  else if(kind==='graveLegacyReveal'){const id=e.ids[e.index],s=id&&x.locate(id);if(id){push([{...e,index:e.index+1}],p,sourceId);if(s&&s.z==='holding')x.rawMove(s,p,e.reveal&&M.hasColor(s.card,'青')?'hand':'trash');}else if(e.reveal)x.record('山札の公開と仕分けを完了。');else if(trash(p).length)x.operation={kind:'recoverUnit',p};}
+  else if(kind==='graveLegacyReveal'){const id=e.ids[e.index],s=id&&x.locate(id);if(id){push([{...e,index:e.index+1}],p,sourceId);if(s&&s.z==='holding')x.rawMove(s,p,e.reveal&&M.hasColor(s.card,'青')?(x.handBlocked(p)?'main':'hand'):'trash');}else if(e.reveal)x.record('山札の公開と仕分けを完了。');else if(trash(p).length)x.operation={kind:'recoverUnit',p};}
   else if(kind==='graveSearchMill'){push([{kind:'graveShuffle'}],p,sourceId);choice('searchMill',p,sourceId);}
   else if(kind==='graveShuffle')x.shuffleRaw(p,'main');
   else if(kind==='graveAbyssEntry'){const c=x.locate(sourceId)?.card;if(c?.graveSummonedFromTrash)push([{kind:'graveMill',count:2}],p,sourceId);}
