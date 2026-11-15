@@ -68,7 +68,7 @@
  {key:'gunveet',name:'記憶の管理者 リゼット',type:'通常',cost:M.cost(4,{青:3}),attack:7,maxHealth:7,symbols:{青:1},requiredCharacter:'almar',provisional:true,onEnter:[{kind:'destroyTapped'}],awaken:'darkGunveet',text:'登場時：相手の横向き1体を破壊。相手ターン終了時、相手手札0なら覚醒。覚醒前7/7・青1は仮設定。'},
  {key:'alegre',name:'ルナ・アレグル',type:'通常',cost:M.cost(5,{青:2}),attack:5,maxHealth:5,symbols:{青:1},provisional:true,onEnd:[{kind:'draw',count:1},{kind:'handDiscard',count:1}],awaken:'alegria',text:'終了時1ドロー→自分の手札1捨て。自分の開始時、トラッシュの呪文6枚を山札へ戻して覚醒可能。5/5・青1は仮設定。'},
  {key:'dogiragon',name:'蒼き覚醒 ドギラゴンX',type:'通常',cost:M.cost(8),attack:13,maxHealth:13,symbols:{},revolution:true,text:'通常支払い不可。自分の元コスト5以上のクリーチャーの攻撃時に革命チェンジ。交換元を除外し同じ枠で攻撃を引き継ぐ。サイド使用1回。'},
- {key:'viceCharger',name:'メモリー・フラスコ',type:'呪文',cost:M.cost(0),requiredCharacter:'almar',viceOnly:true,onUse:[{kind:'randomDiscard',count:1},{kind:'manaToken',color:'青'}],text:'アルマーLv2へ成長した直後だけ任意使用。相手ランダム1捨て→青マナトークン1個。成長の追加処理として回数を二重消費しない。'},
+ {key:'viceCharger',name:'メモリー・フラスコ',type:'呪文',cost:M.cost(0),stackCost:M.cost(0),requiredCharacter:'almar',charger:true,sideboardDiscardAfterUse:true,onUse:[{kind:'randomDiscard',count:1},{kind:'blueStock'}],text:'アルマー専用チャージャー。相手の手札をランダムに1枚捨てさせ、青ストック1個を得る。使用後はトラッシュへ。サイドボードに戻れば再使用できる。'},
  {key:'lostSoul',name:'記憶の簒奪',type:'呪文',cost:M.cost(0,{青:8}),requiredCharacter:'almar',onUse:[{kind:'randomDiscard',count:999}],text:'相手の手札をすべて捨てさせる。実際の捨て札1枚ごとにアルマーLv4が誘発する。'},
  {key:'conspiracy',name:'陰謀と計略の手',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'enemyUnitBounce'},{kind:'opponentDiscard'}],text:'相手の1体をバウンス→相手本人が手札1枚を選んで捨てる。'},
  {key:'technology',name:'インビンシブル・テクノロジー',type:'呪文',cost:M.cost(12,{青:1}),allBlueReduction:3,onUse:[{kind:'technologySearch'},{kind:'technologyCast'}],text:'自分のマナがすべて青なら不特定をさらに3軽減（0まで）。山札から任意枚数を手札へ→現在手札枚数以下の元コストの青カード1枚を任意で無料使用。'},
@@ -81,7 +81,7 @@
  alegria:{name:'ルナ・アレグリア',cost:M.cost(14),attack:13,maxHealth:13,symbols:{青:3},abilities:[],onEnd:[],onEnter:[],drawOnUse:true,revertAtFive:true,text:'覚醒後のみ。13/13・青3。自分の召喚・呪文使用時1ドロー。自分の手札5枚以下なら覚醒解除。'}
  };
  cards.aquaGuard={key:'aquaGuard',name:'アクア・ガード',type:'通常',color:'青',cost:null,attack:0,maxHealth:1,symbols:{青:1},abilities:['ブロッカー'],cannotAttack:true,token:true,onUse:[],onEnter:[],onDefeat:[],text:'攻撃不可。場を離れれば消滅。'};
- const sideboardPreset=sideDefs.filter(c=>c.key!=='vt5000').map(c=>({key:c.key,count:1})).concat({key:'s3',count:1});
+ const sideboardPreset=sideDefs.filter(c=>!['vt5000','viceCharger'].includes(c.key)).map(c=>({key:c.key,count:1})).concat({key:'s3',count:1});
  const starter=(typeof module==='object'&&module.exports?require('./starter-cards.js'):globalThis.StarterContent).install(M,cards,awakened);
  (typeof module==='object'&&module.exports?require('./update-cards.js'):globalThis.CardUpdate).install(M,cards,awakened);
  (typeof module==='object'&&module.exports?require('./expansion-cards.js'):globalThis.ExpansionCards).install(M,cards,awakened);
@@ -147,14 +147,12 @@
   text:'Lv0：相手の手札からトラッシュに置かれたカード1枚につき青ストック1個。成長後も有効。',
   levelTexts:{1:'成長時：1枚引く。',2:'自分のメインフェイズ開始時：2枚引き、手札1枚を選んで捨てる。',3:'自分のターンに1回、青ストック1個で相手手札1枚を選び山札の下へ。',4:'各ターン1回：互いに1枚か2枚を選んで引く／メモリー・フラスコをトラッシュからサイドへ／青ストック3個で手札差のダメージと相手山札の上1枚を上か下へ。相手が手札を捨てるたび、空き枠にアクア・ガード1体を生成し、任意で1枚引く。'}
  });
- delete c.almar_sbnr1.viceOnly;
- Object.assign(c.almar_sbnr1,{text:'相手の手札をランダムに1枚捨てさせ、青ストック1個を得る。',onUse:[{kind:'randomDiscard',count:1},{kind:'blueStock'}]});
- add('sbbo1',{name:'コード・ピルルク',color:'青',rarity:'OR',type:'通常',cost:M.cost(12),attack:0,maxHealth:20,sideboardOnly:true,cardSection:'sideboard',psychic:true,psychicLock:true,awaken:'sbbo1-2',faceIds:['sbbo1','sbbo1-2'],text:'相手は相手のドローフェイズ以外、手札にカードを加えられない。自分の終了時、自分の手札が相手より5枚以上多ければ覚醒。青ストック2でブレイン・タッチを使う能力は参照定義の確認待ち。'});
- forms['sbbo1-2']={faceId:'sbbo1-2',name:'コード・ピルルクΩ',color:'青',type:'通常',rarity:'OR',cost:M.cost(16),attack:0,maxHealth:25,psychicLock:false,psychicIntercept:true,text:'相手のドローフェイズ以外の相手の手札追加に干渉。クリーチャーは捨てて攻撃力分ダメージ、呪文は無償使用、その他は山札の下。自分のターンに1回、青ストック2個で相手山札の上2枚を並べ替え、互いに1枚引く。'};
+ add('sbbo1',{name:'コード・ピルルク',color:'青',rarity:'OR',type:'通常',cost:M.cost(12),attack:0,maxHealth:20,sideboardOnly:true,cardSection:'sideboard',psychic:true,psychicLock:true,psychicBrainTouch:true,awaken:'sbbo1-2',faceIds:['sbbo1','sbbo1-2'],text:'相手は相手のドローフェイズ以外、手札にカードを加えられない。自分の終了時、自分の手札が相手より5枚以上多ければ覚醒。自分のターンに1回、青ストック2個で相手の手札をランダムに1枚捨てさせ、その後自分は1枚引く。'});
+ forms['sbbo1-2']={faceId:'sbbo1-2',name:'コード・ピルルクΩ',color:'青',type:'通常',rarity:'OR',cost:M.cost(16),attack:0,maxHealth:25,psychicLock:false,psychicBrainTouch:false,psychicIntercept:true,text:'相手のドローフェイズ以外の相手の手札追加に干渉。クリーチャーは捨てて攻撃力分ダメージ、呪文は無償使用、その他は山札の下。自分のターンに1回、青ストック2個で相手山札の上2枚を並べ替え、互いに1枚引く。'};
  const hole=(key,name,color,generic,effects,filter,text)=>add(key,{name,color,rarity:'SR',type:'呪文',cardSection:'main',cost:M.cost(generic,{[color]:1}),onUse:[...effects,{kind:'psychicSummon',...filter}],text});
- hole('bs6','超次元ストラテジー・ホール','青',6,[...c.sbbr1.onUse],{color:'青'},'相手1体を手札へ戻し、相手自身が手札1枚を捨てる。その後サイドから青サイキック1体を出す。コスト上限は未確定。');
- hole('ks16','超次元バイス・ホール','黒',4,[{kind:'psychicChoice',choice:'viceSpell'}],{max:10},'相手の手札を確認し、呪文1枚を捨てさせる。その後サイドからコスト10以下のサイキック1体を出す。');
- hole('ws12','超次元ドラヴィタ・ホール','白',3,[{kind:'psychicChoice',choice:'dravitaRecover'}],{max:7},'自分のトラッシュから呪文1枚を手札へ戻す。その後サイドからコスト7以下のサイキック1体を出す。');
+ hole('bs6','超次元ストラテジー・ホール','青',6,[...c.sbbr1.onUse],{color:'青'},'相手1体を手札へ戻し、相手自身が手札1枚を捨てる。その後サイドから青サイキック1体を出す。召喚コスト上限なし。');
+ hole('bs7','超次元バイス・ホール','青',4,[{kind:'psychicChoice',choice:'viceSpell'}],{max:10},'相手の手札を確認し、呪文1枚を捨てさせる。その後サイドからコスト10以下のサイキック1体を出す。');
+ hole('bs8','超次元ドラヴィタ・ホール','青',3,[{kind:'psychicChoice',choice:'dravitaRecover'}],{max:7},'自分のトラッシュから呪文1枚を手札へ戻す。その後サイドからコスト7以下のサイキック1体を出す。');
  add('shno1',{name:'パーフェクト・シールド',color:'無色',rarity:'OR',type:'シールドカード',deckSection:'shields',cardSection:'shields',cost:M.cost(10),shieldRule:{event:'attackDeclared',effect:'perfectShield'},text:'相手の攻撃時、任意色のストック合計10個を支払い、その攻撃を無効にして相手のターンを終了する。'});
  catalog.shieldKeys.push('shno1');
  const equip=(key,name,rarity,count,equipment,face,description)=>{
@@ -188,7 +186,7 @@
  add('sbru4',{name:'闘将銀河城 ハートバーン',color:'赤',rarity:'UR',type:'設置物',cardSection:'sideboard',sideboardOnly:true,
   heartburn:true,redSpeedAura:true,cost:M.cost(0),stackCost:M.cost(0,{赤:4}),faceIds:['sbru4','sbru1-2'],
   text:'自分の赤クリーチャーすべてにSA。自分の赤クリーチャーがアンタップした時、超戦覇龍 ガイNEXTへ龍解。'});
- const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','almar_sbnr1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
+ const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
  for(const card of Object.values(c)){
   if(card.sideboardOnly&&!card.psychic&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
    if(eligibleLegacySide.has(card.key))card.unavailable='色付きストック支払い条件が未確定。';
