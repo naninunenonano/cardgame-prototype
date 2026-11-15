@@ -356,3 +356,127 @@ test('ピルルクの青2起動は捨て札に反応し、相手手札が空で�
  stocks(g,p,'青',2);
  assert(!g.beginBlueAbility(p,'psychicBrainTouch',c.id).ok);
 });
+
+function castRecord(g,c){
+ return g.battleLog(p,{detailed:true}).filter(e=>e.card?.instanceId===c.id&&['cardUse','spellResolution'].includes(e.kind));
+}
+function putOmega(g,controller){
+ const c=add(g,'sbbo1',controller,'signi-1');
+ Object.assign(c,Cards.awakened['sbbo1-2'],{awakened:'sbbo1-2'});
+ return c;
+}
+
+test('Ωは応答先のない応答専用呪文を唱え、使用者の誘発を処理して持ち主のトラッシュへ送る',()=>{
+ for(const [controller,owner] of [[p,q],[q,p]]){
+  const g=ready(),omega=putOmega(g,controller);
+  const casterWatch=add(g,'nn3',controller,'signi-2');
+  const ownerWatch=add(g,'nn3',owner,'signi-2');
+  casterWatch.drawOnUse=ownerWatch.drawOnUse=true;
+  assert.equal(omega.drawOnUse,undefined);
+  const response=add(g,'br3',owner,'main',true);
+  const casterHand=g.state[controller].hand.length,ownerHand=g.state[owner].hand.length;
+  ok(g.draw(owner,1));
+  const [cast,resolution]=castRecord(g,response);
+  assert.deepEqual([cast.kind,cast.actor,cast.caster,cast.owner,Mana.total(cast.cost)],['cardUse',controller,controller,owner,0]);
+  assert.deepEqual([resolution.kind,resolution.actor,resolution.caster,resolution.owner,resolution.resolution,resolution.reason],['spellResolution',controller,controller,owner,'fizzled','noLegalResponseTarget']);
+  assert.equal(g.state[controller].hand.length,casterHand+1);
+  assert.equal(g.state[owner].hand.length,ownerHand);
+  assert.equal(g.locate(response.id).p,owner);
+  assert.equal(g.locate(response.id).z,'trash');
+  assert.equal(response.origin,owner);
+  assert(!g.state[owner].main.includes(response));
+  assert(!g.state[owner].hand.includes(response));
+  assert.deepEqual(g.state[controller].check,[]);
+  const trigger=g.battleLog(p,{detailed:true}).find(e=>e.kind==='draw'&&e.source?.instanceId===casterWatch.id);
+  assert(cast.number<trigger.number&&trigger.number<resolution.number);
+  assert.equal(g.operation,null);
+ }
+});
+
+test('通常呪文の発動履歴と解決は使用者を基準にし、自分で唱えた場合も同じ誘発を使う',()=>{
+ for(const stolen of [false,true]){
+  const g=ready();
+  if(stolen)putOmega(g,p);
+  const caster=stolen?p:q,owner=q;
+  const pilot=add(g,'nn3',p,'signi-2'),opponent=add(g,'nn3',q,'signi-2');
+  pilot.drawOnUse=opponent.drawOnUse=true;
+  const spell=add(g,'bn7',owner,stolen?'main':'hand',stolen);
+  const counts=Object.fromEntries([p,q].map(id=>[id,g.state[id].hand.length]));
+  if(stolen)ok(g.draw(owner,1));
+  else{
+   g.turn.player=owner;
+   fund(g,owner,4,'青');
+   play(g,spell);
+  }
+  assert.equal(g.state[p].hand.length,counts[p]+(stolen?3:0));
+  assert.equal(g.state[q].hand.length,counts[q]+(stolen?0:2));
+  const [cast,resolution]=castRecord(g,spell);
+  assert.equal(cast.caster,caster);
+  assert.equal(cast.owner,owner);
+  assert.equal(resolution.resolution,'resolved');
+  assert.equal(g.locate(spell.id).p,owner);
+  assert.equal(g.locate(spell.id).z,'trash');
+ }
+});
+
+test('Ωの対抗呪文は解決を待つ相手の呪文を打ち消し、次の対抗呪文は応答先がなければ不発になる',()=>{
+ const g=ready();
+ putOmega(g,p);
+ const casterWatch=add(g,'nn3',p,'signi-2');
+ const ownerWatch=add(g,'nn3',q,'signi-2');
+ casterWatch.drawOnUse=ownerWatch.drawOnUse=true;
+ add(g,'nn3',q,'signi-3').drawOnUse=true;
+ g.turn.player=q;
+ fund(g,q,4,'青');
+ const initial=add(g,'bn7',q,'hand');
+ const second=add(g,'br3',q,'main',true);
+ const first=add(g,'br3',q,'main',true);
+ const before=g.state[p].hand.length,enemy=g.state[q].hand.length;
+ assert(!g.beginPayment(add(g,'br3',q,'hand').id).ok);
+ g.state[q].hand.pop();
+ play(g,initial);
+ assert.equal(g.state[q].hand.length,enemy-1);
+ assert.equal(g.state[p].hand.length,before+2);
+ assert.equal(castRecord(g,first)[1].resolution,'resolved');
+ assert.equal(castRecord(g,second)[1].resolution,'fizzled');
+ assert.equal(castRecord(g,initial)[1].resolution,'countered');
+ for(const card of [first,second,initial]){
+  assert.equal(g.locate(card.id).p,q);
+  assert.equal(g.locate(card.id).z,'trash');
+  assert.equal(card.origin,q);
+ }
+ const success=g.battleLog(p,{detailed:true}).find(e=>e.kind==='counterSuccess');
+ assert.equal(success.target.instanceId,initial.id);
+ assert.deepEqual(g.state[p].check,[]);
+ assert.deepEqual(g.state[q].check,[]);
+ assert.equal(g.operation,null);
+});
+
+test('Ωの無償使用で持ち主のトラッシュ移動時能力も処理される',()=>{
+ const g=ready();
+ putOmega(g,p);
+ const counter=add(g,'br3',q,'main',true);
+ counter.trashPriority=true;
+ const unit=add(g,'nn3',q,'main',true);
+ g.state[q].main.splice(0,2,counter,unit);
+ ok(g.draw(q,1));
+ assert.equal(g.operation.kind,'graveChoice');
+ assert.equal(g.operation.p,q);
+ const trigger=g.battleLog(p,{detailed:true}).find(e=>e.kind==='graveInterrupt');
+ assert.equal(trigger.actor,q);
+ assert.equal(trigger.source.instanceId,counter.id);
+ ok(g.resolveGraveChoice(g.state[q].hand[0].id));
+ assert.equal(g.locate(counter.id).z,'trash');
+ assert.equal(g.locate(counter.id).p,q);
+ assert.equal(g.operation,null);
+});
+
+test('Ωが唱えた通常呪文も合法な単独対象がなければ不発になる',()=>{
+ const g=ready();
+ putOmega(g,p);
+ const spell=add(g,'gr5',q,'main',true);
+ ok(g.draw(q,1));
+ assert.equal(castRecord(g,spell)[1].resolution,'fizzled');
+ assert.equal(g.locate(spell.id).p,q);
+ assert.equal(g.locate(spell.id).z,'trash');
+});

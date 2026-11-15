@@ -148,7 +148,7 @@
   levelTexts:{1:'成長時：1枚引く。',2:'自分のメインフェイズ開始時：2枚引き、手札1枚を選んで捨てる。',3:'自分のターンに1回、青ストック1個で相手手札1枚を選び山札の下へ。',4:'各ターン1回：互いに1枚か2枚を選んで引く／メモリー・フラスコをトラッシュからサイドへ／青ストック3個で手札差のダメージと相手山札の上1枚を上か下へ。相手が手札を捨てるたび、空き枠にアクア・ガード1体を生成し、任意で1枚引く。'}
  });
  add('sbbo1',{name:'コード・ピルルク',color:'青',rarity:'OR',type:'通常',cost:M.cost(12),attack:0,maxHealth:20,sideboardOnly:true,cardSection:'sideboard',psychic:true,psychicLock:true,psychicBrainTouch:true,awaken:'sbbo1-2',faceIds:['sbbo1','sbbo1-2'],text:'相手は相手のドローフェイズ以外、手札にカードを加えられない。自分の終了時、自分の手札が相手より5枚以上多ければ覚醒。自分のターンに1回、青ストック2個で相手の手札をランダムに1枚捨てさせ、その後自分は1枚引く。'});
- forms['sbbo1-2']={faceId:'sbbo1-2',name:'コード・ピルルクΩ',color:'青',type:'通常',rarity:'OR',cost:M.cost(16),attack:0,maxHealth:25,psychicLock:false,psychicBrainTouch:false,psychicIntercept:true,text:'相手のドローフェイズ以外の相手の手札追加に干渉。クリーチャーは捨てて攻撃力分ダメージ、呪文は無償使用、その他は山札の下。自分のターンに1回、青ストック2個で相手山札の上2枚を並べ替え、互いに1枚引く。'};
+ forms['sbbo1-2']={faceId:'sbbo1-2',name:'コード・ピルルクΩ',color:'青',type:'通常',rarity:'OR',cost:M.cost(16),attack:0,maxHealth:25,psychicLock:false,psychicBrainTouch:false,psychicIntercept:true,text:'相手のドローフェイズ以外の相手の手札追加に干渉。クリーチャーは捨てて攻撃力分ダメージ、呪文は無償で唱え、元の持ち主のトラッシュへ。応答専用呪文は有効な応答先がなければ不発。その他は山札の下。自分のターンに1回、青ストック2個で相手山札の上2枚を並べ替え、互いに1枚引く。'};
  const hole=(key,name,color,generic,effects,filter,text)=>add(key,{name,color,rarity:'SR',type:'呪文',cardSection:'main',cost:M.cost(generic,{[color]:1}),onUse:[...effects,{kind:'psychicSummon',...filter}],text});
  hole('bs6','超次元ストラテジー・ホール','青',6,[...c.sbbr1.onUse],{color:'青'},'相手1体を手札へ戻し、相手自身が手札1枚を捨てる。その後サイドから青サイキック1体を出す。召喚コスト上限なし。');
  hole('bs7','超次元バイス・ホール','青',4,[{kind:'psychicChoice',choice:'viceSpell'}],{max:10},'相手の手札を確認し、呪文1枚を捨てさせる。その後サイドからコスト10以下のサイキック1体を出す。');
