@@ -60,4 +60,64 @@ test('technology choosezero and decline freeuse preserve identity/counts',()=>{c
 test('character cannot be paid as a card and a turn cannot grow twice',()=>{const g=game(),id=g.character('p1').id;A(!g.beginPayment(id).ok);yes(require('./test-fixtures.cjs').growthFixture(g));settle(g);A(!g.beginGrowth('p1').ok);A.equal(g.character('p1').level,1);});
 test('sideboard roster retains both registered cards across character, field, return and used states',()=>{const g=game();grow(g,1);next(g);const c=side(g,'bo1');settle(g);A.equal(g.sideboardRoster('p1').length,2);A(g.sideboardRoster('p1').includes(g.character('p1')));A(!g.sideboardRoster('p1').includes(c));A(g.destroyUnit(c.id));A.equal(g.sideboardRoster('p1').length,2);});
 test('side composition can exchange copies while keeping10, but only1 character',()=>{const d={...D.preset('blue'),id:'test',preset:false};d.sideboard=C.sideboardPreset.filter(e=>e.key!=='almar_sbbu1').map(e=>({...e,count:e.key==='sbnr2'?2:e.count}));A(!D.validate(d).some(e=>e.includes('サイド')));d.sideboard[0].count=2;A(D.validate(d).some(e=>e.includes('成長型キャラクター')));});
+test('Xyz materials cannot be field targets and detach atomically to their respective owners',()=>{
+ const g=game();
+ const first=g.fromDefinition('nn3','p2'),second=g.fromDefinition('nn3','p1');
+ const host=unit(g,'p1',6,{xyzMaterials:[first,second]});
+ A.deepEqual(g.fieldCards('p1').map(c=>c.id),[host.id]);
+ A.equal(g.locate(first.id),null);
+ A(!g.targetOptions({kind:'unitBounce'},'p2').some(c=>[first.id,second.id].includes(c.id)));
+ for(const ids of [[first.id,first.id],[first.id,'invalid']]){
+  A(!g.detachXyzMaterials(host.id,ids).ok);
+  A.deepEqual(host.xyzMaterials,[first,second]);
+ }
+ yes(g.detachXyzMaterials(host.id,[first.id]));
+ A.deepEqual(host.xyzMaterials,[second]);
+ A.deepEqual([g.locate(first.id).p,g.locate(first.id).z],['p2','trash']);
+ A(!g.detachXyzMaterials(host.id,[first.id]).ok);
+ A(!g.events.some(e=>e.kind==='unitDestroyed'&&e.cardId===first.id));
+ const moves=g.battleLog('p1').filter(e=>e.kind==='move'&&e.card?.instanceId===first.id);
+ A.equal(moves.length,1);
+ A.equal(moves[0].from.zone,'xyzMaterial');
+});
+
+test('an Xyz host releases all remaining materials only when it actually leaves the field',()=>{
+ const g=game(),first=g.fromDefinition('kn4','p2'),second=g.fromDefinition('nn3','p1');
+ second.onDeath=[{kind:'draw',count:1}];
+ const host=unit(g,'p1',6,{xyzMaterials:[first,second]});
+ yes(g.manualMove(host.id,'p1','signi-2'));
+ A.deepEqual(host.xyzMaterials,[first,second]);
+ host.indestructible=true;
+ A(!g.destroyUnit(host.id));
+ A.deepEqual(host.xyzMaterials,[first,second]);
+ delete host.indestructible;
+ const hand=g.state.p1.hand.length;
+ yes(g.manualMove(host.id,'p1','hand'));
+ A.deepEqual(host.xyzMaterials,[]);
+ A.deepEqual([g.locate(first.id).p,g.locate(first.id).z],['p2','trash']);
+ A.deepEqual([g.locate(second.id).p,g.locate(second.id).z],['p1','trash']);
+ A.equal(g.state.p1.hand.length,hand+1);
+ A.equal(g.operation.kind,'graveChoice');
+ A.equal(g.operation.p,'p2');
+ const trigger=g.battleLog('p1').filter(e=>e.kind==='graveInterrupt'&&e.source.instanceId===first.id);
+ A.equal(trigger.length,1);
+ yes(g.resolveGraveChoice(g.state.p2.hand[0].id));
+ A(!g.events.some(e=>e.kind==='unitDestroyed'&&[first.id,second.id].includes(e.cardId)));
+});
+
+test('evolution sends a host’s Xyz materials to trash without mixing them into evolution bases',()=>{
+ const g=game();
+ const material=g.fromDefinition('nn3','p2');
+ const base=unit(g,'p1',6,{color:'青',xyzMaterials:[material]});
+ const evolution=g.fromDefinition('bs5','p1');
+ g.state.p1.hand.push(evolution);
+ yes(g.beginPayment(evolution.id));
+ yes(g.chooseSlot('signi-1'));
+ yes(g.confirmPayment());
+ settle(g);
+ A.equal(g.locate(evolution.id).z,'signi-1');
+ A.deepEqual(evolution.under,[base]);
+ A.deepEqual(base.xyzMaterials,[]);
+ A.deepEqual([g.locate(material.id).p,g.locate(material.id).z],['p2','trash']);
+});
 console.log(`${n} sideboard revision groups passed`);
