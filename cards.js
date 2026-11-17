@@ -226,6 +226,6 @@
    }
   }
  }
- catalog.sideboardPreset=catalog.sideboardPreset.filter(e=>c[e.key]?.sideboardOnly&&!c[e.key].unavailable);
+ catalog.sideboardPreset=catalog.sideboardPreset.filter(e=>c[e.key]?.sideboardOnly&&!c[e.key].unavailable&&!c[e.key].psychic);
  return (typeof module==='object'&&module.exports?require('./character-series.js'):globalThis.CharacterSeries).install(catalog);
 });
