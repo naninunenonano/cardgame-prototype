@@ -1,4 +1,3 @@
-const { holdUnavailable }=require('./test-fixtures.cjs');
 'use strict';
 const assert=require('node:assert/strict');
 const {create}=require('./game');
@@ -38,14 +37,25 @@ function use(g,c,slot,target){
  pass(g);
 }
 assert.equal(cards.sbwl1.cost.白,4);
+assert.deepEqual(cards.sbwl1.cost,cards.sbwl1.stackCost);
+assert(Decks.available('sideboard').some(c=>c.key==='sbwl1'));
 assert.equal(awakened['sbwl1-2'].attack,7);
 assert.deepEqual(awakened['sbwl1-2'].symbols,{白:1});
 assert(!Packs.pool().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
 assert(!Decks.available().some(c=>c.key==='t10'||c.key==='sbwl1-2'));
-holdUnavailable(['sbwl1'],'Crest token creation, awakening, and escape',()=>{
+{
  const g=setup();
+ const leader=put(g,'eira','p1','lrig');
+ leader.level=2;
  const crest=put(g,'sbwl1','p1','extra');
+ const stock=color=>g.card(color+'ストック','ストック',color,null,false,'p1');
+ g.state.p1.stacks=[stock('白'),stock('白'),stock('白'),stock('青')];
+ assert.match(g.beginPayment(crest.id).message,/ストック不足/);
+ const mana=g.availableMana('p1').total;
+ g.state.p1.stacks.push(stock('白'));
  use(g,crest);
+ assert.deepEqual(g.state.p1.stacks.map(s=>s.color),['青']);
+ assert.equal(g.availableMana('p1').total,mana);
  assert.equal(g.locate(crest.id).z,'structures');
  assert.equal(g.operation.kind,'tokens');
  yes(g.placeToken('signi-1'));
@@ -72,7 +82,7 @@ holdUnavailable(['sbwl1'],'Crest token creation, awakening, and escape',()=>{
  assert.equal(crest.name,'始まりの紋章');
  g.destroyUnit(tokens[0].id);
  assert(!g.locate(tokens[0].id));
-});
+}
 {
  const g=setup();
  const target=put(g,'nn3','p2','signi-1');

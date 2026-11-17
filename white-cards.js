@@ -61,7 +61,7 @@ function install(M,cards,awakened){
   cost:M.cost(0,{白:1})
  };
  cards.wn4={
-  key:"wn4", name:"クラッシュ・フォックス", rarity:"N", color:"白", type:"通常",
+  key:"wn4", name:"スネークアイ・フォックス", rarity:"N", color:"白", type:"通常",
   civilizations:["白"], deckLimit:3, symbols:{},
   attack:1, maxHealth:2,
   abilities:[],
@@ -73,7 +73,7 @@ function install(M,cards,awakened){
   cost:M.cost(1,{白:1})
  };
  cards.wn5={
-  key:"wn5", name:"クラッシュ・ラビット", rarity:"N", color:"白", type:"通常",
+  key:"wn5", name:"スネークアイ・ラビット", rarity:"N", color:"白", type:"通常",
   civilizations:["白"], deckLimit:3, symbols:{},
   attack:1, maxHealth:2,
   abilities:[],
@@ -191,7 +191,7 @@ function install(M,cards,awakened){
  const crest={
   key:'sbwl1',name:'始まりの紋章',color:'白',civilizations:['白'],rarity:'LEGEND',
   type:'設置物',sideboardOnly:true,shieldLink:true,neverendCrest:true,deckLimit:1,
-  cost:M.cost(0,{白:4}),symbols:{},abilities:[],onUse:[],
+  cost:M.cost(0,{白:4}),stackCost:M.cost(0,{白:4}),symbols:{},abilities:[],onUse:[],
   onEnter:[{kind:'tokens',tokenKey:'t10',count:2}],
   text:'設置時、ラ・ウラ・ギガを2体出す。自分のシールドリンクが5枚になった時、他のリンクをすべて破壊し覚醒する。場を離れたらサイドボードへ戻る。'
  };
