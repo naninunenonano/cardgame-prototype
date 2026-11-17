@@ -442,8 +442,8 @@ test('retired side spells use mana from hand and preserve card-specific conditio
  assert(!g.sideSpent('p1'));
 });
 
-test('all nine unavailable cards stay rejected in saved decks and battle',()=>{
- const keys=['nl1','almar_sbbu1','sbbu1','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','sbwl1'];
+test('all remaining unavailable cards stay rejected in saved decks and battle',()=>{
+ const keys=['nl1','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','sbwl1'];
  assert.deepEqual(Object.values(Cards.cards).filter(c=>c.unavailable).map(c=>c.key).sort(),keys.slice().sort());
  const {g,advance}=ready();
  advanceToMain(g,advance);

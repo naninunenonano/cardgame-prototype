@@ -3,6 +3,9 @@
   "version": 1,
   "baseCommit": "e220f6d914ad29ca78d2a7c07f80148a052c65cc",
   "entries": [
+    {"oldId": "bs9", "baseId": "bs9", "id": "bs9", "name": "エナジー・ゲート", "oldRarity": "SR", "rarity": "SR", "color": "青", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 9, "retired": false},
+    {"oldId": "sbbs3", "baseId": "sbbs3", "id": "sbbs3-1", "name": "アクア・アタック＜BAGOOON・パンツァー＞", "oldRarity": "SR", "rarity": "SR", "color": "青", "section": "sideboard", "ownerCharacterId": null, "token": false, "generated": false, "faces": ["sbbs3-1", "sbbs3-2"], "oldForm": null, "serial": 3, "retired": false},
+    {"oldId": "br6", "baseId": "br6", "id": "br6", "name": "封魔ウアラク（仮）", "oldRarity": "R", "rarity": "R", "color": "青", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 6, "retired": false},
     {"oldId": "sbbr2", "baseId": "sbbr2", "id": "sbbr2", "name": "ネフィル・アサイラム・ヘット・ナイト（N・As・H Knight）", "oldRarity": "R", "rarity": "R", "color": "青", "section": "sideboard", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 2, "retired": false},
     {"oldId": "sbbs2", "baseId": "sbbs2", "id": "sbbs2", "name": "CX－N・As・Ch Knight（カオスナイト）", "oldRarity": "SR", "rarity": "SR", "color": "青", "section": "sideboard", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 2, "retired": false},
     {"oldId": "sbno2", "baseId": "sbno2", "id": "sbno2", "name": "CiNo.1000 夢幻虚光神ヌメロニアス・ヌメロニア", "oldRarity": "OR", "rarity": "OR", "color": "無色", "section": "sideboard", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 2, "retired": false},
@@ -3688,15 +3691,15 @@
     "sbwl1-2": "sbwl1-2"
   },
   "highWaterMarks": {
-    "sbbs": 2,
+    "sbbs": 3,
     "gn": 4,
     "gr": 5,
     "gs": 6,
     "gl": 2,
     "rn": 21,
-    "br": 5,
+    "br": 6,
     "bl": 3,
-    "bs": 8,
+    "bs": 9,
     "bn": 7,
     "nl": 2,
     "ns": 2,

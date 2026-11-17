@@ -9,15 +9,13 @@ const yes=r=>assert(r.ok,r.message);
 const size=(deck,section)=>deck[section].reduce((n,e)=>n+e.count,0);
 
 const advanced=Decks.preset('blueAdvanced');
-assert.equal(advanced.name,'青上級Bot／アルマー');
+assert.equal(advanced.name,'青上級Bot／ヌメロニア');
 assert.equal(advanced.difficulty,'advanced');
-assert.deepEqual(advanced.main.map(({key,count})=>[key,count]),[
- ['bo1',3],['bs1',3],['bl2',1],['bl3',1],['nl2',1],['br1',3],['bn1',3],['br3',3],
- ['br5',3],['ns1',3],['br4',3],['nn1',3],['bs5',3],['bs3',3],['nn7',4]
-]);
-assert.deepEqual(advanced.sideboard.map(e=>e.key),['almar','sbnl4']);
-assert.deepEqual(advanced.shields.map(e=>e.key),['shnl1','shnl2','shnr2','shnr5']);
-assert.deepEqual(['main','sideboard','shields'].map(s=>size(advanced,s)),[40,2,4]);
+const pairs=cards=>Object.fromEntries(cards.map(({key,count})=>[key,count]));
+assert.deepEqual(pairs(advanced.main),{almar_sbbs1:3,bs9:4,almar_sbbu2:4,bs6:4,bs8:4,br3:4,bn1:4,sbbu2:4,bs1:4,br6:4,bl1:1});
+assert.deepEqual(pairs(advanced.sideboard),{almar:1,sbbo1:1,almar_sbbu1:1,sbbu1:1,almar_sbnr1:2,sbbr2:1,sbbs2:1,sbno2:1,sbbs3:1});
+assert.deepEqual(pairs(advanced.shields),{shnl1:1,shnr2:1,shnr7:1,shnr8:1,shnr9:1});
+assert.deepEqual(['main','sideboard','shields'].map(s=>size(advanced,s)),[40,10,5]);
 assert.deepEqual(Decks.validate(advanced),[]);
 assert.equal(advanced.lands,undefined);
 const red=Decks.preset('redBeginner'),black=Decks.preset('blackBeginner');

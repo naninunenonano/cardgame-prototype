@@ -117,6 +117,14 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
    const small=units=>units.filter(unit=>unit.attack<=5&&!unit.bounceImmune);
    score=25+bounceValue(small(enemy.units))-bounceValue(small(me.units))+2*small(enemy.units).length;
   }
+  if(c.key==='br6'){
+   const slows=enemy.character?.key==='redcaptain'||enemy.units.some(u=>u.speedAttacker);
+   score=me.units.some(u=>u.blocksEntryTurnSpeedAttack)?(me.units.filter(u=>u.key==='br6').length<2?12:5):(slows?66:30);
+  }
+  if(c.key==='bs6')score=me.units.length<7?62+(enemy.units.length?12:0):-10;
+  if(c.key==='bs8')score=me.units.length<7?57:me.trash.some(x=>x.type==='呪文')?13:-25;
+  if(c.key==='bs9')score=me.counts.main>3?47+(me.hand.some(u=>u.type==='通常'&&total(u)<=7)?15:0):-90;
+  if(c.key==='almar_sbnr1')score=enemy.counts.hand?52:10;
   if(c.key==='bs1'&&me.hand.length>=10)score+=35;
   if(c.key==='bn1')score=enemy.units.length?(danger?55:16)+(followUp?10:0):-100;
   if(c.key==='bs3')score=bounceGain>0?bounceGain+(followUp?8:0):-100;
@@ -257,7 +265,22 @@ function decide(v){
   if(o.kind==='expansionChoice'&&o.choice==='judgmentUnit')return {type:'expansion',id:best(o.candidates,c=>(c.health<=o.amount?50:0)+unitValue(c))?.id};
   if(o.kind==='expansionChoice'&&o.choice==='recoverMana')return {type:'expansion',id:best(o.candidates,c=>(c.rest?12:0)+(c.manaToken?-100:0)+(c.castFromMana?-8:0)+keepScore(v,c))?.id};
   if(o.kind==='expansionChoice'){if(o.choice==='lumiereMode'){const a=o.candidates.filter(c=>!c.disabled),order=['free',...(me.life<me.maxLife?['heal']:[]),'draw','seal','recover','heal','skip'];return {type:'expansion',id:order.find(id=>a.some(c=>c.id===id))};}if(o.choice==='zazeMode')return {type:'expansion',id:'draw'};if(o.choice==='lifeSave')return {type:'expansion',id:me.life>5?'use':'decline'};const c=best(o.candidates,c=>o.choice==='burnShield'?0:o.choice==='lockMana'?total(c):o.choice==='destroyMana'?-(total(c))+(c.manaToken?10:0):o.choice==='gigaMana'?-(unitValue(c,me.manaCount))+(c.zone==='hand'?15:0):o.choice==='celestiaHeal'?(c.maxHealth-c.health)*5+unitValue(c,me.manaCount):unitValue(c,me.manaCount));return {type:'expansion',id:c?.id||(o.choice==='executorSelect'?'done':undefined)};}
-  if(o.kind==='xyzOffer')return {type:'xyzResolve',confirm:false};
+  if(o.kind==='xyzOffer'){
+   const c=me.blueAdvanced&&enemy.units.length?o.targets[0]:null;
+   return c?{type:'xyzOffer',id:c.id}:{type:'xyzResolve',confirm:false};
+  }
+  if(o.kind==='xyz'){
+   const available=o.materials.filter(c=>!o.ids.includes(c.id));
+   if(o.ids.length<o.required){
+    const c=best(available,c=>-unitValue(c,me.manaCount)-(c.abilities?.includes('ブロッカー')?15:0)+(c.rest?4:0));
+    return c?{type:'xyzSelect',id:c.id}:{type:'xyzResolve',confirm:false};
+   }
+   if(!o.targetId&&o.method!=='normal'){
+    const c=best(o.targets,c=>c.key==='sbno2'?10000:c.owner!==p?100+unitValue(c,enemy.manaCount):-unitValue(c,me.manaCount));
+    return c?{type:'xyzSelect',id:c.id,target:true}:{type:'xyzResolve',confirm:false};
+   }
+   return {type:'xyzResolve'};
+  }
   if(o.kind==='xyzNegate'){
    const material=o.materials.find(c=>!o.ids.includes(c.id));
    return o.ids.length?{type:'xyzResolve'}:material?{type:'xyzSelect',id:material.id}:{type:'xyzResolve',confirm:false};
@@ -272,6 +295,20 @@ function decide(v){
   if(o.kind==='revolution')return {type:'revolution',use:true};
   if(o.kind==='sideChoice'){
    if(o.choice==='almarDrawPick'||o.choice==='almarOrder')return {type:'sideChoice',id:o.candidates[0].id};
+   if(['damageTrigger','damageTriggerCast'].includes(o.choice))return {type:'sideChoice',id:me.counts.main>=3?o.candidates[0]?.id:null};
+   if(o.choice==='psychicSummon'&&me.blueAdvanced){
+    const c=best(o.candidates,c=>{
+     if(c.key==='sbbs3')return me.counts.main<=16||me.life<=10?95:60;
+     if(c.key==='almar_sbbu1')return enemy.units.some(x=>x.rest)?100:50;
+     if(c.key==='sbbo1')return me.counts.main>9&&!me.units.some(x=>x.psychicLock||x.psychicIntercept)?85:20;
+     return 55;
+    });
+    return {type:'sideChoice',id:c?.id};
+   }
+   if(o.choice==='panzerSearch'){
+    const c=me.counts.main>1?best(o.candidates,c=>keepScore(v,c)):null;
+    return {type:'sideChoice',id:c?.id};
+   }
    if(o.choice==='viceOffer')return {type:'sideChoice',id:o.candidates[0]?.id||null};
    if(['technologySearch','awakeSpells'].includes(o.choice)){const limit=o.choice==='awakeSpells'?6:Math.min(8,Math.max(0,o.ids.length-2)),remaining=o.candidates.filter(c=>!o.selected.includes(c.id));if(o.selected.length<limit&&remaining.length)return {type:'sideSelect',id:best(remaining,c=>o.choice==='awakeSpells'?-total(c):keepScore(v,c)).id};return {type:'sideChoice'};}
    const candidates=o.candidates||[],c=best(candidates,c=>o.choice==='opponentDiscard'?-keepScore(v,c):o.choice==='darkHand'?total(c)*3+unitValue(c,enemy.manaCount):o.choice==='destroySame'?unitValue(c,enemy.manaCount):c.type==='通常'?unitValue(c,me.manaCount):Math.max(0,playScore(v,c))+total(c));return {type:'sideChoice',id:c?.id||null};
@@ -340,6 +377,19 @@ function decide(v){
  if(['main1','main2'].includes(v.turn.step)){
   // Preserve an immediate direct win rather than tapping its mana creature to deploy more cards.
   if(v.turn.step==='main1'&&enemy.life<=Math.max(0,...me.units.map(c=>c.attack||0))&&!enemy.units.some(c=>c.lure)&&me.units.some(c=>!c.rest&&!c.sick&&!c.cannotAttack))return {type:'advance'};
+  if(me.blueAdvanced){
+   const xyz=me.xyzActions||[],late=v.turn.counts[p]>=10;
+   const chaos=me.units.find(c=>c.key==='sbbs2');
+   const knight=me.units.find(c=>c.key==='sbbr2');
+   const threats=enemy.units.filter(c=>!c.cannotAttack).reduce((sum,c)=>sum+c.attack,0);
+   const couldSurvive=threats<me.life||me.units.filter(c=>c.abilities?.includes('ブロッカー')&&!c.rest).length>1;
+   const move=(late&&chaos&&me.sideboard.some(c=>c.key==='sbno2')&&xyz.find(a=>a.id===chaos.id&&a.method==='ability'))||
+    (late&&knight?.xyzMaterials?.length&&xyz.find(a=>a.method==='overlay'))||
+    (knight&&enemy.units.length&&xyz.find(a=>a.id===knight.id&&a.method==='ability'))||
+    (late&&couldSurvive&&!knight&&!chaos&&xyz.find(a=>a.key==='sbbs2'&&a.method==='normal'))||
+    (!knight&&!chaos&&couldSurvive&&(enemy.units.length||late)&&xyz.find(a=>a.key==='sbbr2'&&a.method==='normal'));
+   if(move)return {type:'xyzBegin',id:move.id,method:move.method};
+  }
   const warsla=me.blueBeginner?blueWarslaPlan(v):null;
   if(warsla?.action)return warsla.action;
   if(me.character?.key==='lumiere'&&me.shieldLinkCount<5){if(me.character.level===3&&me.character.activeTurn!==v.turn.counts[p]&&me.hand.some(c=>c.shieldLink))return {type:'characterAbility'};if(me.character.level===4&&v.sources.length&&me.lumiereUsed.length<5)return {type:'characterAbility'};}
@@ -352,7 +402,9 @@ function decide(v){
   const usable=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].filter(c=>c.canPlay);
   const c=best(usable,c=>playScore(v,c));
   if(c&&playScore(v,c)>0)return {type:'play',id:c.id,...(c.canEnhance&&me.units.length<6?{method:'enhance'}:{})};
- }else if(v.turn.step==='attack'){const a=attackChoice(v);if(a)return {type:'attack',id:a.id,target:a.target};}
+ }else if(v.turn.step==='attack'){
+  const options=me.blueAdvanced?v.attacks.filter(({card,targets})=>card.mustAttack||targets.some(t=>t.id==='body'&&card.attack>=enemy.life)||!card.abilities?.includes('ブロッカー')||targets.some(t=>t.id!=='body'&&enemy.units.some(u=>u.id===t.id&&u.health<=card.attack&&u.attack<card.health))):v.attacks;
+  const a=attackChoice(v,options);if(a)return {type:'attack',id:a.id,target:a.target};}
  return v.canAdvance?{type:'advance'}:{type:'wait'};
 }
 return {decide,unitValue,playScore,chooseBlock,keepScore,blueWarslaPlan};
