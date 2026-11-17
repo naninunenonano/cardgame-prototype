@@ -8,7 +8,28 @@ const frame=p.locator('#board [data-side-panel="p1"] .character-art');
 for(let level=0;level<=4;level++){await p.evaluate(level=>{(Game.character('p1')||Game.state.p1.extra.find(c=>c.type==='キャラクター')).level=level;render();},level);await p.waitForFunction(()=>document.querySelector('#board [data-side-panel="p1"] .character-art img')?.naturalWidth===60);A.equal(await frame.getAttribute('data-art-level'),String(level));const shape=await frame.evaluate(e=>{const r=e.getBoundingClientRect();return r.width/r.height;});A(shape>0&&shape<2);A.equal(await frame.locator('img').evaluate(e=>getComputedStyle(e).objectFit),'cover');}
 await p.evaluate(()=>{const c=Game.fromDefinition('gn1','p1');c.faceUp=true;Game.state.p1['signi-1'].push(c);render();});const art=p.locator('[data-player="p1"][data-zone="signi-1"] .optional-art');await p.waitForFunction(()=>document.querySelector('[data-player="p1"][data-zone="signi-1"] .optional-art img')?.naturalWidth===60);A.equal(await art.locator('img').evaluate(e=>getComputedStyle(e).objectFit),'contain');A(await p.evaluate(()=>!cardHTML({...CardCatalog.cards.gn1,id:'secret'},{hide:true}).includes('<img')));await p.locator('[data-player="p1"][data-zone="signi-1"] [data-card]').click();await p.locator('#peek').click();A.equal(await p.locator('#modal .preview .optional-art').count(),1);await p.locator('#close').click();
 await p.locator('#change-mode').click();await p.locator('#edit-decks').click();await p.locator('#editor-search').fill('フェアリー');A(await p.locator('#editor-list .optional-art').count()>0);await p.keyboard.press('Escape');
-await p.evaluate(()=>{PackOpening.start({cards:['gn1','almar','gn1','gn1','gn1'].map(key=>({key,rarity:CardCatalog.cards[key].rarity})),catalog:CardCatalog.cards});});await p.locator('.pack-stack').waitFor();A.equal(await p.locator('.pack-stack .optional-art').count(),5);await p.waitForFunction(()=>document.querySelector('[data-pack-current] img')?.naturalWidth===60);await p.locator('[data-pack-next]').click();await p.waitForFunction(()=>document.querySelector('.pack-stack')?.dataset.packCursor==='1');await p.locator('[data-pack-detail]').click();A.equal(await p.locator('.pack-detail img').count(),1,'one character detail image');await p.locator('[data-pack-skip]').click();A.equal(await p.locator('.pack-summary .optional-art').count(),5);A(await p.evaluate(()=>{const d=document.querySelector('#pack-opening');return d.scrollWidth<=d.clientWidth+1;}));await p.screenshot({path:'/tmp/png-results-'+width+'.png'});await p.locator('[data-pack-close]').first().click();
+await p.evaluate(()=>{
+ const catalog={...CardCatalog.cards,...CardCatalog.evolutionSeries};
+ PackOpening.start({cards:['gn1','almar','gn1','gn1','gn1'].map(key=>({key,rarity:catalog[key].rarity})),catalog});
+});
+await p.locator('.pack-stack').waitFor();
+A.equal(await p.locator('.pack-stack .optional-art').count(),5);
+await p.waitForFunction(()=>document.querySelector('[data-pack-current] img')?.naturalWidth===60);
+await p.locator('[data-pack-next]').click();
+await p.waitForFunction(()=>document.querySelector('.pack-stack')?.dataset.packCursor==='1');
+const lv4='images/characters/almar/lv4.png';
+A.equal(await p.locator('[data-pack-current] img').getAttribute('src'),lv4);
+await p.locator('[data-pack-detail]').click();
+A.equal(await p.locator('.pack-detail img').count(),1,'one character detail image');
+A.equal(await p.locator('.pack-detail img').getAttribute('src'),lv4);
+A.equal(await p.locator('.pack-detail .character-level').innerText(),'Lv1〜4');
+await p.locator('[data-pack-skip]').click();
+A.equal(await p.locator('.pack-summary .optional-art').count(),5);
+A.equal(await p.locator('.pack-summary [data-pack-card="1"] img').getAttribute('src'),lv4);
+A.equal(await p.evaluate(()=>CardCatalog.evolutionSeries.almar.level),0);
+A(await p.evaluate(()=>{const d=document.querySelector('#pack-opening');return d.scrollWidth<=d.clientWidth+1;}));
+await p.screenshot({path:'/tmp/png-results-'+width+'.png'});
+await p.locator('[data-pack-close]').first().click();
 // Owned cards are presented through the deck editor in normal mode.
 await p.evaluate(()=>{stopAll();modeChosen=false;contentMode='normal';savedDecks=collection.store;refreshDeckChoices();render();});await require('./test-fixtures.cjs').saveBrowserTestDeck(p,'red');await p.evaluate(()=>collection.gain([{key:'gn1',rarity:CardCatalog.cards.gn1.rarity}]));const owned=await p.evaluate(()=>JSON.stringify(collection.profile().owned));await p.locator('#edit-decks').click();await p.locator('#editor-search').fill('フェアリー');A(await p.locator('#editor-list .optional-art').count()>0);A.equal(await p.evaluate(()=>JSON.stringify(collection.profile().owned)),owned);await p.keyboard.press('Escape');
 present=false;await p.reload();await p.evaluate(()=>{contentMode='debug';savedDecks=debugDecks;refreshDeckChoices();render();});await p.selectOption('#self-sideboard','almar');await p.locator('#start-solo').click();await p.locator('#keep').click();await p.locator('#keep').click();await p.locator('#next-phase').click();await p.waitForFunction(()=>!document.querySelector('#board [data-side-panel="p1"] .character-art-placeholder').hidden);await p.evaluate(()=>{const c=Game.fromDefinition('gn1','p1');c.faceUp=true;Game.state.p1['signi-1'].push(c);render();});await p.waitForFunction(()=>!document.querySelector('[data-player="p1"][data-zone="signi-1"] .optional-art'));A.match(await p.locator('[data-player="p1"][data-zone="signi-1"]').innerText(),/フェアリー/);await p.locator('#next-phase').click();A.deepEqual(errors,[]);console.log('PASS '+width+'px: PNG levels0-4/card/board/editor/owned/detail/pack, absent/error text fallback, hidden images, contain2:3, relative subpath, no preload or collection mutation, phase progression');await p.close();}}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>server.close());
