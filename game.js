@@ -375,8 +375,8 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   case 'destroySame':return fieldCards(q).filter(c=>c.type==='通常'&&c.cost&&Mana.total(c.cost)===o.cost&&!targetProtected(c,p));
   case 'technologySearch':return state[p].main.filter(c=>o.ids.includes(c.id));
   case 'technologyCast':return state[p].hand.filter(c=>!(c.type==='呪文'&&spellsLocked(p,c))&&Mana.hasColor(c,'青')&&c.cost&&Mana.total(c.cost)<=state[p].hand.length&&!c.responseOnly&&(!c.evolution||evolutionBases(p,c).length)&&!summonError(c,p));
-  case 'interstellarEnter':return [...state[p].hand.filter(c=>c.type==='呪文'&&!c.responseOnly&&!spellsLocked(p,c)),...state[p].trash.filter(c=>c.type==='呪文'&&c.cost&&Mana.total(c.cost)<=5&&!c.responseOnly&&!spellsLocked(p,c))];
-  case 'interstellarAttack':return state[p].exile.filter(c=>c.type==='呪文'&&c.cost&&Mana.total(c.cost)<=5&&!c.responseOnly&&!spellsLocked(p,c));
+  case 'interstellarEnter':return [...state[p].hand,...state[p].trash].filter(c=>c.type==='呪文'&&c.cost&&Mana.total(c.cost)<=7&&!c.responseOnly&&!spellsLocked(p,c));
+  case 'interstellarAttack':return state[p].exile.filter(c=>c.type==='呪文'&&c.cost&&Mana.total(c.cost)<=7&&!c.responseOnly&&!spellsLocked(p,c));
   case 'awakeSpells':return state[p].trash.filter(c=>c.type==='呪文');
   default:return [];
  }}
