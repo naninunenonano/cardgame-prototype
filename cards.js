@@ -123,6 +123,26 @@
  };
  cards.gt5000.deckLimit=3;cards.vt5000.deckLimit=3;
  cards.vt5000.sideboardOnly=false;cards.vt5000.mainDeckOnly=true;delete cards.vt5000.sideboardScope;
+ const xyz=(key,name,color,rarity,attack,maxHealth,summon,abilityLines,extra={})=>{cards[key]={
+  key,abilities:[],symbols:{},onEnter:[],onUse:[],onDeath:[],onDefeat:[],
+  name,color,rarity,type:'通常',cost:null,sideboardOnly:true,cardSection:'sideboard',attack,maxHealth,xyz:summon,
+  stackCost:color==='無色'?M.cost(1):M.cost(0,{[color]:1}),abilityLines,text:abilityLines.join('\n'),...extra
+ };};
+ xyz('sbbr2','ネフィル・アサイラム・ヘット・ナイト（N・As・H Knight）','青','R',2,8,{count:2,ability:'absorb'},[
+  '自分・相手のメインフェイズに1ターンに1回、このカードの素材を2枚取り除いて発動できる。場の他のクリーチャー1体を選び、このカードの下にエクシーズ素材として重ねる。'
+ ]);
+ xyz('sbbs2','CX－N・As・Ch Knight（カオスナイト）','青','SR',7,3,{count:3,overlayBase:'sbbr2',ability:'overlay'},[
+  '自分の《ネフィル・アサイラム・ヘット・ナイト》の上に重ねて出すこともできる。通常の素材条件とストック支払いは不要。',
+  '自分のメインフェイズに、このカードの素材を2枚取り除いて発動できる。サイドボードのエクシーズ・クリーチャー1体をこのカードの上に重ねる。通常の素材条件とストック支払いは不要。回数制限なし。'
+ ]);
+ xyz('sbno2','CiNo.1000 夢幻虚光神ヌメロニアス・ヌメロニア','無色','OR',10,10,{count:8,earliestTurn:10},[
+  '自分の10ターン目以降にのみ場に出せる。効果で重ねる場合にも適用する。タップ状態で場に出る。このカードは攻撃できない。',
+  'このカードが場にある限り、自分はゲームに敗北しない。このカードが場を離れた場合、自分はゲームに敗北する。このカードは相手の効果によって選ばれない。',
+  'このカードが場にある限り、相手は1ターンにクリーチャー1体でしか攻撃できない。',
+  '相手の攻撃宣言時、このカードの素材を1枚取り除いて発動できる。その攻撃を無効にする。',
+  '相手ターン終了時、このカードが場にあるなら、自分はゲームに勝利する。',
+  '登場時、自分の場の他のカードと手札をすべてトラッシュに置く。その後、自分のトラッシュのカードをすべて除外する。エクシーズ素材は場のカードではないため移動しない。'
+ ],{xyzNumeronia:true,enterRest:true,cannotAttack:true,untargetable:true,onEnter:[{kind:'xyzWipe'}]});
  const catalog=(typeof module==='object'&&module.exports?require('./identity.js'):globalThis.CardIdentity).install({starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:Object.values(cards).filter(c=>c.type==='シールドカード').map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'});
  for(const [i,cost] of [1,2,2,3].entries())characterLevels[i+1].cost=cost;
  characterLevels[2].text='成長時・開始時：相手の手札をランダムに1枚捨てる。';

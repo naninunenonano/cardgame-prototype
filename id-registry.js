@@ -3,6 +3,9 @@
   "version": 1,
   "baseCommit": "e220f6d914ad29ca78d2a7c07f80148a052c65cc",
   "entries": [
+    {"oldId": "sbbr2", "baseId": "sbbr2", "id": "sbbr2", "name": "ネフィル・アサイラム・ヘット・ナイト（N・As・H Knight）", "oldRarity": "R", "rarity": "R", "color": "青", "section": "sideboard", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 2, "retired": false},
+    {"oldId": "sbbs2", "baseId": "sbbs2", "id": "sbbs2", "name": "CX－N・As・Ch Knight（カオスナイト）", "oldRarity": "SR", "rarity": "SR", "color": "青", "section": "sideboard", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 2, "retired": false},
+    {"oldId": "sbno2", "baseId": "sbno2", "id": "sbno2", "name": "CiNo.1000 夢幻虚光神ヌメロニアス・ヌメロニア", "oldRarity": "OR", "rarity": "OR", "color": "無色", "section": "sideboard", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 2, "retired": false},
     {"oldId": "trap", "migrationFrom": "gs2", "baseId": "gr5", "id": "gr5", "name": "ナチュラル・トラップ", "oldRarity": "SR", "rarity": "R", "color": "緑", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 5, "retired": false},
     {"oldId": "gs6", "baseId": "gs6", "id": "gs6", "name": "統率するレオパルド・ホーン", "oldRarity": "SR", "rarity": "SR", "color": "緑", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 6, "retired": false},
     {"oldId": "ws7", "baseId": "ws7", "id": "ws7", "name": "コンコルディア", "oldRarity": "SR", "rarity": "SR", "color": "白", "section": "main", "ownerCharacterId": null, "token": false, "generated": false, "faces": [], "oldForm": null, "serial": 7, "retired": false},
@@ -3685,6 +3688,7 @@
     "sbwl1-2": "sbwl1-2"
   },
   "highWaterMarks": {
+    "sbbs": 2,
     "gn": 4,
     "gr": 5,
     "gs": 6,
@@ -3704,7 +3708,7 @@
     "sbnl": 4,
     "almar_sbnr": 1,
     "almar_sbbs": 1,
-    "sbbr": 1,
+    "sbbr": 2,
     "rl": 4,
     "rr": 3,
     "rs": 5,
@@ -3736,7 +3740,7 @@
     "wu": 2,
     "wr": 7,
     "ko": 1,
-    "sbno": 1,
+    "sbno": 2,
     "no": 1,
     "bo": 1,
     "wo": 1,

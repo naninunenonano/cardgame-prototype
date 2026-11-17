@@ -257,6 +257,11 @@ function decide(v){
   if(o.kind==='expansionChoice'&&o.choice==='judgmentUnit')return {type:'expansion',id:best(o.candidates,c=>(c.health<=o.amount?50:0)+unitValue(c))?.id};
   if(o.kind==='expansionChoice'&&o.choice==='recoverMana')return {type:'expansion',id:best(o.candidates,c=>(c.rest?12:0)+(c.manaToken?-100:0)+(c.castFromMana?-8:0)+keepScore(v,c))?.id};
   if(o.kind==='expansionChoice'){if(o.choice==='lumiereMode'){const a=o.candidates.filter(c=>!c.disabled),order=['free',...(me.life<me.maxLife?['heal']:[]),'draw','seal','recover','heal','skip'];return {type:'expansion',id:order.find(id=>a.some(c=>c.id===id))};}if(o.choice==='zazeMode')return {type:'expansion',id:'draw'};if(o.choice==='lifeSave')return {type:'expansion',id:me.life>5?'use':'decline'};const c=best(o.candidates,c=>o.choice==='burnShield'?0:o.choice==='lockMana'?total(c):o.choice==='destroyMana'?-(total(c))+(c.manaToken?10:0):o.choice==='gigaMana'?-(unitValue(c,me.manaCount))+(c.zone==='hand'?15:0):o.choice==='celestiaHeal'?(c.maxHealth-c.health)*5+unitValue(c,me.manaCount):unitValue(c,me.manaCount));return {type:'expansion',id:c?.id||(o.choice==='executorSelect'?'done':undefined)};}
+  if(o.kind==='xyzOffer')return {type:'xyzResolve',confirm:false};
+  if(o.kind==='xyzNegate'){
+   const material=o.materials.find(c=>!o.ids.includes(c.id));
+   return o.ids.length?{type:'xyzResolve'}:material?{type:'xyzSelect',id:material.id}:{type:'xyzResolve',confirm:false};
+  }
   if(o.kind==='lootCost')return {type:'lootCost',id:best(o.candidates,c=>-keepScore(v,c))?.id};
 
   if(o.kind==='scryMany'){const c=o.candidates.find(c=>o.top.includes(c.id)&&keepScore(v,c)<8);return c?{type:'scryMove',id:c.id,destination:'bottom'}:{type:'scry'};}
