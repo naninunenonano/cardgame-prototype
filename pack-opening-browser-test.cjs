@@ -10,6 +10,27 @@ async function gesture(dx,cancel=false){const r=await p.locator('[data-pack-curr
 await p.locator('[data-open-pack="1"]').click();A.equal(await p.locator('.sealed-pack').count(),1);A.equal(await p.locator('.pack-card').count(),0);await p.locator('.pack-stack').waitFor();const fixed=await snap();A.equal(await p.locator('.pack-stack .pack-card').count(),5);A.equal(await p.locator('.pack-card-back').count(),0);A.equal(await p.locator('[data-pack-skip]').count(),1);A.equal(await p.locator('.pack-stack .pack-card:disabled').count(),4);A(await p.locator('[data-pack-current]').evaluate(e=>{const r=e.getBoundingClientRect(),scene=e.closest('.pack-scene').getBoundingClientRect();return r.left>=scene.left&&r.right<=scene.right&&r.top>=scene.top&&r.bottom<=scene.bottom&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2).closest('[data-pack-current]')===e;}));await p.waitForFunction(()=>document.querySelector('[data-pack-current] img')?.naturalWidth===60);A.equal(await p.locator('[data-pack-current] img').evaluate(e=>getComputedStyle(e).objectFit),'contain');await p.locator('.pack-stack').screenshot({path:'/tmp/pack-stack-'+width+'.png'});await gesture(18);await gesture(110);await gesture(-110);await p.locator('[data-pack-detail]').click();A.match(await p.locator('.pack-detail').innerText(),/マナロック/);await next();A.equal(await p.locator('[data-pack-current].rare-card').count(),1);await next();await next();A.equal(await state(),null);A.equal(await p.locator('.pack-summary .pack-card').count(),5);A.equal(await snap(),fixed);await p.locator('[data-pack-close]').first().click();
 // Skipping the opening itself goes straight to the unchanged full receipt.
 await p.locator('[data-open-pack="1"]').click();const skipOne=await snap();await p.locator('[data-pack-skip]').click();A.equal(await p.locator('.pack-summary .pack-card').count(),5);A.equal(await snap(),skipOne);await p.locator('[data-pack-close]').first().click();await p.locator('[data-open-pack="10"]').click();A.equal(await p.locator('.sealed-pack').count(),10);A.equal(await p.locator('.pack-card').count(),0);const skipTen=await snap();await p.locator('[data-pack-skip]').click();A.equal(await p.locator('.pack-summary .pack-card').count(),50);A.equal(await snap(),skipTen);A.match(await p.locator('.pack-progress').innerText(),/自動分解.*生成素材/);await p.locator('[data-pack-close]').first().click();
+// The first visible cards are ordinary; the remaining results include costless XYZ cards.
+await p.evaluate(()=>{
+ const draw=CardPacks.open;
+ CardPacks.open=count=>{
+  const cards=draw(count);
+  if(count===10)cards[12]={key:'sbbr2',rarity:'R',slot:'normal'};
+  return cards;
+ };
+});
+await p.locator('[data-open-pack="10"]').click();
+await p.locator('.pack-stack').waitFor();
+const xyzReceipt=await snap();
+A.equal(await p.locator('.pack-stack .pack-card').filter({hasText:'ネフィル'}).count(),0);
+await p.locator('[data-pack-skip]').click();
+A.equal(await p.locator('.pack-summary .pack-card').count(),50);
+const xyzCard=p.locator('.pack-summary .pack-card').filter({hasText:'ネフィル'});
+A.match(await xyzCard.innerText(),/記載コストなし/);
+await xyzCard.click();
+A.match(await p.locator('.pack-detail').innerText(),/ネフィル/);
+A.equal(await snap(),xyzReceipt);
+await p.locator('[data-pack-close]').first().click();
 // Fifty cards stay in a single stack, with no five-card page boundaries.
 await p.emulateMedia({reducedMotion:'reduce'});await p.locator('[data-open-pack="10"]').click();await p.locator('.pack-stack').waitFor();const fifty=await snap();for(let card=0;card<50;card++){A.deepEqual(await state(),[50,card]);A.equal(await p.locator('.pack-stack .pack-card').count(),Math.min(5,50-card));await next();}A.equal(await p.locator('.pack-summary .pack-card').count(),50);A.equal(await snap(),fifty);await p.locator('[data-pack-card="0"]').click();A(await p.locator('.pack-detail').isVisible());await p.screenshot({path:'/tmp/pack-results-'+width+'.png'});A(await p.locator('#pack-opening').evaluate(e=>e.scrollWidth<=e.clientWidth+1));A(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await p.locator('[data-pack-close]').first().click();
 await p.locator('[data-open-pack="10"]').click();await p.locator('.pack-stack').waitFor();await next();const all=await snap();await p.locator('[data-pack-skip]').click();A.equal(await p.locator('.pack-summary .pack-card').count(),50);A.equal(await snap(),all);await p.locator('[data-pack-again]').click();await p.locator('.pack-stack').waitFor();A.deepEqual(await state(),[50,0]);const closeEarly=await snap();await p.keyboard.press('Escape');A(!await p.evaluate(()=>PackOpening.isOpen()));A.equal(await snap(),closeEarly);
