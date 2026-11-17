@@ -123,6 +123,9 @@
  };
  cards.gt5000.deckLimit=3;cards.vt5000.deckLimit=3;
  cards.vt5000.sideboardOnly=false;cards.vt5000.mainDeckOnly=true;delete cards.vt5000.sideboardScope;
+ cards.br6={key:'br6',name:'封魔ウアラク（仮）',color:'青',rarity:'R',type:'通常',cost:M.cost(1,{青:1}),
+  attack:1,maxHealth:3,blocksEntryTurnSpeedAttack:true,abilities:[],symbols:{},onUse:[],onEnter:[],onDefeat:[],
+  text:'スピードアタッカーを持つクリーチャーは、登場したターンに攻撃できない。'};
  const xyz=(key,name,color,rarity,attack,maxHealth,summon,abilityLines,extra={})=>{cards[key]={
   key,abilities:[],symbols:{},onEnter:[],onUse:[],onDeath:[],onDefeat:[],
   name,color,rarity,type:'通常',cost:null,sideboardOnly:true,cardSection:'sideboard',attack,maxHealth,xyz:summon,
@@ -143,6 +146,12 @@
   '相手ターン終了時、このカードが場にあるなら、自分はゲームに勝利する。',
   '登場時、自分の場の他のカードと手札をすべてトラッシュに置く。その後、自分のトラッシュのカードをすべて除外する。エクシーズ素材は場のカードではないため移動しない。'
  ],{xyzNumeronia:true,enterRest:true,cannotAttack:true,untargetable:true,onEnter:[{kind:'xyzWipe'}]});
+ cards.bs9={key:'bs9',name:'エナジー・ゲート',color:'青',rarity:'SR',type:'呪文',cost:M.cost(6,{青:1}),damageTrigger:M.cost(0,{青:1}),onUse:[{kind:'draw',count:2},{kind:'psychicChoice',choice:'energyEntry'}],
+  text:'2枚引く。その後、手札からコスト7以下のクリーチャー1体を無償で出してもよい。ダメージトリガー：ライフが10以下なら手札から公開し、山札の上1枚を公開する。同じ色があれば青ストック1個で無償使用できる。公開した山札のカードは戻してシャッフルする。'};
+ cards.sbbs3={key:'sbbs3',name:'アクア・アタック＜BAGOOON・パンツァー＞',color:'青',rarity:'SR',type:'通常',cost:M.cost(7),attack:4,maxHealth:4,sideboardOnly:true,psychic:true,awaken:'sbbs3-2',panzerAwaken:true,
+  abilities:['ブロッカー'],cannotAttack:true,cannotBeAttacked:true,onStart:[{kind:'optionalDraw',count:1}],
+  text:'ブロッカー。攻撃されず、自身は攻撃できない。自分のターン開始時、1枚引いてもよい。相手ターン終了時に自分の山札が10枚以下なら、トラッシュを山札に戻してシャッフルし覚醒する。サイドボード由来はサイドボードに戻す。'};
+ awakened['sbbs3-2']={faceId:'sbbs3-2',name:cards.sbbs3.name+'（覚醒）',type:'通常',color:'青',rarity:'SR',cost:M.cost(10),attack:5,maxHealth:5,panzerAwaken:false,onStart:[{kind:'psychicChoice',choice:'panzerSearch'}],text:'ブロッカー。攻撃されず、自身は攻撃できない。自分のターン開始時、山札から1枚を手札に加えてもよい。その後シャッフルする。'};
  const catalog=(typeof module==='object'&&module.exports?require('./identity.js'):globalThis.CardIdentity).install({starter,COLORS,TYPES,cards,characterLevels,awakened,sideboardPreset,shieldKeys:Object.values(cards).filter(c=>c.type==='シールドカード').map(c=>c.key),neutralKeys:neutralDefs.map(c=>c.key),fateKeys:fates.map(c=>c.key),decks,startDeck:'green'});
  for(const [i,cost] of [1,2,2,3].entries())characterLevels[i+1].cost=cost;
  characterLevels[2].text='成長時・開始時：相手の手札をランダムに1枚捨てる。';
@@ -206,6 +215,7 @@
  add('sbru4',{name:'闘将銀河城 ハートバーン',color:'赤',rarity:'UR',type:'設置物',cardSection:'sideboard',sideboardOnly:true,
   heartburn:true,redSpeedAura:true,cost:M.cost(0),stackCost:M.cost(0,{赤:4}),faceIds:['sbru4','sbru1-2'],
   text:'自分の赤クリーチャーすべてにSA。自分の赤クリーチャーがアンタップした時、超戦覇龍 ガイNEXTへ龍解。'});
+ for(const key of ['almar_sbbu1','sbbu1'])c[key].psychic=true;
  const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
  for(const card of Object.values(c)){
   if(card.sideboardOnly&&!card.psychic&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
@@ -216,6 +226,6 @@
    }
   }
  }
- catalog.sideboardPreset=catalog.sideboardPreset.filter(e=>c[e.key]?.sideboardOnly&&!c[e.key].unavailable);
+ catalog.sideboardPreset=catalog.sideboardPreset.filter(e=>c[e.key]?.sideboardOnly&&!c[e.key].unavailable&&!c[e.key].psychic);
  return (typeof module==='object'&&module.exports?require('./character-series.js'):globalThis.CharacterSeries).install(catalog);
 });

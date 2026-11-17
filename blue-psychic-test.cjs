@@ -9,7 +9,10 @@ const {fund,growthFixture,skipCharge}=require('./test-fixtures.cjs');
 const p='p1',q='p2';
 function ok(result){assert(result.ok,result.message);}
 function ready(){
- const g=Game.create({decks:{p1:'blueAdvanced',p2:'green'},clock:()=>1000,random:()=>0.42});
+ const main=[['bo1',3],['bs1',3],['bl2',1],['bl3',1],['nl2',1],['br1',3],['bn1',3],['br3',3],
+  ['br5',3],['ns1',3],['br4',3],['nn1',3],['bs5',3],['bs3',3],['nn7',4]].map(([key,count])=>({key,count}));
+ const d={...require('./decks').preset('blueAdvanced'),id:'psychic-test',preset:false,main,sideboard:[{key:'almar',count:1},{key:'sbnl4',count:1}]};
+ const g=Game.create({decks:{p1:d.id,p2:'green'},records:[d],clock:()=>1000,random:()=>0.42});
  ok(g.completeMulligan(p,[],true));
  ok(g.completeMulligan(q,[],true));
  skipCharge(g);
@@ -277,10 +280,9 @@ test('青化した超次元呪文は青マナが必要で、旧IDのデッキと
 
 test('メモリー・フラスコは0ストックで使用し、同じ個体を3ターンにわたり回収・再使用できる',()=>{
  const Decks=require('./decks'),d=Decks.preset('blueAdvanced');
- assert(!d.sideboard.some(c=>c.key==='almar_sbnr1'));
+ assert.equal(d.sideboard.find(c=>c.key==='almar_sbnr1').count,2);
  d.id='flask-test';
  d.preset=false;
- d.sideboard.push({key:'almar_sbnr1',count:2});
  const g=Game.create({decks:{p1:d.id,p2:'green'},records:[d],clock:()=>1000,random:()=>0.42});
  ok(g.completeMulligan(p,[],true));ok(g.completeMulligan(q,[],true));
  const [flask,other]=g.state[p].extra.filter(c=>c.key==='almar_sbnr1');

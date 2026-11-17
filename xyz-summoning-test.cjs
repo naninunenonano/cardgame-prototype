@@ -16,6 +16,7 @@ function ready(mode='solo'){
  ok(g.completeMulligan(q,[],true));
  skipCharge(g);
  g.character(p).level=2;
+ g.state[p].extra=g.state[p].extra.filter(c=>!c.xyz);
  for(const owner of [p,q]){
   g.state[owner].hand=[];
   g.state[owner].shields=[];
