@@ -148,7 +148,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(context.type!=='lifeLoss'){const castle=state[p].structures.find(c=>c.replacePlayerDamage&&!c.abilitiesDisabled);if(castle){rawMove(locate(castle.id),p,'trash');amount=0;record(castle.name+'がダメージを0に置換し、トラッシュへ。');}}
   const before=life[p];if(context.type!=='lifeLoss'&&!context.selfDamage&&!context.characterSelf&&yellowZoneActive(p))amount=Math.min(3,amount);life[p]=redMoon(p,4)&&context.type!=='combat'?Math.max(1,life[p]-amount):life[p]-amount;amount=before-life[p];trace('life',label(p)+'のライフが'+amount+'減少：'+before+'→'+life[p]+'。',{targetPlayer:p,beforeLife:before,amount:-amount,afterLife:life[p],reason},p);events.push({id:++eventSerial,kind:'lifeLost',p,amount,text:`${reason}：ライフ${amount}減少`});
   if(!context.characterSelf&&amount>0)checkYellowZone(p);if(context.drainPlayer)healLife(context.drainPlayer,amount);
-  if(life[p]<=0){if(!context.strictLethal&&!context.characterSelf&&shieldCandidates(p,{kind:'lethal',life:life[p]}).length){queueShield(p,{kind:'lethal',life:life[p]});if(!operation)pump();return ok('起死回生の使用確認。');}finish(other(p),'相手ライフが0以下');return ok('ライフ0以下で敗北。');}
+  if(life[p]<=0&&!xyzDefense(p).length){if(!context.strictLethal&&!context.characterSelf&&shieldCandidates(p,{kind:'lethal',life:life[p]}).length){queueShield(p,{kind:'lethal',life:life[p]});if(!operation)pump();return ok('起死回生の使用確認。');}finish(other(p),'相手ライフが0以下');return ok('ライフ0以下で敗北。');}
   if(amount>0&&context.type!=='lifeLoss'&&!context.reflux){
    enqueueTriggered(state[p].structures.filter(c=>c.bloodReflux&&!c.abilitiesDisabled).map(c=>({kind:'bloodReflux',sourceId:c.id})),p,null);
   }
@@ -278,7 +278,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  if(c.parallelInvasion||c.revolution)return '攻撃時のみ使用できます。';
  if(c.equipment&&!equipTargets(c,p).length)return '装備できるクリーチャーが必要です。';if(c.used)return 'このサイドカードは使用済みです。';if(sideSpent(p))return 'このターンのサイドボードは使用済みです。';const restriction=characterRestriction(c,p);if(restriction)return restriction;if(c.viceOnly)return 'Lv2への成長直後の追加処理だけで使用できます。';return '';}
  function activeLocks(p){return summonLocks.filter(l=>l.p===p&&turn.player===p&&turn.counts[p]===l.turn);}
- function summonError(c,p){if(c.unavailable)return '使用不可：'+c.unavailable;if(c.mainDeckOnly){const restriction=characterRestriction(c,p);if(restriction)return restriction;}if(c.type==='設置物'&&c.shieldLink&&shieldLinkCount(p)>=5&&!state[p].structures.some(x=>x.id===c.id))return 'シールドリンクは最大5枚・上書き不可です。';return c.type==='通常'&&attack(c,p)<=5&&activeLocks(p).length?'5000VT：このターンは攻撃力5以下を場に出せません。':'';}
+ function summonError(c,p,xyzSummon=false){if(c.xyz&&!xyzSummon)return 'エクシーズ召喚または重ねる効果が必要です。';if(c.xyz?.earliestTurn>turn.counts[p])return '自分の第'+c.xyz.earliestTurn+'ターン以降に登場できます。';if(c.unavailable)return '使用不可：'+c.unavailable;if(c.mainDeckOnly){const restriction=characterRestriction(c,p);if(restriction)return restriction;}if(c.type==='設置物'&&c.shieldLink&&shieldLinkCount(p)>=5&&!state[p].structures.some(x=>x.id===c.id))return 'シールドリンクは最大5枚・上書き不可です。';return c.type==='通常'&&attack(c,p)<=5&&activeLocks(p).length?'5000VT：このターンは攻撃力5以下を場に出せません。':'';}
  function costBreakdown(c,p){const base=c.cost||Mana.cost(0);return {vengeance:c.vengeanceGenericReduction&&life[p]<=15?c.vengeanceGenericReduction:0,field:fieldReduction(c),level4:0,allBlue:c.allBlueReduction&&manaCount(p)>0&&state[p].energy.every(c=>Mana.producedColors(c).length===1&&Mana.producedColors(c)[0]==='青')?c.allBlueReduction:0,base:clone(base),final:effectiveCost(c,p)};}
  function makeStack(p,color,token=false){const c=card(color+'ストック','ストック',color,null,false,p);return {...c,token,faceUp:true};}
  function gainStacks(p,color,count){
@@ -408,7 +408,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function cleanupUsed(source,resolved=true){const c=source.card;c.resolving=false;const dest=c.cleanupDestination,owner=c.origin||source.p;delete c.cleanupDestination;delete c.psychicSummonUsed;
   if(dest==='ownerTrash'){rawMove(source,owner,'trash');return;}
   if(c.vanishAfterUse){vanish(source);return;}
-  if(isSideCard(c)){if(!c.psychic&&!c.sideboardDiscardAfterUse)c.used=true;rawMove(source,source.p,c.sideboardDiscardAfterUse?'trash':'extra');}else if(resolved&&c.charger&&!dest){state[source.p][source.z].splice(source.index,1);putMana(c,source.p);}else rawMove(source,c.type==='呪文'&&(!dest||dest==='trash')?owner:source.p,dest==='exile'?'exile':dest==='bottom'?'main':'trash',true);}
+  if(isSideCard(c)){if(!c.psychic&&!c.xyz&&!c.sideboardDiscardAfterUse)c.used=true;rawMove(source,source.p,c.sideboardDiscardAfterUse?'trash':'extra');}else if(resolved&&c.charger&&!dest){state[source.p][source.z].splice(source.index,1);putMana(c,source.p);}else rawMove(source,c.type==='呪文'&&(!dest||dest==='trash')?owner:source.p,dest==='exile'?'exile':dest==='bottom'?'main':'trash',true);}
  function psychicEffect(e){
   const {kind,p,sourceId}=e,q=other(p);
   if(kind==='blueStock')gainStacks(p,'青',1);
@@ -536,8 +536,9 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
    trace('ruleDamage',label(p)+'にルールダメージ'+amount+'：'+before[p]+'→'+life[p]+'。',{targetPlayer:p,beforeLife:before[p],afterLife:life[p],amount,damageType:'rule',reason},p);
    events.push({id:++eventSerial,kind:'ruleDamage',p,amount,text:reason+'：ルールダメージ'+amount});
   }
-  if(players.some(p=>life[p]<=0)){
-   const winner=players.length===1?other(players[0]):life.p1===life.p2?null:life.p1>life.p2?'p1':'p2';
+  const losing=players.filter(p=>life[p]<=0&&!xyzDefense(p).length);
+  if(losing.length){
+   const winner=losing.length===1?other(losing[0]):life.p1===life.p2?null:life.p1>life.p2?'p1':'p2';
    finish(winner,reason+'のルールダメージでライフが0以下');
   }
  }
@@ -587,6 +588,173 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(from.zone==='hand')triggerDiscard(from.player);
   if(c.gaiaRevive&&from.player===owner&&!isField(from.zone)&&effectPlayer===other(owner))enqueueTriggered([{kind:'gaiaOffer'}],owner,c.id);
  }
+ function xyzDefense(p){return fieldCards(p).filter(c=>c.xyzNumeronia&&!c.abilitiesDisabled);}
+ function xyzMaterialsFor(p,count){
+  const groups=new Map();
+  for(const c of fieldCards(p)){
+   if(c.type!=='通常'||c.xyz||!c.cost||!isUnit(locate(c.id)?.z))continue;
+   const cost=Mana.total(c.cost);
+   if(!groups.has(cost))groups.set(cost,[]);
+   groups.get(cost).push(c);
+  }
+  return [...groups.values()].filter(group=>group.length>=count).flat();
+ }
+ function xyzSummonError(s,method,selecting=false){
+  if(!s?.card.xyz||s.z!=='extra')return 'サイドボードのエクシーズを選んでください。';
+  const {p,card:c}=s;
+  const entry=summonError(c,p,true);
+  if(entry)return entry;
+  if(method==='effect')return '';
+  const timing=selecting?'':mainError(p);
+  if(timing)return timing;
+  if((character(p)?.level||0)<2)return 'キャラクターLv2以上が必要です。';
+  if(method==='overlay')return xyzHosts(s).length?'':'自分のネフィルが必要です。';
+  if(!xyzMaterialsFor(p,c.xyz.count).length)return '同じ記載コストの素材が不足しています。';
+  return stackPlan(p,c.stackCost)?'':'ストック不足です。';
+ }
+ function xyzHosts(s){
+  return s?.card.xyz?.overlayBase?fieldCards(s.p).filter(c=>c.key===s.card.xyz.overlayBase&&isUnit(locate(c.id)?.z)):[];
+ }
+ function xyzTargets(s){
+  if(s.card.xyz.ability==='absorb')return PLAYERS.flatMap(p=>fieldCards(p)).filter(c=>c.id!==s.card.id&&c.type==='通常'&&isUnit(locate(c.id)?.z)&&!targetProtected(c,s.p));
+  return state[s.p].extra.filter(c=>c.xyz&&!xyzSummonError(locate(c.id),'effect'));
+ }
+ function xyzAbilityError(id,allowSelection=false){
+  const s=locate(id),ability=s?.card.xyz?.ability;
+  if(result||status!=='ready'||operation&&!allowSelection)return '現在は能力を使用できません。';
+  if(!ability||!isUnit(s.z)||s.card.abilitiesDisabled||!['main1','main2'].includes(turn.step))return 'この能力はメインフェイズに使用できます。';
+  if(ability==='overlay'&&s.p!==turn.player)return '自分のメインフェイズに使用できます。';
+  if(ability==='absorb'&&s.card.xyzAbilityTurn===turn.sequence)return 'このターンは使用済みです。';
+  if((s.card.xyzMaterials?.length||0)<2)return 'エクシーズ素材が2枚必要です。';
+  return xyzTargets(s).length?'':'選べる対象がありません。';
+ }
+ function beginXyz(id,method='normal'){
+  if(!['normal','overlay','ability'].includes(method))return fail('使用方法が不正です。');
+  const s=locate(id),error=method==='ability'?xyzAbilityError(id):xyzSummonError(s,method);
+  if(error)return fail(error);
+  operation={kind:'xyz',method,id,p:s.p,ids:[],targetId:null,required:method==='normal'?s.card.xyz.count:method==='ability'?2:0};
+  return ok('素材と対象を選択してください。');
+ }
+ function xyzOptions(o=operation){
+  const s=locate(o?.id);
+  if(!s||!['xyz','xyzNegate','xyzOffer'].includes(o.kind))return {materials:[],targets:[]};
+  if(o.kind==='xyzOffer')return {materials:[],targets:o.hostIds.map(id=>locate(id)?.card).filter(Boolean)};
+  if(o.kind==='xyzNegate')return {materials:s.card.xyzMaterials||[],targets:[]};
+  if(o.method==='ability')return {materials:s.card.xyzMaterials||[],targets:xyzTargets(s)};
+  if(o.method==='overlay')return {materials:[],targets:xyzHosts(s)};
+  const materials=xyzMaterialsFor(o.p,o.required),first=materials.find(c=>c.id===o.ids[0]);
+  return {materials:first?materials.filter(c=>Mana.total(c.cost)===Mana.total(first.cost)):materials,targets:[]};
+ }
+ function selectXyz(id,target=false,expected=operation){
+  const o=operation;
+  if(o!==expected||!['xyz','xyzNegate'].includes(o?.kind))return fail('エクシーズの選択中ではありません。');
+  const choices=xyzOptions(o);
+  if(!choices[target?'targets':'materials'].some(c=>c.id===id))return fail('有効なカードを選んでください。');
+  if(target)o.targetId=id;
+  else if(o.ids.includes(id))o.ids=o.ids.filter(x=>x!==id);
+  else if(o.ids.length<o.required)o.ids.push(id);
+  else return fail('選択上限です。');
+  return ok();
+ }
+ function attachXyzMaterial(source,host,p,method){
+  const c=source.card,carried=method==='overlay'?c.xyzMaterials||[]:[];
+  if(carried.length)c.xyzMaterials=[];
+  rawMove(source,c.origin||source.p,'holding',true,true,false,p,method);
+  const moved=locate(c.id);
+  if(moved?.z!=='holding'){
+   if(carried.length)c.xyzMaterials=carried;
+   return false;
+  }
+  state[moved.p].holding.splice(moved.index,1);
+  host.xyzMaterials.push(c,...carried);
+  trace('xyzAttach','《'+c.name+'》をエクシーズ素材にしました。',{cardId:c.key,hostId:host.id},p);
+  return true;
+ }
+ function enterXyz(source,bases,method){
+  const {card:c,p}=source;
+  const slot=bases[0].z,rest=method==='normal'&&bases.some(s=>s.card.rest);
+  beginResolution('xyz');
+  c.xyzMaterials=[];
+  for(const base of bases){
+   attachXyzMaterial(locate(base.card.id),c,p,method);
+   if(result)return;
+  }
+  if(!replaceWeakEntry(locate(c.id),p)){
+   rawMove(locate(c.id),p,slot);
+   c.faceUp=true;
+   unitEntered(c,p,false,rest);
+   trace('xyzSummon',c.name+'が'+(method==='normal'?'エクシーズ召喚':'効果で重なって登場')+'。',{method,card:refId(c.id),materials:c.xyzMaterials.length},p);
+  }else releaseXyzMaterials(c,p);
+  if(result)return;
+  endResolution();
+  refreshDerived();
+ }
+ function resolveXyz(confirm=true,expected=operation){
+  const o=operation;
+  if(o!==expected||!['xyz','xyzNegate','xyzOffer'].includes(o?.kind)||result)return fail('以前の選択です。');
+  if(!confirm){operation=null;pump();return ok('今回は見送りました。');}
+  if(o.kind==='xyzOffer')return fail('起動するネフィルを選んでください。');
+  const s=locate(o.id),{materials,targets}=xyzOptions(o),target=targets.find(c=>c.id===o.targetId);
+  if(!s||o.ids.length!==o.required||new Set(o.ids).size!==o.ids.length||o.ids.some(id=>!materials.some(c=>c.id===id))||
+   ['overlay','ability'].includes(o.method)&&!target)return fail('必要な素材と対象を選んでください。');
+  if(o.kind==='xyzNegate'){
+   if(!xyzDefense(o.p).includes(s.card)||activeCombat?.combatId!==o.combatId)return fail('この攻撃は終了しています。');
+   operation=null;
+   moveXyzMaterialsToTrash(s.card,o.p,o.ids);
+   activeCombat.xyzNegated=true;
+   record(s.card.name+'が攻撃を無効にしました。');
+  }else if(o.method==='ability'){
+   const error=xyzAbilityError(o.id,true);
+   if(error)return fail(error);
+   operation=null;
+   beginResolution('xyzAbility');
+   if(s.card.xyz.ability==='absorb')s.card.xyzAbilityTurn=turn.sequence;
+   moveXyzMaterialsToTrash(s.card,o.p,o.ids);
+   if(s.card.xyz.ability==='absorb')attachXyzMaterial(locate(target.id),s.card,o.p,'capture');
+   else enterXyz(locate(target.id),[s],'overlay');
+   if(!result)endResolution();
+  }else{
+   const error=xyzSummonError(s,o.method,true);
+   if(error)return fail(error);
+   operation=null;
+   if(o.method==='normal'&&!spendStacks(o.p,s.card.stackCost))return fail('ストック不足です。');
+   const bases=o.method==='normal'?o.ids.map(locate):[locate(target.id)];
+    entryWindow(s,o.p,()=>{
+    const live=locate(o.id),currentBases=bases.map(base=>locate(base.card.id));
+    if(live?.z!=='extra'||summonError(live.card,o.p,true)||currentBases.some(base=>base?.p!==o.p||!isUnit(base.z)))return;
+    if(o.method==='overlay'&&!xyzHosts(live).includes(currentBases[0].card))return;
+    if(o.method==='normal'&&!currentBases.every(base=>xyzMaterialsFor(o.p,o.required).includes(base.card)&&Mana.total(base.card.cost)===Mana.total(currentBases[0].card.cost)))return;
+    enterXyz(live,currentBases,o.method);
+   });
+  }
+  pump();
+  return ok('エクシーズの処理を確定しました。');
+ }
+ function chooseXyzOffer(id,expected=operation){
+  const o=operation;
+  if(o!==expected||o?.kind!=='xyzOffer'||!o.hostIds.includes(id)||result)return fail('有効なネフィルを選んでください。');
+  operation=null;
+  const started=beginXyz(id,'ability');
+  if(!started.ok)operation=o;
+  return started;
+ }
+ function xyzEffect(e){
+  if(e.kind==='xyzWipe'){
+   const ids=ZONES.filter(z=>isField(z.id)).flatMap(z=>state[e.p][z.id]).filter(c=>c.id!==e.sourceId).map(c=>c.id);
+   for(const id of [...ids,...state[e.p].hand.map(c=>c.id)]){
+    const s=locate(id);
+    if(s&&(s.z==='hand'||isField(s.z)))rawMove(s,e.p,'trash',true,true,false,e.p,'wipe');
+   }
+   for(const c of [...state[e.p].trash])rawMove(locate(c.id),e.p,'exile',true,true);
+  }else if(e.kind==='xyzWin'){
+   if(xyzDefense(e.p).length)finish(e.p,'ヌメロニアの特殊勝利');
+  }else if(e.kind==='xyzNegate'){
+   const host=locate(e.sourceId);
+   if(!activeCombat?.xyzNegated&&activeCombat?.combatId===e.combatId&&host?.card.xyzMaterials?.length&&xyzDefense(e.p).includes(host.card))
+    operation={kind:'xyzNegate',id:e.sourceId,p:e.p,combatId:e.combatId,required:1,ids:[]};
+  }else return false;
+  return true;
+ }
  function moveXyzMaterialsToTrash(host,player,ids){
   const materials=host.xyzMaterials||[];
   const selected=ids.map(id=>materials.find(c=>c.id===id));
@@ -617,19 +785,24 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  }
  function removeFromZone(source){
   state[source.p][source.z].splice(source.index,1);
-  if(isField(source.z))releaseXyzMaterials(source.card,source.p);
+  if(isField(source.z))xyzLeftField(source.card,source.p);
  }
- function rawMove(source,p,z,bottom=true,preserveDestination=false,suppressAbilities=false,effectPlayer=locate(activeEffectSource)?.p){if(!source)return null;if(z==='hand'&&!(isSideCard(source.card)&&!preserveDestination)&&handBlocked(p))return source.card;const from={player:source.p,zone:source.z},before=publicRef(source.card,source.z),c=moveRaw(source,p,z,bottom,preserveDestination,effectPlayer),dest=locate(c.id),after=dest?publicRef(c,dest.z):null,ref=!before.hidden?before:after&&!after.hidden?after:{hidden:true};trace('move',(ref.name?'《'+ref.name+'》':'非公開カード')+'：'+(ZONES.find(x=>x.id===from.zone)?.name||from.zone)+'→'+(dest?ZONES.find(x=>x.id===dest.z)?.name:'消滅')+'。',{card:ref,from,to:dest?{player:dest.p,zone:dest.z}:{zone:'vanished'},before,after},from.player);if(dest?.z==='trash'&&(from.zone!=='trash'||from.player!==dest.p))onMovedToTrash(c,from,dest.p,suppressAbilities,effectPlayer);if(isField(from.zone)&&!isField(dest?.z))releaseXyzMaterials(c,from.player);if(dest?.z==='hand'&&(from.zone!=='hand'||from.player!==dest.p))handAdded(dest.p,c);if(isUnit(from.zone)&&!isUnit(dest?.z)&&(c.key==='t13'||c.key==='rs5')){syncBloodQueens(from.player);for(const queen of bloodQueens(from.player))if(queen.health<=0&&!queen.bloodFilling)destroyUnit(queen.id,'現在体力0以下');}return c;}
- function moveRaw(source,p,z,bottom=true,preserveDestination=false,effectPlayer=null) {
+ function xyzLeftField(c,p){
+  releaseXyzMaterials(c,p);
+  if(c.xyzNumeronia&&!c.abilitiesDisabled)finish(other(p),'ヌメロニアが場を離れた');
+ }
+ function rawMove(source,p,z,bottom=true,preserveDestination=false,suppressAbilities=false,effectPlayer=locate(activeEffectSource)?.p,xyzTransfer=null){if(!source)return null;if(z==='hand'&&!(isSideCard(source.card)&&!preserveDestination)&&handBlocked(p))return source.card;const from={player:source.p,zone:source.z},before=publicRef(source.card,source.z),c=moveRaw(source,p,z,bottom,preserveDestination,effectPlayer,xyzTransfer),dest=locate(c.id),after=dest?publicRef(c,dest.z):null,ref=!before.hidden?before:after&&!after.hidden?after:{hidden:true};trace('move',(ref.name?'《'+ref.name+'》':'非公開カード')+'：'+(ZONES.find(x=>x.id===from.zone)?.name||from.zone)+'→'+(dest?ZONES.find(x=>x.id===dest.z)?.name:'消滅')+'。',{card:ref,from,to:dest?{player:dest.p,zone:dest.z}:{zone:'vanished'},before,after},from.player);if(dest?.z==='trash'&&(from.zone!=='trash'||from.player!==dest.p))onMovedToTrash(c,from,dest.p,suppressAbilities,effectPlayer);if(isField(from.zone)&&!isField(dest?.z))xyzLeftField(c,from.player);if(dest?.z==='hand'&&(from.zone!=='hand'||from.player!==dest.p))handAdded(dest.p,c);if(isUnit(from.zone)&&!isUnit(dest?.z)&&(c.key==='t13'||c.key==='rs5')){syncBloodQueens(from.player);for(const queen of bloodQueens(from.player))if(queen.health<=0&&!queen.bloodFilling)destroyUnit(queen.id,'現在体力0以下');}return c;}
+ function moveRaw(source,p,z,bottom=true,preserveDestination=false,effectPlayer=null,xyzTransfer=null) {
+  const materialCost=xyzTransfer==='normal'||xyzTransfer==='overlay';
   if((z==='hand'||z==='main')&&isSideCard(source.card)&&!preserveDestination){z='extra';p=source.card.origin||source.p;}
   if(z==='structures'&&(source.z!=='structures'||source.p!==p)&&source.card.shieldLink&&shieldLinkCount(p)>=5)return source.card;
   if(source.z==='structures'&&z!=='structures'&&source.card.token){const [c]=state[source.p][source.z].splice(source.index,1);vanishedIds.add(c.id);return c;}
-  if(immuneToSpell(source.card)||isUnit(source.z)&&(!isUnit(z)||p!==source.p)&&staysOnField(source.card))return source.card;
-  if(isUnit(source.z)&&!isUnit(z)&&source.card.markerGuard&&!source.card.abilitiesDisabled){const marker=state[source.p].markers.find(x=>x.hostId===source.card.id);if(marker){rawMove(locate(marker.id),source.p,'trash');record('マーカーを破棄し離場を1回防止。');return source.card;}}
-  if(isUnit(source.z)&&!isUnit(z)&&source.card.awakened&&source.card.release&&!source.card.abilitiesDisabled){applyForm(source.card,source.p,null);return source.card;}
+  if(!materialCost&&(immuneToSpell(source.card)||isUnit(source.z)&&(!isUnit(z)||p!==source.p)&&staysOnField(source.card)))return source.card;
+  if(!materialCost&&isUnit(source.z)&&!isUnit(z)&&source.card.markerGuard&&!source.card.abilitiesDisabled){const marker=state[source.p].markers.find(x=>x.hostId===source.card.id);if(marker){rawMove(locate(marker.id),source.p,'trash');record('マーカーを破棄し離場を1回防止。');return source.card;}}
+  if(!materialCost&&isUnit(source.z)&&!isUnit(z)&&source.card.awakened&&source.card.release&&!source.card.abilitiesDisabled){applyForm(source.card,source.p,null);return source.card;}
   if(isUnit(source.z)&&!isUnit(z)){
    const shield=attached(source.card,'gigaheart'),effect=locate(activeEffectSource)?.card;
-   if(shield&&effectPlayer===other(source.p)&&['通常','呪文'].includes(effect?.type)&&!summonError(Catalog.awakened['sbrr1-2'],source.p)){
+   if(!materialCost&&shield&&effectPlayer===other(source.p)&&['通常','呪文'].includes(effect?.type)&&!summonError(Catalog.awakened['sbrr1-2'],source.p)){
     dragonForm(shield.id,source.p,'sbrr1-2');
     source.card.health=Math.max(1,source.card.health);
     return source.card;
@@ -639,7 +812,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
     rawMove(locate(c.id),source.p,'extra');
    }
   }
-  if(source.z==='structures'&&!isField(z)&&source.card.sideboardOnly){
+  if(source.z==='structures'&&!isField(z)&&source.card.sideboardOnly&&xyzTransfer!=='wipe'){
    z='extra';
    p=source.card.origin||source.p;
    delete source.card.hostId;
@@ -650,16 +823,16 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(source.z==='markers'){const host=locate(source.card.hostId);delete source.card.hostId;if(host&&isUnit(host.z)&&!host.card.rest&&!host.card.abilitiesDisabled)enqueueTriggered([{kind:'damagePlayer',amount:attack(host.card,host.p)}],host.p,host.card.id);}
   if(isUnit(source.z)&&!isUnit(z)){for(const marker of [...state[source.p].markers].filter(x=>x.hostId===source.card.id)){delete marker.hostId;rawMove(locate(marker.id),source.p,'trash');}}
 
-  if((source.card.neverendCrest||source.card.escapeLink)&&isField(source.z)&&!isField(z)){z='extra';p=source.card.origin||source.p;preserveDestination=false;}
+  if(!xyzTransfer&&(source.card.neverendCrest||source.card.escapeLink)&&isField(source.z)&&!isField(z)){z='extra';p=source.card.origin||source.p;preserveDestination=false;}
   // Draghearts return to the sideboard even when an effect sends them to mana.
   if(z==='energy'&&isUnit(source.z)&&(Catalog.cards[source.card.key]?.heartburn||Catalog.cards[source.card.key]?.equipment)&&isSideCard(source.card))preserveDestination=false;
   if(!preserveDestination&&isSideCard(source.card)&&source.card.type==='通常'&&isUnit(source.z)&&!isUnit(z)){z='extra';p=source.card.origin||source.p;}
   if(source.card.manaToken&&source.z==='energy'&&z!=='energy'){const [c]=state[source.p].energy.splice(source.index,1);vanishedIds.add(c.id);return c;}
   const [c]=state[source.p][source.z].splice(source.index,1),leaving=isUnit(source.z)&&!isUnit(z);
   if(source.z==='exile'&&z!=='exile'){delete c.returnReservation;delete c.handReturn;}
-  if(leaving){delete c.hostId;delete c.rituelUsed;delete c.rituelFree;delete c.concordiaUsed;if(c.bloodQueen)restoreKindQueen(c);delete c.galmieuxMach;delete c.crimsonNoAttack;delete c.enemyUseDrawSequence;delete c.stayUntil;delete c.skipStartUntap;delete c.combatLock;delete c.graveDelayed;delete c.graveSummonedFromTrash;delete c.graveSummonMethod;if(c.vengeanceHealthBonus){c.maxHealth-=c.vengeanceHealthBonus;delete c.vengeanceHealthBonus;}delete c.attackCountSequence;delete c.attackCount;delete c.turnSymbols;delete c.turnSA;delete c.turnAttackBonus;delete c.pendingDestruction;delete c.justDiverUntil;delete c.attackZero;if(c.temporarySA){delete c.speedAttacker;delete c.temporarySA;}if(c.statBonus){c.attack-=c.statBonus.attack;c.maxHealth-=c.statBonus.health;delete c.statBonus;}const bases=[...(c.under||[])];c.under=[];for(const base of bases){if(!base.token){base.faceUp=true;state[base.origin||source.p].trash.push(base);grave?.onTrash(base,base.origin||source.p);}else vanishedIds.add(base.id);}const real=c.token?[]:[c];if(c.token)vanishedIds.add(c.id);if(!real.length)return c;
+  if(leaving){delete c.hostId;delete c.rituelUsed;delete c.rituelFree;delete c.concordiaUsed;if(c.bloodQueen)restoreKindQueen(c);delete c.galmieuxMach;delete c.crimsonNoAttack;delete c.enemyUseDrawSequence;delete c.stayUntil;delete c.skipStartUntap;delete c.combatLock;delete c.graveDelayed;delete c.graveSummonedFromTrash;delete c.graveSummonMethod;if(c.vengeanceHealthBonus){c.maxHealth-=c.vengeanceHealthBonus;delete c.vengeanceHealthBonus;}delete c.attackCountSequence;delete c.attackCount;delete c.turnSymbols;delete c.turnSA;delete c.turnAttackBonus;delete c.pendingDestruction;delete c.justDiverUntil;delete c.attackZero;if(c.temporarySA){delete c.speedAttacker;delete c.temporarySA;}if(c.statBonus){c.attack-=c.statBonus.attack;c.maxHealth-=c.statBonus.health;delete c.statBonus;}const bases=[...(c.under||[])];c.under=[];for(const base of bases){if(!base.token){base.faceUp=true;state[base.origin||source.p].trash.push(base);grave?.onTrash(base,base.origin||source.p);}else vanishedIds.add(base.id);}const keepAsMaterial=xyzTransfer&&xyzTransfer!=='wipe',real=c.token&&!keepAsMaterial?[]:[c];if(c.token&&!keepAsMaterial)vanishedIds.add(c.id);if(!real.length)return c;
    if(z==='main'&&real.length>1){state[p].holding.push(...real);operation={kind:'stackOrder',p,ids:real.map(c=>c.id),order:real.map(c=>c.id),destination:z};return c;}
-   for(const item of real){if(isSideCard(item)&&!preserveDestination){if(item.awakened)applyForm(item,p,null);if(!item.moltDeployed&&!item.psychic)item.used=true;delete item.moltDeployed;delete item.moltHost;state[item.origin||p].extra.push(item);continue;}if(z==='hand')item.faceUp=true;if(bottom)state[p][z].push(item);else state[p][z].unshift(item);}return c;
+   for(const item of real){if(isSideCard(item)&&!preserveDestination){if(item.awakened)applyForm(item,p,null);if(!item.moltDeployed&&!item.psychic&&!item.xyz)item.used=true;delete item.moltDeployed;delete item.moltHost;state[item.origin||p].extra.push(item);continue;}if(z==='hand')item.faceUp=true;if(bottom)state[p][z].push(item);else state[p][z].unshift(item);}return c;
   }
   if(isUnit(z)&&!isUnit(source.z)){c.sick=true;c.enteredTurn=turn.counts[p];}
   if(z==='energy'||z==='hand')c.rest=false;if(bottom)state[p][z].push(c);else state[p][z].unshift(c);return c;
@@ -739,6 +912,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(c.evolution&&!evolutionBases(p,c).length)return '条件を満たす自分のユニットの進化元が必要です。';return '';
  }
  function playStatus(c,p){
+  if(c.xyz){const error=xyzSummonError(locate(c.id),'normal');return {ok:!error,text:error||'エクシーズ召喚可能',reasons:error?[error]:[]};}
   if(c.type==='土地')return {ok:false,text:'旧基本土地は使用できません。',reasons:['旧基本土地は使用できません。']};
   if(!['通常','呪文','設置物'].includes(c.type)||!c.cost)return {ok:false,text:'通常使用の対象外',reasons:['通常使用の対象外です。']};
   if(locate(c.id)?.z==='trash'&&c.fushigiCost)return grave.fushigiStatus(c,p);
@@ -751,7 +925,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   return {ok:!reasons.length,text:reasons[0]||(gzero?'G・ゼロ使用可':'マナ支払い可'),reasons,gzero};
  }
  function beginPayment(id,purpose='normal'){
-  const source=locate(id);if(!source)return fail('カードが見つかりません。');const c=source.card,p=source.p;if(operation?.kind==='response'&&c.instant)purpose='instant';
+  const source=locate(id);if(!source)return fail('カードが見つかりません。');const c=source.card,p=source.p;if(c.xyz)return beginXyz(id);if(operation?.kind==='response'&&c.instant)purpose='instant';
   if(c.unavailable)return fail('使用不可：'+c.unavailable);
   if(purpose==='normal'&&c.gZero&&source.z==='hand'&&grave.gZero(c,p))purpose='gzero';
   if(purpose==='paid')purpose='normal';
@@ -814,19 +988,20 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   if(summonError(s.card,p)){record(summonError(s.card,p));rawMove(s,p,s.card.sideboardOnly?'extra':'hand');return s.card;}const c=rawMove(s,p,s.card.type==='設置物'&&!s.card.equipment&&!s.card.heartburn?'structures':slot);c.faceUp=true;c.rest=!!c.enterRest;c.sick=c.type==='通常';c.enteredTurn=turn.counts[p];
   if(enhanced)applyBloodQueen(c);if(c.type==='通常')unitEntered(c,p);else if(c.type==='設置物')structureEntered(c,p);else enqueueTriggered(c.onEnter||[],p,c.id);refreshDerived();return c;
  }
- function unitEntered(c,p,returning=false){
+ function unitEntered(c,p,returning=false,inheritedRest=false){
   if(replaceWeakEntry(locate(c.id),p))return;
   if(Mana.hasColor(c,'赤'))turn.redEntries[p]++;
   const commander=character(p),speed=hasSpeed(c,p)||c.graveSummonMethod==='abyss';
   const redTriggers=commander?.key==='redcaptain'&&speed?[{kind:'commanderStack',sourceId:commander.id},...(baseAbility(commander,'redcaptain')&&commander.level===2?[{kind:'draw',count:1,sourceId:commander.id},{kind:'damagePlayer',amount:1,sourceId:commander.id}]:[])]:[];
   if(turn.redEntries[p]===3)for(const b of draghearts(p).filter(x=>x.awakened==='sbru2-2'&&!x.abilitiesDisabled))enqueueTriggered([{kind:'dragonForm',form:'sbru2-3',sourceId:b.id}],p,b.id);
   if(c.key==='t12')for(const queen of fieldCards(p).filter(x=>x.key==='rs5'&&!x.bloodQueen&&!x.abilitiesDisabled))enqueueTriggered([{kind:'damagePlayer',amount:2}],p,queen.id);
+  c.rest=!!c.enterRest||inheritedRest;
   const zone=locate(c.id)?.z;if(zone)trace('unitEntry','クリーチャーが登場。',{card:publicRef(c,zone),zone},p);
   c.entryGeneration=(c.entryGeneration||0)+1;
   if(c.graveSummonMethod==='abyss'){c.turnSA=true;c.graveDelayed={p,turn:turn.counts[p],generation:c.entryGeneration,action:'bottom'};}
   for(const owner of PLAYERS)for(const otherCard of fieldCards(owner))if(otherCard.id!==c.id&&otherCard.rageArm)otherCard.turnAttackBonus=(otherCard.turnAttackBonus||0)+1;
   const diver=c.justDiver&&!c.abilitiesDisabled;if(diver)c.justDiverGeneration=(c.justDiverGeneration||0)+1;
-  resetHealth(c,p);if(c.key==='t13'||c.bloodQueen)syncBloodQueens(p);c.sick=true;c.rest=!!c.enterRest;c.enteredTurn=turn.counts[p];
+  resetHealth(c,p);if(c.key==='t13'||c.bloodQueen)syncBloodQueens(p);c.sick=true;c.enteredTurn=turn.counts[p];
   // 同時に誘発した登場時能力は、本人の効果→場にあった設置物の順で解決。
   const triggers=[...state[p].structures.flatMap(s=>(s.onUnitEnter||[]).map(e=>({...e,triggerName:s.name}))),...PLAYERS.flatMap(owner=>state[owner].structures.filter(s=>s.drawOnAnyUnitEnter&&!s.abilitiesDisabled).map(s=>({kind:'optionalDraw',count:1,p:owner,sourceId:s.id})))];
   const watches=fieldCards(p).filter(x=>x.id!==c.id&&x.drawOnUse).map(()=>({kind:'draw',count:1}));const banners=Mana.hasColor(c,'赤')?state[p].structures.filter(x=>x.redBanner).length:0;const effects=[...redTriggers,...(redMoon(p,2)?[{kind:'redMoonEnter',id:c.id}]:[]),...(diver?[{kind:'justDiver',generation:c.justDiverGeneration,entrantAbility:true}]:[]),...(banners?[{kind:'bannerOne',id:c.id,amount:banners}]:[]),...(returning?[]:((c.onEnter||[]).map(e=>e.kind==='moltDragheart'?{...e,generation:c.entryGeneration}:e.kind==='leopardBuff'?{...e,generation:c.entryGeneration,count:fieldCards(p).filter(x=>x.type==='通常'&&x.id!==c.id).length}:e)).map(e=>({...e,entrantAbility:true}))),...triggers,...watches];if(!grave.gateEntry(c,p,effects))enqueueTriggered(effects,p,c.id);
@@ -931,7 +1106,7 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
  function safelogInstant(id){return !!locate(id)?.card.instant;}
  function beginTurn(forcedPlayer=null,forceOpponent=false) {
   let p,extra=false;if(forcedPlayer&&(mode==='solo'||forceOpponent)){p=forcedPlayer;normalNext=other(p);}else if(turn.sequence===0){p=firstPlayer;normalNext=other(p);}else if(extraTurns.length){p=extraTurns.shift();extra=true;}else if(mode==='bot'){p=normalNext;normalNext=other(p);}else p=SELF;
-  for(const q of PLAYERS)for(const c of fieldCards(q))if(c.attackZero?.until===p)delete c.attackZero;operation=null;turn.player=p;turn.extra=extra;turn.sequence++;turn.counts[p]++;turn.number=turn.counts[p];turn.key={};turn.step='untap';turn.lastDraw=0;turn.attacks=0;turn.redEntries={p1:0,p2:0};turn.lifeReduced={p1:0,p2:0};turn.battleWins={p1:0,p2:0};delete turn.attackForbidden;delete turn.scramble;
+  for(const q of PLAYERS)for(const c of fieldCards(q))if(c.attackZero?.until===p)delete c.attackZero;operation=null;turn.player=p;turn.extra=extra;turn.sequence++;turn.counts[p]++;turn.number=turn.counts[p];turn.key={};turn.step='untap';turn.lastDraw=0;turn.attacks=0;turn.attackerIds=[];delete turn.xyzOfferedPhase;turn.redEntries={p1:0,p2:0};turn.lifeReduced={p1:0,p2:0};turn.battleWins={p1:0,p2:0};delete turn.attackForbidden;delete turn.scramble;
   const lateRuleDamage=p===firstPlayer&&turn.sequence>=41&&turn.number>=21;
   if(lateRuleDamage){
    trace('turnStart',label(p)+'のターン開始。',{after:auditState().players},p);
@@ -956,11 +1131,19 @@ function create({clock=()=>Date.now(),random=()=>Math.random(),mode:initialMode=
   pump();return ok('帰還を宣言しました。');
  }if(replaceWeakEntry(s,o.p)){pump();return ok('登場を置換。');}if(checked.replacement)rawMove(locate(checked.replacement.id),o.p,'trash');const c=rawMove(s,o.p,o.slot);delete c.returnReservation;c.faceUp=true;c.speedAttacker=true;unitEntered(c,o.p,true);record(`${c.name}がスピードアタッカーを持って帰還。`);pump();return ok('帰還を確定しました。');}
  function queueTurnEnd(force=false){
-  turn.step='end';enqueue([{kind:'sideEnd'},{kind:'concordiaDirect'},...PLAYERS.filter(owner=>baseAbility(character(owner),'celestia')&&character(owner)?.level===4).map(owner=>({kind:'celestiaEnd',p:owner,sourceId:character(owner).id})),...PLAYERS.flatMap(q=>fieldCards(q).filter(c=>c.markerGuard&&!state[q].markers.some(x=>x.hostId===c.id)).map(c=>({kind:'markerEnd',id:c.id}))),...fieldCards(turn.player).flatMap(c=>triggeredEffects(c.onEnd||[],turn.player,c.id)),{kind:'lumiereEnd'},{kind:'graveEnd'},{kind:'returnSealedHands'},{kind:'turnTemporaryCleanup'}],turn.player,null);
+  turn.step='end';enqueue([...(xyzDefense(other(turn.player)).length?[{kind:'xyzWin',p:other(turn.player)}]:[]),{kind:'sideEnd'},{kind:'concordiaDirect'},...PLAYERS.filter(owner=>baseAbility(character(owner),'celestia')&&character(owner)?.level===4).map(owner=>({kind:'celestiaEnd',p:owner,sourceId:character(owner).id})),...PLAYERS.flatMap(q=>fieldCards(q).filter(c=>c.markerGuard&&!state[q].markers.some(x=>x.hostId===c.id)).map(c=>({kind:'markerEnd',id:c.id}))),...fieldCards(turn.player).flatMap(c=>triggeredEffects(c.onEnd||[],turn.player,c.id)),{kind:'lumiereEnd'},{kind:'graveEnd'},{kind:'returnSealedHands'},{kind:'turnTemporaryCleanup'}],turn.player,null);
   if(force)queue.push({kind:'forcedNextTurn',p:turn.player});
  }
  function advance(expectedKey=turn.key) {
   const e=interactionError();if(e)return fail(e);if(mustAttackPending())return fail('ブレイズクローが攻撃可能なため攻撃してください。');if(expectedKey!==turn.key||clock()<turn.notBefore)return fail('フェイズ処理中、または以前の操作です。');
+  if(mode==='bot'&&['main1','main2'].includes(turn.step)&&turn.xyzOfferedPhase!==turn.step){
+   const p=other(turn.player),hostIds=fieldCards(p).filter(c=>c.xyz?.ability==='absorb'&&!xyzAbilityError(c.id)).map(c=>c.id);
+   if(hostIds.length){
+    turn.xyzOfferedPhase=turn.step;
+    operation={kind:'xyzOffer',id:hostIds[0],p,hostIds};
+    return ok('相手メインフェイズのネフィルの能力を確認してください。');
+   }
+  }
   turn.key={};turn.notBefore=clock()+350;
   if(turn.step==='charge')return skipCharge();if(turn.step==='stackCharge')chargeStack(turn.player);else if(turn.step==='levelUp'){
    turn.step='main1';
@@ -1500,7 +1683,7 @@ if(o.choice==='ownLinkDestroy')return state[p].structures.filter(c=>c.shieldLink
   }
   return true;
  }
- if(kind==='guardDeath'){const targets=[...fieldCards(other(p)).filter(c=>c.type==='通常'),null],c=targets[Math.min(targets.length-1,Math.floor(random()*targets.length))];if(c)damageUnit(c,1,p);else loseLife(other(p),1,'近衛兵の死亡時ダメージ');return true;}
+ if(kind==='guardDeath'){const targets=[...fieldCards(other(p)).filter(c=>c.type==='通常'&&!xyzDefense(other(p)).includes(c)),null],c=targets[Math.min(targets.length-1,Math.floor(random()*targets.length))];if(c)damageUnit(c,1,p);else loseLife(other(p),1,'近衛兵の死亡時ダメージ');return true;}
  if(kind==='attachMarker'){const host=locate(sourceId);if(host&&isUnit(host.z)&&requireMain(p,e)){const c=state[p].main.shift();c.hostId=sourceId;c.faceUp=false;state[p].markers.push(c);record('山札上1枚を裏向きマーカーとして付与。');}return true;}
  if(kind==='markerEnd'){const c=locate(e.id);if(c&&isUnit(c.z)&&!c.card.abilitiesDisabled&&!state[c.p].markers.some(x=>x.hostId===e.id))destroyUnit(e.id,'マーカーなしの終了時');return true;}
  if(kind==='panzerOffer'){if(state[p].energy.filter(x=>!x.manaToken&&Mana.producedColors(x).includes('緑')).length>=5)starterChoice('panzer',p,sourceId);return true;}
@@ -1585,7 +1768,7 @@ if(kind==='scryMany'){const ids=state[p].main.slice(0,e.count).map(c=>c.id);if(i
  else if(kind==='damagePlayer')loseLife(other(p),e.amount,'カード・キャラクター効果');
  else if(kind==='discardThenDamage'||kind==='discardThenDestroy')starterChoice(kind==='discardThenDamage'?'discardDamage':'discardDestroy',p,sourceId,{amount:e.amount});
  else if(kind==='galmieuxSelfDamage'){const s=locate(sourceId);if(s&&isUnit(s.z))damageUnit(s.card,1,p);}
- else if(kind==='galmieuxStrike'){const q=other(p),targets=[...fieldCards(q).filter(c=>c.type==='通常'),null],target=targets[Math.floor(random()*targets.length)];if(target)damageUnit(target,3,p);else loseLife(q,3,'ガルミーユ');}
+ else if(kind==='galmieuxStrike'){const q=other(p),targets=[...fieldCards(q).filter(c=>c.type==='通常'&&!xyzDefense(q).includes(c)),null],target=targets[Math.floor(random()*targets.length)];if(target)damageUnit(target,3,p);else loseLife(q,3,'ガルミーユ');}
  else if(kind==='crimsonWyvern'){
   const targets=e.targets||fieldCards(other(p)).filter(c=>c.type==='通常'&&c.abilities?.includes('ブロッカー')).map(c=>c.id);
   const destroyed=e.destroyed||e.previous&&events.some(x=>x.id>e.since&&x.kind==='unitDestroyed'&&x.cardId===e.previous);
@@ -1636,7 +1819,7 @@ if(kind==='scryMany'){const ids=state[p].main.slice(0,e.count).map(c=>c.id);if(i
    else if(expansionEffect(effect)){}
    else if(starterEffect(effect)){}
    else if(takeEffect(effect)){}
-   else if(psychicEffect(effect)||sideEffect(effect)){}
+   else if(xyzEffect(effect)||psychicEffect(effect)||sideEffect(effect)){}
    else if(effect.kind==='forcedNextTurn'){summonLocks=summonLocks.filter(l=>!(l.p===p&&l.turn<=turn.counts[p]));beginTurn(other(p),true);}
    else if(effect.kind==='startDraw'){startDraw(p);}
    else if(effect.kind==='return'){const s=locate(effect.id);if(s?.z==='exile'&&s.card.returnReservation?.owner===p&&!summonError(s.card,p)){operation={kind:'returnPlace',p,id:effect.id,slot:null,replacedId:null};break;}}
@@ -1810,6 +1993,8 @@ if(o!==expected||!['reorder','stackOrder'].includes(o?.kind))return fail('以前
  function attackError(id){
   if(turn.attackForbidden)return 'カードカー・Dを使用したターンは攻撃できません。';const s=locate(id);if(result)return '対戦は終了しています。';if(status!=='ready'||turn.step!=='attack')return '攻撃はアタックフェイズで行ってください。';if(operation)return '選択中の処理を完了してください。';
   if(!s||s.p!==turn.player||!isUnit(s.z)||s.card.type!=='通常'||!Number.isFinite(attack(s.card,s.p)))return '自分の場のユニットを選んでください。';
+  const attackers=turn.attackerIds||[];
+  if(xyzDefense(other(s.p)).length&&attackers.length&&!(attackers.length===1&&attackers[0]===id))return 'ヌメロニアにより、攻撃できるクリーチャーは1ターンに1体です。';
   if(effectiveAttackCount(s.card)>1&&s.card.attackCountSequence===turn.sequence&&s.card.attackCount>=effectiveAttackCount(s.card))return 'このターンの攻撃回数を使い切っています。';if(combatRestricted(s.card))return '断罪の執行者により攻撃できません。';if(s.card.cannotAttack||s.card.crimsonNoAttack===turn.sequence)return 'このユニットは攻撃できません。';if(s.card.rest)return '使用済みのため攻撃できません。';if(!attackTargets(id).length)return '召喚酔い中、または攻撃できる対象がありません。';return '';
  }
  function declareAttack(id,targetId=undefined){
@@ -1822,9 +2007,10 @@ if(o!==expected||!['reorder','stackOrder'].includes(o?.kind))return fail('以前
  function cancelAttackTarget(){if(operation?.kind!=='attackTarget')return fail('対象選択ではありません。');operation=null;return ok('攻撃前の対象選択を取りやめました。');}
  function startAttack(id,target){
   const s=locate(id);const combatId=++attackSerial;trace('attackDeclared','《'+s.card.name+'》が'+(target==='body'?label(other(s.p)):locate(target)?.card.name)+'へ攻撃宣言。',{combatId,attacker:publicRef(s.card,s.z),declaredTarget:target,targetPlayer:other(s.p)},s.p);if(s.card.attackCountSequence!==turn.sequence){s.card.attackCountSequence=turn.sequence;s.card.attackCount=0;}s.card.attackCount=(s.card.attackCount||0)+1;activeCombat={id,combatId,p:s.p,defender:other(s.p),silence:!!s.card.shieldSilence};s.card.rest=true;events.push({id:++eventSerial,kind:'attack',p:s.p,attackerId:id,targetId:target,text:s.card.name+'が'+(target==='body'?'相手本体':locate(target)?.card.name)+'へ攻撃'});record(`${s.card.name}が${target==='body'?'相手本体':locate(target)?.card.name}へ攻撃宣言。使用済みにしました。`);
-  turn.attacks=(turn.attacks||0)+1;enqueue([{kind:'priorityAttack'},{kind:'parallelOffer',id,generation:s.card.entryGeneration},...draghearts(s.p).filter(c=>!c.abilitiesDisabled&&(c.equipment==='batblade'&&c.hostId===id||c.awakened==='sbru2-2'&&Mana.hasColor(s.card,'赤'))).map(c=>({kind:'batReveal',max:Mana.total(s.card.cost||Mana.cost(0)),sourceId:c.id})),...((s.card.key==='ks14'||s.card.rituel)&&s.card.abilitiesDisabled?[]:triggeredEffects((s.card.onAttack||[]).map(e=>e.kind==='rituelFree'?{...e,generation:s.card.entryGeneration}:e),s.p,id)),...(s.card.key==='ks14'&&!s.card.abilitiesDisabled&&!fieldCards(s.p).some(c=>c.type==='通常'&&c.id!==id)?[{kind:'miseryDestroy',generation:s.card.entryGeneration}]:[]),{kind:'attackContinue',id,target,combatId,generation:s.card.entryGeneration}],s.p,id);queueShield(other(s.p),{kind:'attackDeclared',life:life[other(s.p)],attackerId:id,target});pump();return ok('攻撃を宣言しました。');
+  turn.attackerIds=[...new Set([...(turn.attackerIds||[]),id])];
+  turn.attacks=(turn.attacks||0)+1;enqueue([...xyzDefense(other(s.p)).filter(c=>c.xyzMaterials?.length).map(c=>({kind:'xyzNegate',p:other(s.p),sourceId:c.id,combatId,priorityDone:true})),{kind:'priorityAttack'},{kind:'parallelOffer',id,generation:s.card.entryGeneration},...draghearts(s.p).filter(c=>!c.abilitiesDisabled&&(c.equipment==='batblade'&&c.hostId===id||c.awakened==='sbru2-2'&&Mana.hasColor(s.card,'赤'))).map(c=>({kind:'batReveal',max:Mana.total(s.card.cost||Mana.cost(0)),sourceId:c.id})),...((s.card.key==='ks14'||s.card.rituel)&&s.card.abilitiesDisabled?[]:triggeredEffects((s.card.onAttack||[]).map(e=>e.kind==='rituelFree'?{...e,generation:s.card.entryGeneration}:e),s.p,id)),...(s.card.key==='ks14'&&!s.card.abilitiesDisabled&&!fieldCards(s.p).some(c=>c.type==='通常'&&c.id!==id)?[{kind:'miseryDestroy',generation:s.card.entryGeneration}]:[]),{kind:'attackContinue',id,target,combatId,generation:s.card.entryGeneration}],s.p,id);queueShield(other(s.p),{kind:'attackDeclared',life:life[other(s.p)],attackerId:id,target});pump();return ok('攻撃を宣言しました。');
  }
- function continueAttack(id,target,combatId,generation){const s=locate(id);if(s?.card.canceledAttack){delete s.card.canceledAttack;attackWrap(id,s.p,other(s.p));trace('attackEnd','シールドにより攻撃無効。',{combatId,playerDamage:0});return;}if(!s||!isUnit(s.z)||s.p!==turn.player||!s.card.rest||s.card.entryGeneration!==generation){attackWrap(id,s?.p||turn.player,other(s?.p||turn.player));trace('attackEnd','攻撃クリーチャーが場を離れたため攻撃終了。本体ダメージ0。',{combatId,playerDamage:0,reason:'attackerLeft'});return;}
+ function continueAttack(id,target,combatId,generation){const s=locate(id);if(activeCombat?.combatId===combatId&&activeCombat.xyzNegated){if(s)delete s.card.canceledAttack;attackWrap(id,turn.player,other(turn.player));trace('attackEnd','ヌメロニアにより攻撃無効。',{combatId,playerDamage:0});return;}if(s?.card.canceledAttack){delete s.card.canceledAttack;attackWrap(id,s.p,other(s.p));trace('attackEnd','シールドにより攻撃無効。',{combatId,playerDamage:0});return;}if(!s||!isUnit(s.z)||s.p!==turn.player||!s.card.rest||s.card.entryGeneration!==generation){attackWrap(id,s?.p||turn.player,other(s?.p||turn.player));trace('attackEnd','攻撃クリーチャーが場を離れたため攻撃終了。本体ダメージ0。',{combatId,playerDamage:0,reason:'attackerLeft'});return;}
   if(target!=='body'){const b=locate(target);if(!b||!isUnit(b.z)||b.p===s.p)return fail('対象ユニットが場にありません。');attackWrap(id,s.p,b.p,false,true);battle(s,b,false,combatId);trace('attackEnd','クリーチャーへの攻撃終了。本体ダメージ0。',{combatId,playerDamage:0});pump();return ok('ユニットへの直接攻撃を解決しました。');}
   operation={kind:'combat',id,p:s.p,defender:other(s.p),blockerId:null,combatId,declaredTarget:target};if(mode==='bot'&&operation.defender==='p1'&&!blockers('p1').length)return resolveAttack(null,operation);return ok('防御側がブロックするか選択してください。');
  }
@@ -1860,7 +2046,7 @@ if(o!==expected||!['reorder','stackOrder'].includes(o?.kind))return fail('以前
   const beforeLife=life[o.defender],hit=loseLife(o.defender,damage,'戦闘ダメージ',{type:'combat',drainPlayer:hasDrain(a.card,a.p)?a.p:null});const dealt=hit.damage??beforeLife-life[o.defender];if(!result&&dealt>0)commanderHit(a.card,a.p);
   if(!result&&!a.card.abilitiesDisabled&&a.card.onPlayerDamage)enqueueTriggered(a.card.onPlayerDamage.map(e=>({...e,dealt})),a.p,a.card.id);events.push({id:++eventSerial,kind:'playerCombatDamage',p:o.defender,amount:dealt,text:`戦闘ダメージ${dealt}`});trace('attackEnd','本体へ'+dealt+'ダメージ。攻撃終了。',{combatId:o.combatId,blocked:false,playerDamage:dealt,targetPlayer:o.defender,attackEnded:true},o.p);pump();return ok('プレイヤーへの攻撃を解決しました。');
  }
- function finish(winner,reason,extra={}){if(result)return;const loser=winner?other(winner):null,outcome=winner?label(winner)+'の勝利':'引き分け';trace('result',outcome+'：'+reason+'。',{winner,loser,reason});result={winner,loser,reason,type:'normal',turnNumber:turn.number,gameId,...extra};operation=null;queue=[];stack=[];resolutions.length=0;turn.key={};epoch++;record(`${outcome}：${reason}。`);}
+ function finish(winner,reason,extra={}){if(result)return;if(extra.type!=='surrender'&&(winner?xyzDefense(other(winner)).length:PLAYERS.some(p=>xyzDefense(p).length)))return;const loser=winner?other(winner):null,outcome=winner?label(winner)+'の勝利':'引き分け';trace('result',outcome+'：'+reason+'。',{winner,loser,reason});result={winner,loser,reason,type:'normal',turnNumber:turn.number,gameId,...extra};operation=null;queue=[];stack=[];resolutions.length=0;turn.key={};epoch++;record(`${outcome}：${reason}。`);}
  function chooseFate(key,expected=operation){const o=operation;if(o!==expected||o?.kind!=='fateChoice'||!Catalog.fateKeys.includes(key))return fail('3種類の運命から1枚を選んでください。');const c=fromDefinition(key,o.p);addGeneratedHand(o.p,c);operation=null;record(`${label(o.p)}が${c.name}を手札に生成しました。`);pump();return ok('運命を選びました。');}
  function toggleUntapMana(id){const o=operation;if(o?.kind!=='untapMana'||!state[o.p].energy.some(c=>c.id===id)||o.eligibleIds&&!o.eligibleIds.includes(id))return fail('自分のマナを選んでください。');if(!o.ids.includes(id)&&o.ids.length>=o.max)return fail(`最大${o.max}枚です。`);o.ids=o.ids.includes(id)?o.ids.filter(x=>x!==id):[...o.ids,id];return ok('未使用に戻すマナを選択しました。');}
  function confirmUntap(expected=operation){const o=operation;if(o!==expected||o?.kind!=='untapMana'||o.ids.length>o.max||new Set(o.ids).size!==o.ids.length||o.ids.some(id=>!state[o.p].energy.some(c=>c.id===id)||o.eligibleIds&&!o.eligibleIds.includes(id)))return fail('マナの選択が不正です。');if(o.ids.filter(id=>locate(id)?.card.rest).length>recoveryAllowance(o.p))return fail('このターンに回復できるマナの上限を超えています。');recoverManaIds(o.p,o.ids);operation=null;record(`${label(o.p)}がマナ${o.ids.length}枚を未使用へ。`);pump();return ok('マナの回復を確定しました。');}
@@ -1878,7 +2064,7 @@ if(o!==expected||!['reorder','stackOrder'].includes(o?.kind))return fail('以前
    players[p].unknownGateCopies=Math.max(0,(chosenSpecs[p].main.find(c=>c.key==='bn1')?.count??0)-known);
   }
   const actor=decisionPlayer(),o=operation;let projected=o?{kind:o.kind,p:actor}:null;
-  if(o&&actor===p){projected=copy(o);if(o.kind==='expansionChoice')projected.candidates=expansionCandidates(o).map(c=>o.choice==='burnShield'||c.option?c:publicCard(c,locate(c.id).p,locate(c.id).z));if(o.kind==='lootCost')projected.candidates=state[p].hand.map(c=>publicCard(c,p,'hand'));if(o.kind==='refreshPenalty')projected.candidates=state[p].energy.map(c=>publicCard(c,p,'energy'));if(o.kind==='manaCharge')projected.card=publicCard(locate(o.id).card,p,'hand');if(o.kind==='sideChoice'){projected.preview=o.topId?clone(locate(o.topId)?.card):undefined;projected.candidates=o.choice==='viceOffer'?state[p].extra.filter(c=>c.key===(o.chargerKey||'almar_sbnr1')&&!c.used&&!c.expired&&!c.unavailable).map(c=>publicCard(c,p,'extra')):sideChoiceCandidates(o).map(c=>c.option?c:publicCard(c,locate(c.id).p,locate(c.id).z));}if(o.kind==='shieldWindow')projected.candidates=state[p].shields.filter(c=>o.ids.includes(c.id)&&!c.faceUp).map(c=>publicCard(c,p,'shields'));if(['resetShield','inspectShield'].includes(o.kind))projected.candidates=shieldEffectCandidates().map(c=>o.kind==='resetShield'?publicCard(c,p,'shields'):{id:c.id,faceUp:false});if(o.kind==='shieldReveal')projected.card=publicCard(locate(o.id).card,other(p),'shields');if(['payment','freePlace','freeCast','returnPlace','sideFreePlace'].includes(o.kind)){projected.slots=placementOptions(o.p,locate(o.id)?.card).filter(z=>!o.psychicSummon||!state[o.p][z.id].length).filter(z=>o.kind!=='payment'||!locate(o.id)?.card.evolution?.colorlessBaseDiscount||evolutionPaymentOptions(locate(o.id).card,o.p).some(x=>x.slot===z.id&&x.plan)).map(z=>({id:z.id,card:state[o.p][z.id][0]?publicCard(state[o.p][z.id][0],o.p,z.id):null}));}
+  if(o&&actor===p){projected=copy(o);if(['xyz','xyzNegate','xyzOffer'].includes(o.kind))Object.assign(projected,clone(xyzOptions(o)));if(o.kind==='expansionChoice')projected.candidates=expansionCandidates(o).map(c=>o.choice==='burnShield'||c.option?c:publicCard(c,locate(c.id).p,locate(c.id).z));if(o.kind==='lootCost')projected.candidates=state[p].hand.map(c=>publicCard(c,p,'hand'));if(o.kind==='refreshPenalty')projected.candidates=state[p].energy.map(c=>publicCard(c,p,'energy'));if(o.kind==='manaCharge')projected.card=publicCard(locate(o.id).card,p,'hand');if(o.kind==='sideChoice'){projected.preview=o.topId?clone(locate(o.topId)?.card):undefined;projected.candidates=o.choice==='viceOffer'?state[p].extra.filter(c=>c.key===(o.chargerKey||'almar_sbnr1')&&!c.used&&!c.expired&&!c.unavailable).map(c=>publicCard(c,p,'extra')):sideChoiceCandidates(o).map(c=>c.option?c:publicCard(c,locate(c.id).p,locate(c.id).z));}if(o.kind==='shieldWindow')projected.candidates=state[p].shields.filter(c=>o.ids.includes(c.id)&&!c.faceUp).map(c=>publicCard(c,p,'shields'));if(['resetShield','inspectShield'].includes(o.kind))projected.candidates=shieldEffectCandidates().map(c=>o.kind==='resetShield'?publicCard(c,p,'shields'):{id:c.id,faceUp:false});if(o.kind==='shieldReveal')projected.card=publicCard(locate(o.id).card,other(p),'shields');if(['payment','freePlace','freeCast','returnPlace','sideFreePlace'].includes(o.kind)){projected.slots=placementOptions(o.p,locate(o.id)?.card).filter(z=>!o.psychicSummon||!state[o.p][z.id].length).filter(z=>o.kind!=='payment'||!locate(o.id)?.card.evolution?.colorlessBaseDiscount||evolutionPaymentOptions(locate(o.id).card,o.p).some(x=>x.slot===z.id&&x.plan)).map(z=>({id:z.id,card:state[o.p][z.id][0]?publicCard(state[o.p][z.id][0],o.p,z.id):null}));}
    if(o.kind==='graveChoice')projected.candidates=grave.candidates(o).map(c=>publicCard(c,locate(c.id)?.p||p,locate(c.id)?.z||'holding'));if(o.kind==='gravePlace')projected.slots=placementOptions(p,o.ordinary?null:locate(o.id)?.card).map(z=>({id:z.id,card:state[p][z.id][0]?publicCard(state[p][z.id][0],p,z.id):null}));if(['payment','gravePlace','sideFreePlace'].includes(o.kind)&&!o.ordinary&&locate(o.id)?.card.evolution?.grave){projected.graveEvolution=clone(locate(o.id).card.evolution);projected.graveBases=grave.evolutionCandidates(locate(o.id).card,p).map(c=>publicCard(c,p,'trash'));projected.graveBaseIds=o.graveBaseIds||[];}if(o.kind==='starterChoice')projected.candidates=starterCandidates(o).map(c=>c.type==='プレイヤー'?c:publicCard(c,locate(c.id).p,locate(c.id).z));if(o.kind==='scryMany')projected.candidates=o.ids.map(id=>publicCard(locate(id).card,p,'main'));if(o.kind==='effectTarget')projected.candidates=effectTargets().map(c=>{const s=locate(c.id);return publicCard(c,s.p,s.z);});
    if(o.kind==='freeUnit')projected.candidates=freeUnitCandidates().map(c=>publicCard(c,locate(c.id).p,'energy'));
    if(o.kind==='combat'){const a=locate(o.id);projected.attacker=a?publicCard(a.card,a.p,a.z):null;projected.blockers=blockers(p).map(c=>publicCard(c,p,locate(c.id).z));}
@@ -1899,17 +2085,17 @@ if(o!==expected||!['reorder','stackOrder'].includes(o?.kind))return fail('以前
  }
  function dispatch(action,p,expectedEpoch=epoch){
   if(expectedEpoch!==epoch||result)return fail('以前の対戦の操作です。');if(decisionPlayer()!==p)return fail('このプレイヤーの選択待ちではありません。');
-  const handlers={blueAbility:()=>beginBlueAbility(p,action.ability,action.id),rituel:()=>beginRituel(action.id,p),rulePay:()=>confirmRulePayment(),ruleCancel:()=>cancelRulePayment(),graveChoice:()=>grave.resolve(action.id??null),graveBase:()=>grave.toggleBase(action.id),gravePlace:()=>grave.place(),cardcar:()=>grave.cardcar(action.id),expansion:()=>resolveExpansion(action.id||null),loot:()=>beginLoot(action.id),lootCost:()=>resolveLoot(action.id),charge:()=>beginCharge(action.id),confirmCharge:()=>confirmCharge(),skipCharge,refreshSelect:()=>selectRefreshMana(action.id),refresh:()=>confirmRefresh(),grow:()=>beginGrowth(p),sideSelect:()=>selectSideChoice(action.id),sideChoice:()=>resolveSideChoice(action.id||null),sideFree:()=>confirmSideFree(),revolution:()=>resolveRevolution(action.use!==false),shield:()=>resolveShield(action.id||null),shieldEffect:()=>resolveShieldEffect(action.id||null),fate:()=>chooseFate(action.key),returnPlace:()=>confirmReturn(),untapSelect:()=>toggleUntapMana(action.id),untap:()=>confirmUntap(),mulligan:()=>completeMulligan(p,action.ids||[],false),play:()=>beginPayment(action.id,action.method||'normal'),freeCast:()=>confirmFreeCast(),starter:()=>resolveStarter(action.id||null),scryMove:()=>scryMove(action.id,action.destination,action.delta||0),scry:()=>confirmScry(),characterAbility:()=>beginCharacterAbility(p),useTarget:()=>selectUseTarget(action.id),pass:()=>passResponse(),private:()=>resolvePrivate(action.id||null),orderMove:()=>reorderCard(action.id,action.delta),order:()=>confirmOrder(!!action.bottom),token:()=>placeToken(action.slot||null),optional:()=>resolveOptional(action.use!==false),slot:()=>chooseSlot(action.slot),pay:()=>confirmPayment(),cancelPayment,cancelAttackTarget,attack:()=>declareAttack(action.id,action.target),attackTarget:()=>chooseAttackTarget(action.target),block:()=>resolveAttack(action.id),target:()=>resolveEffectTarget(action.id),freeUnit:()=>chooseFreeUnit(action.id||null),freePlace:()=>confirmFreePlacement(),skipFree:skipFreePlacement,discard:()=>{const o=operation;if(o?.kind!=='discard')return fail('手札調整ではありません。');if(!Array.isArray(action.ids)||new Set(action.ids).size!==action.ids.length||action.ids.some(id=>!state[p].hand.some(c=>c.id===id)))return fail('手札から選択してください。');o.ids=[...action.ids];return confirmDiscard(o);},advance:()=>advance()};
+  const handlers={xyzOffer:()=>chooseXyzOffer(action.id),xyzSelect:()=>selectXyz(action.id,action.target),xyzResolve:()=>resolveXyz(action.confirm),blueAbility:()=>beginBlueAbility(p,action.ability,action.id),rituel:()=>beginRituel(action.id,p),rulePay:()=>confirmRulePayment(),ruleCancel:()=>cancelRulePayment(),graveChoice:()=>grave.resolve(action.id??null),graveBase:()=>grave.toggleBase(action.id),gravePlace:()=>grave.place(),cardcar:()=>grave.cardcar(action.id),expansion:()=>resolveExpansion(action.id||null),loot:()=>beginLoot(action.id),lootCost:()=>resolveLoot(action.id),charge:()=>beginCharge(action.id),confirmCharge:()=>confirmCharge(),skipCharge,refreshSelect:()=>selectRefreshMana(action.id),refresh:()=>confirmRefresh(),grow:()=>beginGrowth(p),sideSelect:()=>selectSideChoice(action.id),sideChoice:()=>resolveSideChoice(action.id||null),sideFree:()=>confirmSideFree(),revolution:()=>resolveRevolution(action.use!==false),shield:()=>resolveShield(action.id||null),shieldEffect:()=>resolveShieldEffect(action.id||null),fate:()=>chooseFate(action.key),returnPlace:()=>confirmReturn(),untapSelect:()=>toggleUntapMana(action.id),untap:()=>confirmUntap(),mulligan:()=>completeMulligan(p,action.ids||[],false),play:()=>beginPayment(action.id,action.method||'normal'),freeCast:()=>confirmFreeCast(),starter:()=>resolveStarter(action.id||null),scryMove:()=>scryMove(action.id,action.destination,action.delta||0),scry:()=>confirmScry(),characterAbility:()=>beginCharacterAbility(p),useTarget:()=>selectUseTarget(action.id),pass:()=>passResponse(),private:()=>resolvePrivate(action.id||null),orderMove:()=>reorderCard(action.id,action.delta),order:()=>confirmOrder(!!action.bottom),token:()=>placeToken(action.slot||null),optional:()=>resolveOptional(action.use!==false),slot:()=>chooseSlot(action.slot),pay:()=>confirmPayment(),cancelPayment,cancelAttackTarget,attack:()=>declareAttack(action.id,action.target),attackTarget:()=>chooseAttackTarget(action.target),block:()=>resolveAttack(action.id),target:()=>resolveEffectTarget(action.id),freeUnit:()=>chooseFreeUnit(action.id||null),freePlace:()=>confirmFreePlacement(),skipFree:skipFreePlacement,discard:()=>{const o=operation;if(o?.kind!=='discard')return fail('手札調整ではありません。');if(!Array.isArray(action.ids)||new Set(action.ids).size!==action.ids.length||action.ids.some(id=>!state[p].hand.some(c=>c.id===id)))return fail('手札から選択してください。');o.ids=[...action.ids];return confirmDiscard(o);},advance:()=>advance()};
   if(action.type==='play'&&locate(action.id)?.p!==p)return fail('自分の手札を選んでください。');
   return handlers[action.type]?handlers[action.type]():fail('操作が見つかりません。');
  }
  function surrender(p='p1'){if(!PLAYERS.includes(p)||result)return fail('現在は降参できません。');finish(other(p),'降参',{type:'surrender',surrendered:p});return ok('降参して対戦を終了しました。');}
  grave=Graveyard.create({M:Mana,handBlocked,applyUnitDamage,entryWindow,enqueueTriggered,removeFromZone,hasResolution:()=>resolutions.length>0,get state(){return state;},get turn(){return turn;},get status(){return status;},get result(){return result;},get operation(){return operation;},set operation(o){operation=o;},get events(){return events;},random,locate,fieldCards,isUnit,isSideCard,rawMove,enqueue,ok,fail,trace,publicRef,drawRaw,mainError,summonError,targetProtected,effectiveCost,beginPayment,evolutionBases,placementOptions,placementInfo,unitEntered,replaceWeakEntry,character,planPayment,discardBy,destroyUnit,pump,openPriority,shuffleRaw,record,vanishCard:c=>vanishedIds.add(c.id)});
  const initialReset=reset();if(!initialReset.ok)throw Error(initialReset.message);
- const api={detachXyzMaterials,beginBlueAbility,guardianAbilityError,shieldLinkCount,rituelCanUse,beginRituel,rulePaymentInfo,confirmRulePayment,cancelRulePayment,lumiereUsed,handRevealed,spellsLocked,graveCandidates:()=>grave.candidates(),graveEvolutionCandidates:(c,p)=>grave.evolutionCandidates(c,p),resolveGraveChoice:(id=null)=>grave.resolve(id),toggleGraveBase:id=>grave.toggleBase(id),confirmGravePlacement:()=>grave.place(),beginCardcar:id=>grave.cardcar(id),maxLife,setLife,hasDrain,yellowZoneActive,surrender,expansionCandidates,resolveExpansion,beginLoot,resolveLoot,hasSpeed,justDiverActive,starterCandidates,resolveStarter,scryMove,confirmScry,beginCharacterAbility,characterLevelData,instantCards,legalCounterFrames,selectCounterTarget,get normalMode(){return normalMode;},battleLog,exportLog,reportException,get gameId(){return gameId;},get diagnosticFailures(){return diagnosticFailures;},get journalCount(){return journalId;},beginCharge,confirmCharge,cancelCharge,skipCharge,chargeError,createManaToken,destroyMana,selectRefreshMana,confirmRefresh,sideboardRoster:p=>[...sideRoster[p]],soloNextPlayer,character,growStatus,beginGrowth,redAbilityReady,sideSpent,costBreakdown,summonError,activeLocks,sideChoiceCandidates,selectSideChoice,resolveSideChoice,confirmSideFree,resolveRevolution,loseLife,destroyUnit,resolveShield,shieldEffectCandidates,resolveShieldEffect,INITIAL_HAND,setDeckLibrary,deckInfo,chooseFate,confirmReturn,toggleUntapMana,confirmUntap,get vanishedIds(){return [...vanishedIds];},get extraTurns(){return [...extraTurns];},ZONES,PLAYERS,SELF,STEPS,confirmFreeCast,selectUseTarget,targetOptions,counterCards,passResponse,finishPresentation,privateCandidates,reorderCard,confirmOrder,resolvePrivate,placeToken,resolveOptional,observe,dispatch,decisionPlayer,isUnit,isField,label,card,buildDeck,validateDeck,reset,completeMulligan,locate,fromDefinition,addMana,refreshDeck,freeUnitCandidates,chooseFreeUnit,manaCount,fieldCards,attack,healUnit,healLife,symbols,effectiveCost,evolutionPaymentOptions,paymentSources,planPayment,selectedMana,chooseManaColor,effectTargets,resolveEffectTarget,confirmFreePlacement,skipFreePlacement,attackTargets,chooseAttackTarget,cancelAttackTarget,manualMove,addCard,toggle,readyMana,remove,draw,shuffle,availableMana,playStatus,unitSlots,placementOptions,beginPayment,chooseSlot,togglePaymentLand,paymentInfo,confirmPayment,cancelPayment,advance,toggleDiscard,confirmDiscard,attackError,declareAttack,blockers,chooseBlocker,resolveAttack,
+ const api={beginXyz,xyzOptions,selectXyz,resolveXyz,chooseXyzOffer,xyzAbilityError,xyzSummonError,detachXyzMaterials,beginBlueAbility,guardianAbilityError,shieldLinkCount,rituelCanUse,beginRituel,rulePaymentInfo,confirmRulePayment,cancelRulePayment,lumiereUsed,handRevealed,spellsLocked,graveCandidates:()=>grave.candidates(),graveEvolutionCandidates:(c,p)=>grave.evolutionCandidates(c,p),resolveGraveChoice:(id=null)=>grave.resolve(id),toggleGraveBase:id=>grave.toggleBase(id),confirmGravePlacement:()=>grave.place(),beginCardcar:id=>grave.cardcar(id),maxLife,setLife,hasDrain,yellowZoneActive,surrender,expansionCandidates,resolveExpansion,beginLoot,resolveLoot,hasSpeed,justDiverActive,starterCandidates,resolveStarter,scryMove,confirmScry,beginCharacterAbility,characterLevelData,instantCards,legalCounterFrames,selectCounterTarget,get normalMode(){return normalMode;},battleLog,exportLog,reportException,get gameId(){return gameId;},get diagnosticFailures(){return diagnosticFailures;},get journalCount(){return journalId;},beginCharge,confirmCharge,cancelCharge,skipCharge,chargeError,createManaToken,destroyMana,selectRefreshMana,confirmRefresh,sideboardRoster:p=>[...sideRoster[p]],soloNextPlayer,character,growStatus,beginGrowth,redAbilityReady,sideSpent,costBreakdown,summonError,activeLocks,sideChoiceCandidates,selectSideChoice,resolveSideChoice,confirmSideFree,resolveRevolution,loseLife,destroyUnit,resolveShield,shieldEffectCandidates,resolveShieldEffect,INITIAL_HAND,setDeckLibrary,deckInfo,chooseFate,confirmReturn,toggleUntapMana,confirmUntap,get vanishedIds(){return [...vanishedIds];},get extraTurns(){return [...extraTurns];},ZONES,PLAYERS,SELF,STEPS,confirmFreeCast,selectUseTarget,targetOptions,counterCards,passResponse,finishPresentation,privateCandidates,reorderCard,confirmOrder,resolvePrivate,placeToken,resolveOptional,observe,dispatch,decisionPlayer,isUnit,isField,label,card,buildDeck,validateDeck,reset,completeMulligan,locate,fromDefinition,addMana,refreshDeck,freeUnitCandidates,chooseFreeUnit,manaCount,fieldCards,attack,healUnit,healLife,symbols,effectiveCost,evolutionPaymentOptions,paymentSources,planPayment,selectedMana,chooseManaColor,effectTargets,resolveEffectTarget,confirmFreePlacement,skipFreePlacement,attackTargets,chooseAttackTarget,cancelAttackTarget,manualMove,addCard,toggle,readyMana,remove,draw,shuffle,availableMana,playStatus,unitSlots,placementOptions,beginPayment,chooseSlot,togglePaymentLand,paymentInfo,confirmPayment,cancelPayment,advance,toggleDiscard,confirmDiscard,attackError,declareAttack,blockers,chooseBlocker,resolveAttack,
   get sideboardChoices(){return {...sideChoices};},get summonLocks(){return clone(summonLocks);},get deckChoices(){return {...deckChoices};},get events(){return clone(events);},get mode(){return mode;},get firstPlayer(){return firstPlayer;},get epoch(){return epoch;},get life(){return {...life};},get state(){refreshDerived();return state;},get status(){return status;},get turn(){return turn;},get mulligan(){return mulligan;},get operation(){return operation;},get result(){return result;},get supplyStatus(){return supplyStatus;},get log(){return [...log];},get canAdvance(){return status==='ready'&&!result&&!operation&&!mustAttackPending()&&clock()>=turn.notBefore;}};
  api.destroyUnit=(...args)=>{const r=destroyUnit(...args);if(!operation)pump();return r;};
- for(const name of ['beginRituel','resolveGraveChoice','toggleGraveBase','confirmGravePlacement','beginCardcar','setLife','surrender','resolveExpansion','beginLoot','resolveLoot','reset','completeMulligan','beginCharge','confirmCharge','cancelCharge','skipCharge','createManaToken','destroyMana','selectRefreshMana','confirmRefresh','beginGrowth','selectSideChoice','resolveSideChoice','confirmSideFree','resolveRevolution','loseLife','destroyUnit','resolveShield','resolveShieldEffect','chooseFate','confirmReturn','toggleUntapMana','confirmUntap','soloNextPlayer','confirmFreeCast','resolveStarter','scryMove','confirmScry','beginCharacterAbility','selectCounterTarget','selectUseTarget','passResponse','reorderCard','confirmOrder','resolvePrivate','placeToken','resolveOptional','manualMove','addCard','toggle','readyMana','remove','draw','shuffle','beginPayment','chooseSlot','togglePaymentLand','chooseManaColor','confirmPayment','cancelPayment','advance','declareAttack','chooseAttackTarget','cancelAttackTarget','chooseBlocker','resolveAttack','resolveEffectTarget','confirmFreePlacement','skipFreePlacement','chooseFreeUnit','healUnit','healLife','addMana','dispatch'])if(typeof api[name]==='function'){const fn=api[name];api[name]=audited(name,(...args)=>result&&name!=='reset'?fail('対戦は終了しています。'):fn(...args));}
+ for(const name of ['beginXyz','selectXyz','resolveXyz','chooseXyzOffer','beginRituel','resolveGraveChoice','toggleGraveBase','confirmGravePlacement','beginCardcar','setLife','surrender','resolveExpansion','beginLoot','resolveLoot','reset','completeMulligan','beginCharge','confirmCharge','cancelCharge','skipCharge','createManaToken','destroyMana','selectRefreshMana','confirmRefresh','beginGrowth','selectSideChoice','resolveSideChoice','confirmSideFree','resolveRevolution','loseLife','destroyUnit','resolveShield','resolveShieldEffect','chooseFate','confirmReturn','toggleUntapMana','confirmUntap','soloNextPlayer','confirmFreeCast','resolveStarter','scryMove','confirmScry','beginCharacterAbility','selectCounterTarget','selectUseTarget','passResponse','reorderCard','confirmOrder','resolvePrivate','placeToken','resolveOptional','manualMove','addCard','toggle','readyMana','remove','draw','shuffle','beginPayment','chooseSlot','togglePaymentLand','chooseManaColor','confirmPayment','cancelPayment','advance','declareAttack','chooseAttackTarget','cancelAttackTarget','chooseBlocker','resolveAttack','resolveEffectTarget','confirmFreePlacement','skipFreePlacement','chooseFreeUnit','healUnit','healLife','addMana','dispatch'])if(typeof api[name]==='function'){const fn=api[name];api[name]=audited(name,(...args)=>result&&name!=='reset'?fail('対戦は終了しています。'):fn(...args));}
  return api;
 }
 return {create,ZONES,STEPS};
