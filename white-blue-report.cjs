@@ -23,7 +23,7 @@ for(let i=0;i<games;i++){
  const count=(kind,key,p)=>log.filter(e=>e.actor===p&&e.kind===kind&&e.card?.cardId===key).length;
  rows.push({seed,whiteFirst:white==='p1',whiteWin:g.result.winner===white,reason:g.result.reason,turns:g.turn.sequence,
   numeronia:count('unitEntry','sbno2',blue),special:g.result.winner===blue&&g.result.reason.includes('特殊勝利'),serpentHand:drawGames,
-  serpentUses:count('cardUse','wu3',white),baronne:count('unitEntry','sbwo1',white),baronneStops:count('counterSuccess','sbwo1',white),
+  serpentUses:count('cardUse','wu3',white),baronne:count('unitEntry','sbno3',white),baronneStops:count('counterSuccess','sbno3',white),
   usurpation:count('cardUse','almar_bs1',blue),recoveries});
  if(i%20===19)process.stderr.write((i+1)+' games completed\n');
 }

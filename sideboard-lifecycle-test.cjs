@@ -91,7 +91,7 @@ console.log('PASS A/B/C/F/G/H: four spell instances, shared turn limit, and equi
  const g = ready('solo', 'whiteAdvanced');
  g.state.p1.hand.length = 0;
  const charger = g.state.p1.extra.find(c => c.key === 'sbws1');
- const formula = g.state.p1.extra.find(c => c.key === 'sbws2');
+ const formula = g.state.p1.extra.find(c => c.key === 'sbns3');
  const dragon = g.state.p1.extra.find(c => c.key === 'sbws3');
  const crest = g.state.p1.extra.find(c => c.key === 'sbwu3');
  const target = put(g, 'ws5', 'trash');
@@ -140,7 +140,7 @@ console.log('PASS D/E/F: two creatures in one turn, legal return, redeclaration 
 {
  const g = ready('solo', 'whiteAdvanced');
  const charger = g.state.p1.extra.find(c => c.key === 'sbws1');
- const baronne = put(g, 'sbwo1', 'signi-1');
+ const baronne = put(g, 'sbno3', 'signi-1');
  use(g, charger);
  checkZone(g, charger, 'trash');
  ok(g.beginWhiteAbility(baronne.id, 'baronneRecover'));

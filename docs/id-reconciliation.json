@@ -458,7 +458,7 @@
     "rs": 6,
     "sbnn": 1,
     "sbnr": 4,
-    "sbns": 2,
+    "sbns": 3,
     "sbnu": 3,
     "shnl": 2,
     "shns": 2,
@@ -484,7 +484,7 @@
     "wu": 6,
     "wr": 9,
     "ko": 1,
-    "sbno": 2,
+    "sbno": 3,
     "no": 1,
     "bo": 1,
     "wo": 1,
@@ -708,12 +708,14 @@
     "sbnn1",
     "sbno1",
     "sbno2",
+    "sbno3",
     "sbnr1",
     "sbnr2",
     "sbnr3",
     "sbnr4",
     "sbns1",
     "sbns2",
+    "sbns3",
     "sbnu1",
     "sbnu2",
     "sbnu3",
@@ -1028,5 +1030,40 @@
     "shnr8": "23e02457ed78194e2d1e83b5654a56b9ba305473b4ad0076f58af2f8a561fac4",
     "shnr9": "272bc7bb0f76273d6387bd82456108d73f6cc86d599dc6d00b58d8b7ef83a57d",
     "sbru4": "098464fecef3b97414da79a2c0a4d9bdc53bef7c4af9f9044532f6a4c457432f"
-  }
+  },
+  "neutralCorrections": [
+    {
+      "old": "sbws2",
+      "new": "sbns3",
+      "name": "フォーミュラ・シンクロン",
+      "color": "無色",
+      "rarity": "SR",
+      "prefix": "sbns",
+      "section": "サイド",
+      "reason": "無色確定・最大使用番号の次から採番",
+      "date": "2026-11-20"
+    },
+    {
+      "old": "sbns2",
+      "new": "sbns3",
+      "name": "フォーミュラ・シンクロン",
+      "color": "無色",
+      "rarity": "SR",
+      "prefix": "sbns",
+      "section": "サイド",
+      "reason": "無色確定・最大使用番号の次から採番",
+      "date": "2026-11-20"
+    },
+    {
+      "old": "sbwo1",
+      "new": "sbno3",
+      "name": "フルール・ド・バロネス",
+      "color": "無色",
+      "rarity": "OR",
+      "prefix": "sbno",
+      "section": "サイド",
+      "reason": "無色確定・最大使用番号の次から採番",
+      "date": "2026-11-20"
+    }
+  ]
 }

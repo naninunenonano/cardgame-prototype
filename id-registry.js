@@ -4146,7 +4146,10 @@
     "wu5": "wu5",
     "lumiere_wu1": "lumiere_wu1",
     "wu6": "wu6",
-    "sbwu3": "sbwu3"
+    "sbwu3": "sbwu3",
+    "sbws2": "sbns3",
+    "sbns2": "sbns3",
+    "sbwo1": "sbno3"
   },
   "forms": {
     "darkGunveet": "almar_sbbu1-2",
@@ -4183,7 +4186,7 @@
     "rs": 6,
     "sbnn": 1,
     "sbnr": 4,
-    "sbns": 2,
+    "sbns": 3,
     "sbnu": 3,
     "shnl": 2,
     "shns": 2,
@@ -4209,7 +4212,7 @@
     "wu": 6,
     "wr": 9,
     "ko": 1,
-    "sbno": 2,
+    "sbno": 3,
     "no": 1,
     "bo": 1,
     "wo": 1,
@@ -4467,7 +4470,10 @@
     "yellowZone",
     "zalba",
     "zundoko",
-    "zwei"
+    "zwei",
+    "sbws2",
+    "sbns2",
+    "sbwo1"
   ],
   "reservedSections": [
     "exf",
@@ -4948,6 +4954,39 @@
       "prefix": "sbwu",
       "section": "サイド",
       "reason": "現行の色・レアリティ・カード区分へ整合",
+      "date": "2026-11-20"
+    },
+    {
+      "old": "sbws2",
+      "new": "sbns3",
+      "name": "フォーミュラ・シンクロン",
+      "color": "無色",
+      "rarity": "SR",
+      "prefix": "sbns",
+      "section": "サイド",
+      "reason": "無色確定・最大使用番号の次から採番",
+      "date": "2026-11-20"
+    },
+    {
+      "old": "sbns2",
+      "new": "sbns3",
+      "name": "フォーミュラ・シンクロン",
+      "color": "無色",
+      "rarity": "SR",
+      "prefix": "sbns",
+      "section": "サイド",
+      "reason": "無色確定・最大使用番号の次から採番",
+      "date": "2026-11-20"
+    },
+    {
+      "old": "sbwo1",
+      "new": "sbno3",
+      "name": "フルール・ド・バロネス",
+      "color": "無色",
+      "rarity": "OR",
+      "prefix": "sbno",
+      "section": "サイド",
+      "reason": "無色確定・最大使用番号の次から採番",
       "date": "2026-11-20"
     }
   ]

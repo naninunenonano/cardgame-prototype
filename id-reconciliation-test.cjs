@@ -33,9 +33,12 @@ console.log('PASS 43 ID migrations, old saves, reserved IDs, next allocation and
 const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === 'object'
  ? Object.fromEntries(Object.keys(value).sort().map(key => [key,stable(value[key])])) : value;
 for (const [key,fingerprint] of Object.entries(cardFingerprints)) {
- const actual = require('node:crypto').createHash('sha256').update(JSON.stringify(stable(Catalog.cards[key]))).digest('hex');
+ let definition=Catalog.cards[Identity.canonicalKey(key)];
+ // Approved neutral-color correction after PR #89; compare all remaining fields to its baseline.
+ if(['sbws2','sbwo1'].includes(key)){definition={...definition,key,baseId:key,faceId:key,color:'白',civilizations:['白'],cost:Mana.cost(key==='sbws2'?1:9,{白:1})};}
+ const actual = require('node:crypto').createHash('sha256').update(JSON.stringify(stable(definition))).digest('hex');
  assert.equal(actual,fingerprint,key+' has changed beyond its ID');
 }
-console.log('PASS all 235 card definitions retain their abilities, costs, stats and rarity');
+console.log('PASS 235 baseline definitions, allowing only the two approved neutral-color corrections');
 
 assert.equal(allocate(Identity.registry,{name:'legacy rarity input',rarity:'LEGEND',color:'青'}).id,allocate(Identity.registry,{name:'current rarity input',rarity:'UR',color:'青'}).id);
