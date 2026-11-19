@@ -7,7 +7,7 @@ function unitValue(c,lands=0){return (c.attack||0)+(c.health??c.maxHealth??0)+Ob
 function context(v){const p=v.viewer,e=other(p),me=v.players[p],enemy=v.players[e];const supply=me.counts.main+me.counts.trash;const damage=enemy.units.filter(c=>!c.cannotAttack).reduce((n,c)=>n+(c.attack||0),0);const danger=enemy.units.length>0&&me.life<=damage&&!me.units.some(c=>c.lure&&c.health>Math.max(0,...enemy.units.map(x=>x.attack||0)));return {p,e,me,enemy,supply,danger};}
 function replacement(v){const {me}=context(v);return best(me.units,c=>-unitValue(c,me.manaCount));}
 function wipeGain(v){const {me,enemy}=context(v);return enemy.units.reduce((n,c)=>n+unitValue(c,enemy.manaCount),0)+enemy.structures.length*9-me.units.reduce((n,c)=>n+unitValue(c,me.manaCount),0)-me.structures.length*9;}
-function freeValue(v,c){const {me}=context(v);if(c.key==='gl1'&&wipeGain(v)<=0&&(me.units.length||me.structures.length))return -100;return unitValue(c,me.manaCount)+(c.key==='gn2'?8:0)+(c.key==='gl1'?wipeGain(v):0);}
+function freeValue(v,c){const {me}=context(v);if(c.key==='gu1'&&wipeGain(v)<=0&&(me.units.length||me.structures.length))return -100;return unitValue(c,me.manaCount)+(c.key==='gn2'?8:0)+(c.key==='gu1'?wipeGain(v):0);}
 function motherTarget(v,targets){const {p,me,enemy,danger}=context(v);const possible=me.mana.filter(c=>c.type==='通常'&&total(c)<=me.manaCount+1);const upgrade=best(possible,c=>freeValue(v,c));
  return best(targets,c=>c.owner===p?(upgrade?freeValue(v,upgrade)-unitValue(c,me.manaCount)+2:-100):unitValue(c,enemy.manaCount)-(enemy.counts.hand?10:0)-(enemy.manaCount>=8?7:3)+(danger?8:0));}
 function motherGain(v){const {p,me,enemy,danger}=context(v),c=motherTarget(v,[...me.units,...enemy.units]);if(!c)return -100;if(c.owner!==p)return unitValue(c,enemy.manaCount)-(enemy.counts.hand?10:0)-(enemy.manaCount>=8?7:3)+(danger?8:0);const choices=me.mana.filter(x=>x.type==='通常'&&total(x)<=me.manaCount+1);return Math.max(-100,...choices.map(x=>freeValue(v,x)-unitValue(c,me.manaCount)));}
@@ -71,26 +71,26 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
   if(c.key==='gn4'&&danger)score+=65;
   if(c.key==='gs6')score+=me.units.length*2+(me.units.length>=4?24:0);
   if(c.key==='gs4'&&enemy.units.some(x=>x.health<=c.attack))score+=18;
-  if(c.key==='gl1'){const gain=wipeGain(v);if(gain<=0&&(me.units.length||me.structures.length))return -100;score+=gain;}
+  if(c.key==='gu1'){const gain=wipeGain(v);if(gain<=0&&(me.units.length||me.structures.length))return -100;score+=gain;}
   if(me.units.length>=7){const old=replacement(v);if(unitValue(c,me.manaCount)<=unitValue(old,me.manaCount)+3)return -100;score-=unitValue(old,me.manaCount);}
- }else if(c.key==='ks9'){const candidates=me.trash.filter(c=>c.type==='通常'&&!c.noReanimate);score=candidates.length?Math.max(...candidates.map(c=>unitValue(c)))+15:-100;}else if(c.key==='ks8'){const loss=units=>units.reduce((n,x)=>n+(x.health<=8?unitValue(x):2),0);score=loss(enemy.units)-loss(me.units);if(score>0)score+=danger?30:10;}else if(['nn8','rn14','sbnu1'].includes(c.key))score=enemy.life<=(c.key==='sbnu1'?7:3)?10000:40;
- else if(c.key==='sbnr3')score=me.life<=24?35:-100;
- else if(c.key==='sbns1')score=enemy.units.length||enemy.structures.length?45:-100;
+ }else if(c.key==='ks9'){const candidates=me.trash.filter(c=>c.type==='通常'&&!c.noReanimate);score=candidates.length?Math.max(...candidates.map(c=>unitValue(c)))+15:-100;}else if(c.key==='ks8'){const loss=units=>units.reduce((n,x)=>n+(x.health<=8?unitValue(x):2),0);score=loss(enemy.units)-loss(me.units);if(score>0)score+=danger?30:10;}else if(['nn8','rn14','nu3'].includes(c.key))score=enemy.life<=(c.key==='nu3'?7:3)?10000:40;
+ else if(c.key==='nr9')score=me.life<=24?35:-100;
+ else if(c.key==='ns3')score=enemy.units.length||enemy.structures.length?45:-100;
  else if(c.key==='sbnr4')score=50;
  else if(c.key==='bs3')score=enemy.units.reduce((n,c)=>n+unitValue(c),0)-me.units.reduce((n,c)=>n+unitValue(c),0)>0?50:-100;
  else if(c.key==='rn13')score=30;
- else if(c.key==='almar_sbbs1')score=enemy.counts.hand*10+(me.character?.level===4?30:0);
- else if(c.key==='sbbr1')score=enemy.units.length?35:-100;
- else if(c.key==='sbbu2')score=me.counts.main>3?55:-100;
+ else if(c.key==='almar_bs1')score=enemy.counts.hand*10+(me.character?.level===4?30:0);
+ else if(c.key==='br7')score=enemy.units.length?35:-100;
+ else if(c.key==='bu3')score=me.counts.main>3?55:-100;
  else if(c.key==='ns1'){const gain=enemy.units.reduce((n,x)=>n+unitValue(x,enemy.manaCount),0)-me.units.reduce((n,x)=>n+unitValue(x,me.manaCount),0);score=gain>0?gain+(danger?35:0):-100;}
  else if(c.key==='nr1')score=me.life<=26?(danger?70:20):-100;
  else if(c.key==='gs3')score=(me.life<30?25:0)+(me.shields?.some(c=>c.faceUp)?35:0)-5;
- else if(c.key==='nr4')score=canRefill?(me.units.some(c=>c.key==='nl1')?55:30):-100;
- else if(c.key==='nr5')score=me.units.length?35+(me.units.some(c=>c.key==='nl1')&&canRefill?20:0):-100;
- else if(c.key==='nr6')score=me.units.some(c=>c.key==='nl1')?75:enemy.units.length<me.units.length?35:5;
+ else if(c.key==='nr4')score=canRefill?(me.units.some(c=>c.key==='nu1')?55:30):-100;
+ else if(c.key==='nr5')score=me.units.length?35+(me.units.some(c=>c.key==='nu1')&&canRefill?20:0):-100;
+ else if(c.key==='nr6')score=me.units.some(c=>c.key==='nu1')?75:enemy.units.length<me.units.length?35:5;
  else if(c.key==='br2')score=me.structures.length<3?20:3;
  else if(c.key==='wr9')score=me.counts.main>3?(me.shieldLinkCount<4?43:20):-100;
- else if(c.key==='br1'||c.key==='bl1'||c.key==='bn7')score=canRefill?(me.hand.some(x=>x.key==='bs1')&&me.hand.length<10?45:me.hand.length<6?35:8):-100;
+ else if(c.key==='br1'||c.key==='bu1'||c.key==='bn7')score=canRefill?(me.hand.some(x=>x.key==='bs1')&&me.hand.length<10?45:me.hand.length<6?35:8):-100;
  else if(c.key==='bn5')score=me.units.length<5?40:5;
  else if(c.key==='bn1')score=enemy.units.length||enemy.structures.length?(danger?65:12):-100;
  else if(c.key==='br4'||c.key==='br5')score=enemy.counts.hand?18:-100;
@@ -101,7 +101,7 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
  else if(c.key==='gr1')score=(supply?(me.manaCount<8?45:10):0)+(me.manaCount+(supply?1:0)>=7&&canRefill?15:0);
  else if(c.key==='gr2')score=(supply?12:0)+(canRefill?18:0);
  else if(c.key==='gr5'){const threat=best(enemy.units,c=>unitValue(c,enemy.manaCount));score=threat?unitValue(threat,enemy.manaCount)+(danger?50:0)-8-(enemy.manaCount<6?5:0):-100;}
- else if(c.key==='gl2')score=motherGain(v)+(danger?20:0);
+ else if(c.key==='gu2')score=motherGain(v)+(danger?20:0);
  if(me.character?.key==='eira'){
   if(c.key==='wr7'){const amount=2*Math.max(0,...me.structures.filter(x=>x.shieldLink).map(total));score=enemy.units.some(x=>x.health<=amount)?(danger?68:38):18;}
   if(c.key==='wr6'){const links=me.structures.filter(x=>x.shieldLink).length;score=links&&enemy.units.length?Math.min(70,enemy.units.reduce((n,x)=>n+(x.health<=links?20:links),0)):-100;}
@@ -135,7 +135,7 @@ function playScore(v,c){const {me,enemy,supply,danger}=context(v),canRefill=me.c
   if(c.key==='bs3')score=bounceGain>0?bounceGain+(followUp?8:0):-100;
   if(c.key==='br5')score=enemy.counts.hand?18+Math.min(2,enemy.counts.hand)*13:-100;
   if(c.key==='br4')score=enemy.counts.hand?22:-100;
-  if(c.key==='almar_sbbs1')score=enemy.counts.hand?score:-100;
+  if(c.key==='almar_bs1')score=enemy.counts.hand?score:-100;
  }
  if(me.blueBeginner){
   if(c.key==='bs1'&&c.canFreeSummon)score+=35;
@@ -179,8 +179,8 @@ function keepScore(v,c){const {me,danger,supply}=context(v);let n=c.type==='通�
  if(['gn1','gr1','gn2'].includes(c.key))n+=supply&&me.manaCount<8?35:-25;
  if(c.key==='gs3')n+=danger?65:me.life<10?20:0;
  if(c.key==='gr5')n+=danger?45:10;
- if(c.key==='gl2')n+=Math.max(0,motherGain(v));
- if(c.key==='gl1')n+=wipeGain(v)*.3;
+ if(c.key==='gu2')n+=Math.max(0,motherGain(v));
+ if(c.key==='gu1')n+=wipeGain(v)*.3;
  if(total(c)>v.sources.length+3)n-=15;
  n-=Math.max(0,me.hand.filter(x=>x.key===c.key).length-1)*5;return n;
 }
@@ -432,7 +432,7 @@ function decide(v){
    if(ability)return {type:'whiteAbility',...ability};
    const serpent=me.units.find(c=>c.serpentAbility);
    if(serpent&&me.units.length<=6&&me.counts.main>2)return {type:'serpent',id:serpent.id};
-   const side=best(me.sideboard.filter(c=>c.canPlay&&(c.key!=='sbws2'||me.counts.main>2)),c=>({sbwu2:90,sbws3:80,sbws4:70,sbwo1:60,sbwl1:55,sbws1:40,sbws2:10}[c.key]||0));
+   const side=best(me.sideboard.filter(c=>c.canPlay&&(c.key!=='sbws2'||me.counts.main>2)),c=>({sbwu2:90,sbws3:80,sbws4:70,sbwo1:60,sbwu3:55,sbws1:40,sbws2:10}[c.key]||0));
    if(side&&(side.key!=='sbws2'||me.hand.length<2))return {type:'play',id:side.id};
   }
   const usable=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].filter(c=>c.canPlay);

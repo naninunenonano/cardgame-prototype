@@ -43,7 +43,7 @@ test('deck composition, migrated rarity and pack rates',()=>{
  assert.deepEqual(Decks.validate({...red,stacks:[...Array(10).fill('青'),...Array(5).fill('赤')]}),[]);
  assert(Decks.validate({...red,stacks:Array(15).fill('無色')}).length);
  assert.equal(Cards.cards.almar.rarity,'UR');
- assert.equal(Decks.limit(Cards.cards.gl1),4);
+ assert.equal(Decks.limit(Cards.cards.gu1),4);
  for(const [slot,oldUR,newSR] of [['normal',5,9],['rare',10,24],['super',13,86]]){
   assert.equal(Packs.rates[slot].UR,oldUR);
   assert.equal(Packs.rates[slot].SR,newSR);
@@ -184,17 +184,17 @@ test('Twin Horn makes two attacks and Gaiburn destroys itself before burning',()
 test('unavailable cards stay out of construction and cannot be used',()=>{
  const {g,advance}=ready();advanceToMain(g,advance);
  const deck=Decks.preset('redBeginner');
- assert(Decks.validate({...deck,main:[{key:'sbru1',count:1},...deck.main]}).some(e=>e.includes('40枚')));
- assert.equal(Decks.canonicalKey('sbnl1'),'sbnl4');
- const legacy={sideboard:[{key:'sbnl4',count:1},{key:'sbnl1',count:1}]};
+ assert(Decks.validate({...deck,main:[{key:'ro1',count:1},...deck.main]}).some(e=>e.includes('40枚')));
+ assert.equal(Decks.canonicalKey('sbnl1'),'sbnu3');
+ const legacy={sideboard:[{key:'sbnu3',count:1},{key:'sbnl1',count:1}]};
  const migrated=Decks.migrateDeck(legacy);
- assert.deepEqual(migrated.sideboard,[{key:'sbnl4',count:1}]);
+ assert.deepEqual(migrated.sideboard,[{key:'sbnu3',count:1}]);
  assert.deepEqual(Decks.migrateDeck(migrated),migrated);
  assert.equal(Decks.canonicalKey('sbru1-2'),'sbru4');
- const disabled=g.fromDefinition('nl1','p1');
+ const disabled=g.fromDefinition('nu1','p1');
  assert(!g.addCard('p1','hand',disabled).ok);
  assert(Cards.awakened.sbnl1.trample);
- assert.equal(Cards.cards.sbnl4.revolutionMinimumAttack,6);
+ assert.equal(Cards.cards.sbnu3.revolutionMinimumAttack,6);
 });
 
 test('Batrai Blade and Tower reveal, transform, and retain the same physical side card',()=>{
@@ -305,7 +305,7 @@ test('combined parallel card is attack-only and either face spends zero stacks',
   if(face==='invasion')g.state.p1.stacks.length=0;
   const before=g.state.p1.stacks.map(c=>c.id);
   const unit=add(g,'nn9','p1','signi-1');unit.attack=6;unit.sick=false;
-  const card=g.state.p1.extra.find(c=>c.key==='sbnl4');
+  const card=g.state.p1.extra.find(c=>c.key==='sbnu3');
   assert.match(g.beginPayment(card.id).message,/攻撃時のみ/);
   advance();ok(g.declareAttack(unit.id,'body'));pass(g);
   assert.deepEqual(g.expansionCandidates().map(c=>c.id),['invasion','revolution','done']);
@@ -336,7 +336,7 @@ test('commander Lv4 reveal requires actual attack damage and fires once per turn
 
 function moltMatch(){
  const preset=Decks.preset('redBeginner');
- const deck={...preset,id:'molt-test',main:preset.main.flatMap(e=>e.key==='nn9'?[{...e,count:1},{key:'sbru1',count:1}]:[e]),
+ const deck={...preset,id:'molt-test',main:preset.main.flatMap(e=>e.key==='nn9'?[{...e,count:1},{key:'ro1',count:1}]:[e]),
   sideboard:preset.sideboard.map(e=>e.key==='sbru2'?{...e,key:'sbru4'}:e)};
  assert.deepEqual(Decks.validate(deck),[]);
  const {g,advance}=ready(deck.id,'blueBeginner',[deck]);
@@ -345,10 +345,10 @@ function moltMatch(){
 }
 
 test('Molt NEXT is a standalone OR with printed costs and free own equipment deployment',()=>{
- const {g}=moltMatch(),def=Cards.cards.sbru1;
+ const {g}=moltMatch(),def=Cards.cards.ro1;
  assert.equal(def.rarity,'OR');assert.equal(def.faceIds,undefined);
  assert.deepEqual(def.cost,Mana.cost(4,{赤:3}));
- const molt=add(g,'sbru1','p1','hand'),ally=add(g,'nn5','p1','signi-1');
+ const molt=add(g,'ro1','p1','hand'),ally=add(g,'nn5','p1','signi-1');
  const horn=g.state.p1.extra.find(c=>c.key==='sbrr1');
  horn.used=true;
  const {fund}=require('./test-fixtures.cjs');
@@ -370,7 +370,7 @@ test('Molt NEXT ignores the spent side turn and does not mark a fresh Dragheart 
  const {fund}=require('./test-fixtures.cjs');fund(g,'p1',7,'赤');
  const charger=g.state.p1.extra.find(c=>c.key==='sbrn1');
  play(g,charger.id);choose(g,'done');assert(g.sideSpent('p1'));
- const molt=add(g,'sbru1','p1','hand'),fort=g.state.p1.extra.find(c=>c.key==='sbru4');
+ const molt=add(g,'ro1','p1','hand'),fort=g.state.p1.extra.find(c=>c.key==='sbru4');
  play(g,molt.id,'signi-1');choose(g,fort.id);choose(g,'signi-2');
  assert(!fort.used);assert(g.sideSpent('p1'));
  assert.equal(g.locate(fort.id).z,'signi-2');
@@ -378,7 +378,7 @@ test('Molt NEXT ignores the spent side turn and does not mark a fresh Dragheart 
 
 test('Heartburn costs four red stock, gives red-only SA, and awakens from Molt NEXT after attack',()=>{
  const {g,advance}=moltMatch(),fort=g.state.p1.extra.find(c=>c.key==='sbru4');
- const molt=add(g,'sbru1','p1','signi-1');
+ const molt=add(g,'ro1','p1','signi-1');
  const choice=g.operation;
  assert.equal(choice.choice,'moltDragheart');
  // Resolve entry using a previously used weapon before testing paid Heartburn.
@@ -408,7 +408,7 @@ test('Heartburn costs four red stock, gives red-only SA, and awakens from Molt N
 });
 
 test('all 19 retired side cards are available in main and saved copies migrate once',()=>{
- const keys=['almar_sbbs1','sbbr1','sbbu2','almar_sbbu2','sbnn1','sbnr1','sbnr2','sbnr3','sbns1','sbnu1','sbrl1','sbrs1','sbgu2','sbgs1','sbgl1','sbgu3','sbgu4','lumiere_sbwl1','sbwu1'];
+ const keys=['almar_bs1','br7','bu3','almar_bu1','nn10','nr7','nr8','nr9','ns3','nu3','ru6','rs6','gu3','gs7','gu4','gu5','gu6','lumiere_wu1','wu6'];
  const main=new Set(Decks.available('main').map(c=>c.key));
  const side=new Set(Decks.available('sideboard').map(c=>c.key));
  for(const key of keys){
@@ -421,7 +421,7 @@ test('all 19 retired side cards are available in main and saved copies migrate o
  assert.deepEqual(migrated.main,[...old.main,...entries]);
  assert.deepEqual(migrated.sideboard,[{key:'almar',count:1}]);
  assert.deepEqual(Decks.migrateDeck(migrated),migrated);
- assert(side.has('sbnl4'));
+ assert(side.has('sbnu3'));
  assert(Cards.cards.almar_sbnr1.sideboardOnly);
 });
 
@@ -430,11 +430,11 @@ test('retired side spells use mana from hand and preserve card-specific conditio
  const {g,advance}=ready();
  advanceToMain(g,advance);
  fund(g,'p1',5,'青');
- const tech=add(g,'sbbu2','p1','hand');
+ const tech=add(g,'bu3','p1','hand');
  assert.deepEqual(g.effectiveCost(tech,'p1'),Mana.cost(9,{青:1}));
- const dedicated=add(g,'almar_sbbs1','p1','hand');
+ const dedicated=add(g,'almar_bs1','p1','hand');
  assert.match(g.beginPayment(dedicated.id).message,/指定キャラクターLv1以上/);
- const spring=add(g,'sbnr3','p1','hand');
+ const spring=add(g,'nr9','p1','hand');
  const stock=g.state.p1.stacks.length;
  play(g,spring.id);
  assert.equal(g.life.p1,26);
@@ -443,7 +443,7 @@ test('retired side spells use mana from hand and preserve card-specific conditio
 });
 
 test('all remaining unavailable cards stay rejected in saved decks and battle',()=>{
- const keys=['nl1','sbnl3','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','t11'];
+ const keys=['nu1','sbnu2','sbnr4','sbgu1','celestia_sbnr1','lumiere_sbwr1','t11'];
  assert.deepEqual(Object.values(Cards.cards).filter(c=>c.unavailable).map(c=>c.key).sort(),keys.slice().sort());
  const {g,advance}=ready();
  advanceToMain(g,advance);

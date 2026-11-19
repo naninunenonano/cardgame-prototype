@@ -10,14 +10,14 @@ function migrateDeck(d){
   next[section]=d[section].filter(e=>!e||!Identity.removedLegacyKey(e.key)).map(e=>e&&typeof e==='object'?{...e,key:canonicalKey(e.key)}:e);
  }
  if(Array.isArray(d.sideboard)){
-  const paired=d.sideboard.filter(e=>e&&canonicalKey(e.key)==='sbnl4');
+  const paired=d.sideboard.filter(e=>e&&canonicalKey(e.key)==='sbnu3');
   const isBack=e=>['sbnl1','dogiragon'].includes(e.key);
   const sum=entries=>entries.reduce((n,e)=>n+e.count,0);
   if(paired.some(isBack)&&paired.some(e=>!isBack(e))&&paired.every(e=>Number.isInteger(e.count)&&e.count>=0)){
-   const index=next.sideboard.findIndex(e=>e?.key==='sbnl4');
+   const index=next.sideboard.findIndex(e=>e?.key==='sbnu3');
    const copies=Math.max(sum(paired.filter(isBack)),sum(paired.filter(e=>!isBack(e))));
-   next.sideboard=next.sideboard.filter(e=>e?.key!=='sbnl4');
-   next.sideboard.splice(index,0,{key:'sbnl4',count:copies});
+   next.sideboard=next.sideboard.filter(e=>e?.key!=='sbnu3');
+   next.sideboard.splice(index,0,{key:'sbnu3',count:copies});
   }
  }
  const moved=Array.isArray(next.sideboard)?next.sideboard.filter(e=>C.cards[e?.key]?.mainDeckOnly):[];
@@ -58,7 +58,7 @@ function stackColors(d){
 }
 function sideCount(entries){return (entries||[]).reduce((n,e)=>n+(C.cards[e?.key]?.type==='キャラクター'?0:e.count),0);}
 const counts=(entries)=>entries.map(([key,count=3])=>({key,count}));
-const beginnerSide=key=>counts([[key,1],['sbnn1'],['sbnr2',2],['sbnr3',2],['sbnr1',1],['sbns1',1]]);
+const beginnerSide=key=>counts([[key,1],['nn10'],['nr8',2],['nr9',2],['nr7',1],['ns3',1]]);
 Object.assign(official,{
  blueBeginner:{id:'blueBeginner',name:'青・初級Bot',preset:true,
   main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9',2],['nn1'],['nn6',2],['bn1'],['bn5'],['bn7'],['br3'],['bs2'],['bs5'],['bs1']]),
@@ -70,7 +70,7 @@ Object.assign(official,{
   shields:counts(['shnr6','shnr2','shnr7','shnr8','shnr9'].map(key=>[key,1]))},
  blackBeginner:{id:'blackBeginner',name:'黒・初級Bot',preset:true,
   main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['nn1'],['nn7',1],['kn9'],['kn10'],['kn2'],['ks13'],['ks14'],['ks15'],['kn11']]),
-  sideboard:beginnerSide('redmoonavenger'),shields:counts([['redmoonavenger_shkl1',1],['shnr6',2],['shnr5',1]])},
+  sideboard:beginnerSide('redmoonavenger'),shields:counts([['redmoonavenger_shku1',1],['shnr6',2],['shnr5',1]])},
  whiteBeginner:{id:'whiteBeginner',name:'白・初級Bot',preset:true,
   main:counts([['nn2'],['nn3'],['nn4'],['nn5'],['nn9'],['ws7'],['ws8'],['ws9'],['wr7'],['wr6'],['wn1'],['wn2'],['wr1'],['wr4',1]]),
   sideboard:beginnerSide('eira'),shields:counts([['shnr3',2],['shnr2',1],['shnr5',1]])},
@@ -78,13 +78,13 @@ Object.assign(official,{
   main:counts([['nn9'],['nn2'],['nn3'],['nn4'],['nn5'],['gs6'],['gn2'],['gn4'],['gs5'],['gs1'],['gn1'],['gr1'],['gr2',1],['gr5']]),
   sideboard:beginnerSide('verdantguardian'),shields:counts(['shnr1','shnr5','shnr3','shnr2'].map(key=>[key,1]))},
  blueAdvanced:{id:'blueAdvanced',name:'青上級Bot／ヌメロニア',difficulty:'advanced',preset:true,
-  main:counts([['almar_sbbs1',3],...['bs9','almar_sbbu2','bs6','bs8','br3','bn1','sbbu2','bs1','br6'].map(key=>[key,4]),['bl1',1]]),
+  main:counts([['almar_bs1',3],...['bs9','almar_bu1','bs6','bs8','br3','bn1','bu3','bs1','br6'].map(key=>[key,4]),['bu1',1]]),
   sideboard:counts([...['almar','sbbo1','almar_sbbu1','sbbu1','sbbr2','sbbs2','sbno2','sbbs3'].map(key=>[key,1]),['almar_sbnr1',2]]),
-  shields:counts(['shnl1','shnr2','shnr7','shnr8','shnr9'].map(key=>[key,1]))},
+  shields:counts(['shnu2','shnr2','shnr7','shnr8','shnr9'].map(key=>[key,1]))},
  whiteAdvanced:{id:'whiteAdvanced',name:'白上級Bot／蛇眼姫 リゼリア',difficulty:'advanced',preset:true,
   main:counts([['wn2',4],['ws5',4],['wn4',4],['wn5'],['ws10',1],['wr8',1],['ws11'],['ws3',4],['ws2',2],['wo1',2],['wr6'],['wr5',2],['wu3'],['wn6',2],['wr9',2]]),
-  sideboard:counts([['eira',1],['sbws1',4],...['sbwl1','sbws2','sbws3','sbwo1','sbws4','sbwu2'].map(key=>[key,1])]),
-  shields:counts(['shnu1','shnr7','shnl1','shnr9','shnl2'].map(key=>[key,1]))}
+  sideboard:counts([['eira',1],['sbws1',4],...['sbwu3','sbws2','sbws3','sbwo1','sbws4','sbwu2'].map(key=>[key,1])]),
+  shields:counts(['shnu1','shnr7','shnu2','shnr9','shnu3'].map(key=>[key,1]))}
 
 });
 for(const d of Object.values(official)){

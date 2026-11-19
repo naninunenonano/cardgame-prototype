@@ -93,7 +93,7 @@ console.log('PASS A/B/C/F/G/H: four spell instances, shared turn limit, and equi
  const charger = g.state.p1.extra.find(c => c.key === 'sbws1');
  const formula = g.state.p1.extra.find(c => c.key === 'sbws2');
  const dragon = g.state.p1.extra.find(c => c.key === 'sbws3');
- const crest = g.state.p1.extra.find(c => c.key === 'sbwl1');
+ const crest = g.state.p1.extra.find(c => c.key === 'sbwu3');
  const target = put(g, 'ws5', 'trash');
  const materials = ['signi-1', 'signi-2'].map(z => put(g, 't10', z));
  const links = [put(g, 'wn2', 'structures'), put(g, 'wn6', 'structures')];

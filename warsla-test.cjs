@@ -91,7 +91,7 @@ for(let n=1;n<=6;n++){
  g.state.p1.lrig.length=0;const red=put(g,'redcaptain','lrig');red.level=4;
  assert.equal(g.evolutionPaymentOptions(w,'p1')[0].cost.青,2);
  assert.equal(g.effectiveCost(w,'p1').青,4);
- const side=put(g,'sbnr3','extra');side.cost=Mana.cost(3,{青:4});
+ const side=put(g,'nr9','extra');side.cost=Mana.cost(3,{青:4});
  side.reduction={minimum:{青:1}};
  assert.deepEqual(g.effectiveCost(side,'p1'),Mana.cost(3,{青:4}));
  blue.symbols.青=0;

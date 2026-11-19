@@ -54,7 +54,7 @@ function summon(g,key,mode,materials,slot){
  assert.equal(g.result.winner,'p2');
 }
 for(const [damage,life] of [[34,1],[35,0]]){
- const g=fixture(),shield=put(g,'shnl1','shields');shield.faceUp=false;
+ const g=fixture(),shield=put(g,'shnu2','shields');shield.faceUp=false;
  yes(g.loseLife('p1',damage));yes(g.resolveShield(shield.id));
  assert.equal(g.life.p1,life);
  assert.equal(!!g.result,!life);

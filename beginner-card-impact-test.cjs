@@ -9,7 +9,7 @@ const players={p1:'blackBeginner',p2:'blueBeginner'};
 const ref=(cardId,owner,instanceId)=>({cardId,owner,instanceId,type:'通常'});
 const a=ref('kn10','p1','a'),b=ref('kn10','p1','b'),vanilla=ref('nn3','p1','c');
 assert(!eligible(players.p1).has('nn3'));
-assert(!eligible(players.p2).has('sbnn1'));
+assert(!eligible(players.p2).has('nn10'));
 assert(eligible(players.p2).has('bs5')); // Evolution with an attack-triggered ability.
 const hit=(attacker,beforeLife,afterLife)=>[
  {kind:'bodyStrike',attacker},

@@ -34,6 +34,7 @@ jobs:
       - run: node next-batch-test.cjs
       - run: node legacy-red-removal-test.cjs
       - run: node card-name-test.cjs
+      - run: node id-reconciliation-test.cjs
       - run: node identity-test.cjs
       - run: node rename-test.cjs
       - run: node graveyard-test.cjs

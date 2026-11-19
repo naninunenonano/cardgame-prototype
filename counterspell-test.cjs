@@ -36,7 +36,7 @@ function success(g,category){
  assert.deepEqual(deck.main.reduce((counts,e)=>{
   const rarity=cards[e.key].rarity;counts[rarity]=(counts[rarity]||0)+e.count;return counts;
  },{}),{N:28,R:3,SR:9});
- assert(!deck.main.some(e=>['bl2','bn2','bn6'].includes(e.key)));
+ assert(!deck.main.some(e=>['bu2','bn2','bn6'].includes(e.key)));
  assert.deepEqual(deck.sideboard.map(e=>e.key),['bluesage']);
  assert.deepEqual(deck.shields.map(e=>e.key),['shnr4','shnr5','shns1','shnr6']);
 }

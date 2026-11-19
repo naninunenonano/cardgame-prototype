@@ -2,7 +2,7 @@
 'use strict';
 const rarity=r=>({SSR:'UR',LEGEND:'UR'}[r]||r);
 const registeredKey=k=>Object.hasOwn(R.aliases,k)?R.aliases[k]:(R.entries.find(e=>e.faces.includes(k))?.baseId||k);
-const canonicalKey=k=>{const key=registeredKey(k);return key==='sbnl1'?'sbnl4':k==='sbru1-2'?'sbru4':key;};
+const canonicalKey=k=>{const key=registeredKey(k);return key==='sbnl1'?'sbnu3':k==='sbru1-2'?'sbru4':key;};
 const removedLegacyKey=k=>/^rn(?:[1-9]|1[0-2])$/.test(canonicalKey(k));
 const formKey=k=>Object.hasOwn(R.forms,k)?R.forms[k]:k;
 const fields=new Set(['key','tokenKey','chargerKey','requiredCharacter','ownerCharacterId']);

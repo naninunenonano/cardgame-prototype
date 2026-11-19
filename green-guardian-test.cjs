@@ -73,7 +73,7 @@ for(const use of [true,false]){
 }
 for(const revealUnit of [true,false]){
  const g=init();grow(g,1);grow(g,2);choose(g,'done');grow(g,3);choose(g,'done');grow(g,4);
- A.equal(g.costBreakdown(g.fromDefinition('sbnn1',p),p).level4,0);
+ A.equal(g.costBreakdown(g.fromDefinition('nn10',p),p).level4,0);
  const pay=put(g,'nn2','signi-1'),small=put(g,'nn3','signi-1',q),large=put(g,'gs1','signi-2',q);
  const top=put(g,revealUnit?'nn9':'gn1','main');
  g.state[p].main.unshift(g.state[p].main.pop());

@@ -73,13 +73,13 @@ for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
 {
  const g=fixture(), c=add(g,'ks15');
  A.equal(g.effectiveCost(c,'p1').generic,6);
- const y=add(g,'redmoonavenger_shkl1','shields');y.faceUp=true;
+ const y=add(g,'redmoonavenger_shku1','shields');y.faceUp=true;
  A.equal(g.effectiveCost(c,'p1').generic,0);yes(g.setLife('p1',7));
  cast(g,c);A.equal(g.life.p1,1);g.turn.step='attack';A(!g.attackError(c.id));
 }
 {
  const g=fixture(), c=add(g,'ks15');g.character('p1').level=4;
- add(g,'redmoonavenger_shkl1','shields').faceUp=true;add(g,'ks13','structures');yes(g.setLife('p1',6));cast(g,c);A.equal(g.result,null);A.equal(g.life.p1,4);
+ add(g,'redmoonavenger_shku1','shields').faceUp=true;add(g,'ks13','structures');yes(g.setLife('p1',6));cast(g,c);A.equal(g.result,null);A.equal(g.life.p1,4);
 }
 {
  const g=fixture();g.character('p1').level=4;
@@ -88,7 +88,7 @@ for(const [key,n] of [['nn2',4],['nn4',3],['nn9',2],['rn15',6]]){
 }
 {
  const g=fixture();g.character('p1').level=4;
- add(g,'ks13','structures');add(g,'redmoonavenger_shkl1','shields').faceUp=true;
+ add(g,'ks13','structures');add(g,'redmoonavenger_shku1','shields').faceUp=true;
  g.turn.counts.p1=19;g.turn.sequence=38;g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
  A.equal(g.turn.number,20);A.equal(g.life.p1,30);A.equal(g.life.p2,30);
  g.turn.sequence=40;g.turn.step='end';g.turn.notBefore=0;yes(g.advance());
