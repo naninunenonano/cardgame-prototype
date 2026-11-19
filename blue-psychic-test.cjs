@@ -9,9 +9,9 @@ const {fund,growthFixture,skipCharge}=require('./test-fixtures.cjs');
 const p='p1',q='p2';
 function ok(result){assert(result.ok,result.message);}
 function ready(){
- const main=[['bo1',3],['bs1',3],['bl2',1],['bl3',1],['nl2',1],['br1',3],['bn1',3],['br3',3],
+ const main=[['bo1',3],['bs1',3],['bu2',1],['bu4',1],['nu2',1],['br1',3],['bn1',3],['br3',3],
   ['br5',3],['ns1',3],['br4',3],['nn1',3],['bs5',3],['bs3',3],['nn7',4]].map(([key,count])=>({key,count}));
- const d={...require('./decks').preset('blueAdvanced'),id:'psychic-test',preset:false,main,sideboard:[{key:'almar',count:1},{key:'sbnl4',count:1}]};
+ const d={...require('./decks').preset('blueAdvanced'),id:'psychic-test',preset:false,main,sideboard:[{key:'almar',count:1},{key:'sbnu3',count:1}]};
  const g=Game.create({decks:{p1:d.id,p2:'green'},records:[d],clock:()=>1000,random:()=>0.42});
  ok(g.completeMulligan(p,[],true));
  ok(g.completeMulligan(q,[],true));

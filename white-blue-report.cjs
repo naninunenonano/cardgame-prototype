@@ -24,7 +24,7 @@ for(let i=0;i<games;i++){
  rows.push({seed,whiteFirst:white==='p1',whiteWin:g.result.winner===white,reason:g.result.reason,turns:g.turn.sequence,
   numeronia:count('unitEntry','sbno2',blue),special:g.result.winner===blue&&g.result.reason.includes('特殊勝利'),serpentHand:drawGames,
   serpentUses:count('cardUse','wu3',white),baronne:count('unitEntry','sbwo1',white),baronneStops:count('counterSuccess','sbwo1',white),
-  usurpation:count('cardUse','almar_sbbs1',blue),recoveries});
+  usurpation:count('cardUse','almar_bs1',blue),recoveries});
  if(i%20===19)process.stderr.write((i+1)+' games completed\n');
 }
 const sum=k=>rows.reduce((n,r)=>n+Number(r[k]),0);

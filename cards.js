@@ -107,7 +107,7 @@
   if(key==='celestia')c.text=c.text.replace('Lv1〜3：成長時と自分開始時に現在レベルの能力。','Lv1：成長時に1ドロー。Lv2〜3：成長時と自分開始時に現在レベルの能力。');
  }
  cards.ws1={key:'ws1',name:'光神龍スペル・デル・フィン',color:'白',rarity:'SR',rarityProvisional:false,type:'通常',cost:M.cost(6,{白:3}),attack:3,maxHealth:8,symbols:{白:2},abilities:[],onUse:[],onEnter:[],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:3,civilizations:['白'],spellLock:true,revealEnemyHand:true,spellHandBonus:true,text:'相手は呪文を唱えられない。相手は手札を公開してプレイする。相手の手札の呪文1枚につき攻撃力+1。'};
- cards.wl1={key:'wl1',name:'断罪の執行者',color:'白',rarity:'LEGEND',rarityProvisional:false,type:'通常',cost:M.cost(5,{白:2}),attack:0,maxHealth:1,symbols:{白:1},abilities:['ブロッカー'],onUse:[],onEnter:[{kind:'executorSelect'}],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:1,civilizations:['白'],spellImmune:true,text:'ブロッカー。自分・相手双方の呪文効果を受けない。登場時、相手クリーチャーを最大2体選ぶ。選択時の攻撃力合計を自身の攻撃力に、現在体力合計を最大体力に加算。その後選んだクリーチャーを破壊。場に残った対象は次の自分のターン終了時まで攻撃・ブロック不可。'};
+ cards.wu4={key:'wu4',name:'断罪の執行者',color:'白',rarity:'LEGEND',rarityProvisional:false,type:'通常',cost:M.cost(5,{白:2}),attack:0,maxHealth:1,symbols:{白:1},abilities:['ブロッカー'],onUse:[],onEnter:[{kind:'executorSelect'}],onDefeat:[],reduction:{minimum:{白:1}},deckLimit:1,civilizations:['白'],spellImmune:true,text:'ブロッカー。自分・相手双方の呪文効果を受けない。登場時、相手クリーチャーを最大2体選ぶ。選択時の攻撃力合計を自身の攻撃力に、現在体力合計を最大体力に加算。その後選んだクリーチャーを破壊。場に残った対象は次の自分のターン終了時まで攻撃・ブロック不可。'};
  (typeof module==='object'&&module.exports?require('./white-cards.js'):globalThis.WhiteCards).install(M,cards,awakened);
  cards.verdantguardian={
   key:'verdantguardian',name:'新緑の守護者',type:'キャラクター',color:'緑',civilizations:['緑'],rarity:'UR',
@@ -157,7 +157,7 @@
  characterLevels[2].text='成長時・開始時：相手の手札をランダムに1枚捨てる。';
  characterLevels[4].text='成長時：相手の手札をランダムに2枚捨てる。常時：自分の効果で相手が実際に1枚捨てるごとに1ドローし、アクア・ガードを出す。';
  const c=catalog.cards, forms=catalog.awakened;
- c.nl1.unavailable='個別軽減が旧シンボルを参照するため、新しい軽減条件の確認待ち。';
+ c.nu1.unavailable='個別軽減が旧シンボルを参照するため、新しい軽減条件の確認待ち。';
  const updateText=text=>text?.replace(/（最大30）|（最大ライフまで）|。共通：サイドの不特定3軽減|。サイドの無色3軽減|。サイド無色3軽減/g,'');
  for(const card of Object.values(c)){
   if(card.text)card.text=updateText(card.text);
@@ -179,7 +179,7 @@
  add('sbbo1',{name:'コード・ピルルク',color:'青',rarity:'OR',type:'通常',cost:M.cost(12),attack:0,maxHealth:20,sideboardOnly:true,cardSection:'sideboard',psychic:true,psychicLock:true,psychicBrainTouch:true,awaken:'sbbo1-2',faceIds:['sbbo1','sbbo1-2'],text:'相手は相手のドローフェイズ以外、手札にカードを加えられない。自分の終了時、自分の手札が相手より5枚以上多ければ覚醒。自分のターンに1回、青ストック2個で相手の手札をランダムに1枚捨てさせ、その後自分は1枚引く。'});
  forms['sbbo1-2']={faceId:'sbbo1-2',name:'コード・ピルルクΩ',color:'青',type:'通常',rarity:'OR',cost:M.cost(16),attack:0,maxHealth:25,psychicLock:false,psychicBrainTouch:false,psychicIntercept:true,text:'相手のドローフェイズ以外の相手の手札追加に干渉。クリーチャーは捨てて攻撃力分ダメージ、呪文は無償で唱え、元の持ち主のトラッシュへ。応答専用呪文は有効な応答先がなければ不発。その他は山札の下。自分のターンに1回、青ストック2個で相手山札の上2枚を並べ替え、互いに1枚引く。'};
  const hole=(key,name,color,generic,effects,filter,text)=>add(key,{name,color,rarity:'SR',type:'呪文',cardSection:'main',cost:M.cost(generic,{[color]:1}),onUse:[...effects,{kind:'psychicSummon',...filter}],text});
- hole('bs6','超次元ストラテジー・ホール','青',6,[...c.sbbr1.onUse],{color:'青'},'相手1体を手札へ戻し、相手自身が手札1枚を捨てる。その後サイドから青サイキック1体を出す。召喚コスト上限なし。');
+ hole('bs6','超次元ストラテジー・ホール','青',6,[...c.br7.onUse],{color:'青'},'相手1体を手札へ戻し、相手自身が手札1枚を捨てる。その後サイドから青サイキック1体を出す。召喚コスト上限なし。');
  hole('bs7','超次元バイス・ホール','青',4,[{kind:'psychicChoice',choice:'viceSpell'}],{max:10},'相手の手札を確認し、呪文1枚を捨てさせる。その後サイドからコスト10以下のサイキック1体を出す。');
  hole('bs8','超次元ドラヴィタ・ホール','青',3,[{kind:'psychicChoice',choice:'dravitaRecover'}],{max:7},'自分のトラッシュから呪文1枚を手札へ戻す。その後サイドからコスト7以下のサイキック1体を出す。');
  add('shno1',{name:'パーフェクト・シールド',color:'無色',rarity:'OR',type:'シールドカード',deckSection:'shields',cardSection:'shields',cost:M.cost(10),shieldRule:{event:'attackDeclared',effect:'perfectShield'},text:'相手の攻撃時、任意色のストック合計10個を支払い、その攻撃を無効にして相手のターンを終了する。'});
@@ -242,14 +242,14 @@
  ]){add(key,{name,rarity:'R',type:'シールドカード',color:'無色',cardSection:'shields',deckSection:'shields',cost:null,shieldRule:{event,effect},text});catalog.shieldKeys.push(key);}
  forms.sbnl1={...c.sbnl1,faceId:'sbnl1',trample:true,abilities:['トランブル'],text:'パラレル革命：自分の攻撃力6以上のクリーチャーの攻撃時に、交換元を除外し、同じ枠で攻撃を引き継ぐ。ストック消費なし。トランブル。'};
  delete c.sbnl1;
- Object.assign(c.sbnl4,{faceIds:['sbnl4','sbnl1'],alternateFace:'sbnl1',revolutionMinimumAttack:6,stackCost:M.cost(0),text:c.sbnl4.text+' ストック消費なし。'});
- Object.assign(c.sbru1,{cardSection:'main',rarity:'OR',rarityProvisional:false});
- delete c.sbru1.faceIds;
+ Object.assign(c.sbnu3,{faceIds:['sbnu3','sbnl1'],alternateFace:'sbnl1',revolutionMinimumAttack:6,stackCost:M.cost(0),text:c.sbnu3.text+' ストック消費なし。'});
+ Object.assign(c.ro1,{cardSection:'main',rarity:'OR',rarityProvisional:false});
+ delete c.ro1.faceIds;
  add('sbru4',{name:'闘将銀河城 ハートバーン',color:'赤',rarity:'UR',type:'設置物',cardSection:'sideboard',sideboardOnly:true,
   heartburn:true,redSpeedAura:true,cost:M.cost(0),stackCost:M.cost(0,{赤:4}),faceIds:['sbru4','sbru1-2'],
   text:'自分の赤クリーチャーすべてにSA。自分の赤クリーチャーがアンタップした時、超戦覇龍 ガイNEXTへ龍解。'});
  for(const key of ['almar_sbbu1','sbbu1'])c[key].psychic=true;
- const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
+ const eligibleLegacySide=new Set(['sbnu2','sbgu1','almar_sbbu1','sbbu1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwu3']);
  for(const card of Object.values(c)){
   if(card.sideboardOnly&&!card.psychic&&!card.specialSummon&&!card.xyz&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
    if(eligibleLegacySide.has(card.key))card.unavailable='色付きストック支払い条件が未確定。';

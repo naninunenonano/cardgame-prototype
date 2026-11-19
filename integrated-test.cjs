@@ -35,7 +35,7 @@ function play(g,key,slot){
  return card;
 }
 {
- const keys=['wn3','wr2','wr3','ws5','wn4','wn5','wr4','wo1','wr5','ws6','wr6','wu2','lumiere_sbwl1','sbwu1'];
+ const keys=['wn3','wr2','wr3','ws5','wn4','wn5','wr4','wo1','wr5','ws6','wr6','wu2','lumiere_wu1','wu6'];
  for(const key of keys)assert(K.pool().some(c=>c.key===key),key);
  for(const key of ['ko1','bo1','wo1'])assert.equal(D.limit(C.cards[key]),4);
  assert(D.available('main').some(c=>c.key==='wo1'));
@@ -79,7 +79,7 @@ function play(g,key,slot){
  assert.equal(g.shieldLinkCount('p1'),3);
 }
 {
- const g=setup();add(g,'sbwu1','p2','signi-1');
+ const g=setup();add(g,'wu6','p2','signi-1');
  assert(g.spellsLocked('p1',C.cards.gn1));
  assert(g.spellsLocked('p2',C.cards.gn1));
  assert(!g.spellsLocked('p1',C.cards.wn3));

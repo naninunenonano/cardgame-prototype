@@ -8,7 +8,7 @@ const {cards}=require('./cards');
 
 // These catalog entries are ordinary creatures without card abilities.
 // An absent description alone does not imply vanilla (e.g. evolutions).
-const vanilla=new Set(['nn2','nn3','nn4','nn5','nn9','sbnn1']);
+const vanilla=new Set(['nn2','nn3','nn4','nn5','nn9','nn10']);
 const unit=zone=>zone?.startsWith('signi-');
 const opponent=p=>p==='p1'?'p2':'p1';
 const colors={whiteBeginner:'白',blueBeginner:'青',blackBeginner:'黒',redBeginner:'赤'};
