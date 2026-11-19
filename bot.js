@@ -432,8 +432,8 @@ function decide(v){
    if(ability)return {type:'whiteAbility',...ability};
    const serpent=me.units.find(c=>c.serpentAbility);
    if(serpent&&me.units.length<=6&&me.counts.main>2)return {type:'serpent',id:serpent.id};
-   const side=best(me.sideboard.filter(c=>c.canPlay&&(c.key!=='sbws2'||me.counts.main>2)),c=>({sbwu2:90,sbws3:80,sbws4:70,sbwo1:60,sbwu3:55,sbws1:40,sbws2:10}[c.key]||0));
-   if(side&&(side.key!=='sbws2'||me.hand.length<2))return {type:'play',id:side.id};
+   const side=best(me.sideboard.filter(c=>c.canPlay&&(c.key!=='sbns3'||me.counts.main>2)),c=>({sbwu2:90,sbws3:80,sbws4:70,sbno3:60,sbwu3:55,sbws1:40,sbns3:10}[c.key]||0));
+   if(side&&(side.key!=='sbns3'||me.hand.length<2))return {type:'play',id:side.id};
   }
   const usable=[...me.hand,...me.mana,...(me.gravePlayable||[]),...(v.exile||[]),...(me.sideboard||[])].filter(c=>c.canPlay);
   const c=best(usable,c=>playScore(v,c));

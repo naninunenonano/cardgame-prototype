@@ -206,10 +206,10 @@
  c.t10.cost=whiteMana(1);
  const special=(key,name,rarity,cost,attack,maxHealth,specialSummon,extra)=>whiteSide(key,
   {name,rarity,cost:whiteMana(cost),attack,maxHealth,specialSummon,type:'通常',...extra});
- special('sbws2','フォーミュラ・シンクロン','SR',2,2,2,'synchro',{onEnter:[{kind:'draw',count:1}],text:'シンクロ。登場時に1枚引く。'});
+ special('sbns3','フォーミュラ・シンクロン','SR',2,2,2,'synchro',{color:'無色',civilizations:['無色'],cost:M.cost(2),onEnter:[{kind:'draw',count:1}],text:'シンクロ。登場時に1枚引く。'});
  special('sbws3','蛇眼の原罪龍','SR',8,6,6,'fusion',{snakeEye:true,onEnter:[{kind:'fusionRecover'}],
   text:'融合。スネークアイ2体と無色ストック1個、またはシールドリンク2枚。登場時、自分のトラッシュのシールドリンク1枚を任意で回収。'});
- special('sbwo1','フルール・ド・バロネス','OR',10,7,9,'synchro',{
+ special('sbno3','フルール・ド・バロネス','OR',10,7,9,'synchro',{color:'無色',civilizations:['無色'],cost:M.cost(10),
   baronne:true,text:'シンクロ。自分のターンに各1回、自身を破壊してトラッシュのカードを無料使用、または場の1枚を破壊。場にいる間1回、対抗魔術と同様に相手の行動を無効にできる。'});
  special('sbws4','スネークアイ・ファントム','SR',4,2,4,'synchro',{snakeEye:true,onEnter:[{kind:'phantomLinks',remaining:2}],text:'シンクロ。登場時、トラッシュのスネークアイ・クリーチャーを最大2枚、能力のないシールドリンクとして設置。'});
  special('sbwu2','蛇眼の断罪龍','UR',12,7,15,'synchro',{snakeEye:true,

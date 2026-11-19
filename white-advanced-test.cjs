@@ -124,7 +124,7 @@ for(const [damage,life] of [[34,1],[35,0]]){
  assert.equal(g.locate(fox.id).z,'signi-2');
 }
 {
- const g=fixture(),baronne=put(g,'sbwo1','signi-1');
+ const g=fixture(),baronne=put(g,'sbno3','signi-1');
  const enemy=put(g,'nn9','signi-1','p2');
  yes(g.beginWhiteAbility(baronne.id,'baronneDestroy'));choose(g,enemy.id);
  assert.equal(g.locate(enemy.id).z,'trash');
@@ -135,7 +135,7 @@ for(const [damage,life] of [[34,1],[35,0]]){
  assert.equal(g.locate(used.id).z,'structures');
 }
 {
- const g=fixture(),baronne=put(g,'sbwo1','signi-1');
+ const g=fixture(),baronne=put(g,'sbno3','signi-1');
  g.turn.player='p2';fund(g,'p2',8,'青');
  const spell=put(g,'br1','hand','p2');
  yes(g.beginPayment(spell.id));yes(g.confirmPayment());
@@ -193,7 +193,7 @@ for(const [top,install,full] of [
  assert.equal(g.operation,null);
 }
 {
- const g=fixture(),baronne=put(g,'sbwo1','signi-1');
+ const g=fixture(),baronne=put(g,'sbno3','signi-1');
  const fortress=put(g,'sbru4','trash'),charger=put(g,'sbws1','extra');
  g.state.p1.main=[];
  use(g,charger);assert(g.sideSpent('p1'));
@@ -210,7 +210,7 @@ for(const [top,install,full] of [
  const g=fixture();put(g,'wo1','signi-7','p2');
  const hand=put(g,'wn4');use(g,hand,'signi-1');assert.equal(g.locate(hand.id).z,'trash');
  const strong=put(g,'nn5');strong.attack=4;use(g,strong,'signi-1');assert.equal(g.locate(strong.id).z,'signi-1');
- const baronne=put(g,'sbwo1','signi-2');
+ const baronne=put(g,'sbno3','signi-2');
  yes(g.beginWhiteAbility(baronne.id,'baronneRecover'));choose(g,hand.id);choose(g,'signi-2');
  assert.equal(g.locate(hand.id).z,'signi-2');
  const a=put(g,'wn4','signi-3'),b=put(g,'wn5','signi-4');
@@ -319,3 +319,29 @@ function whiteStock(g,count){
  assert(!g.rizeriaReady('p1'));assert(!g.fieldCards('p1').some(c=>c.key==='t11'));
 }
 console.log('PASS リゼリアの新Lv2〜Lv4、任意発動・ストック・再誘発防止');
+
+{
+ const Identity=require('./identity'),Registry=require('./id-registry'),Art=require('./card-images');
+ for(const [key,cost] of [['sbns3',2],['sbno3',10]]){
+  assert.equal(cards[key].color,'無色');assert.deepEqual(cards[key].civilizations,['無色']);
+  assert.deepEqual(cards[key].cost,Mana.cost(cost));assert.equal(cards[key].specialSummon,'synchro');
+  assert.equal(Art.path(key),'images/cards/'+key+'.png');
+ }
+ for(const [old,key] of Object.entries({sbws2:'sbns3',sbns2:'sbns3',sbwo1:'sbno3'})){
+  assert.equal(Identity.canonicalKey(old),key);assert(Registry.retiredIds.includes(old));assert(!cards[old]);
+  assert.deepEqual(Decks.migrateOwned({[old]:2}),{[key]:2});
+  const d=Decks.preset('whiteAdvanced');d.sideboard=[{key:old,count:1}];
+  assert.deepEqual(Decks.migrateDeck(d).sideboard,[{key,count:1}]);
+ }
+ assert.equal(Identity.canonicalKey('sbno1'),'bo1');
+ for(const [key,aKey,bKey] of [['sbns3','t10','t10'],['sbno3','sbws4','sbnu3']]){
+  const g=fixture();g.state.p1.stacks=[];
+  const a=put(g,aKey,'signi-1'),b=put(g,bKey,'signi-2');
+  const before=g.state.p1.hand.length;
+  summon(g,key,'synchro',[a,b],'signi-1');
+  assert.equal(g.state.p1.stacks.length,0);assert(!g.sideSpent('p1'));
+  for(const material of [a,b])assert(!g.fieldCards('p1').some(c=>c.id===material.id));
+  if(key==='sbns3')assert.equal(g.state.p1.hand.length,before+1);
+ }
+}
+console.log('PASS neutral synchro costs, material summoning without stocks, retired aliases and saved decks');

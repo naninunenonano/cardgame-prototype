@@ -83,7 +83,7 @@ Object.assign(official,{
   shields:counts(['shnu2','shnr2','shnr7','shnr8','shnr9'].map(key=>[key,1]))},
  whiteAdvanced:{id:'whiteAdvanced',name:'白上級Bot／蛇眼姫 リゼリア',difficulty:'advanced',preset:true,
   main:counts([['wn2',4],['ws5',4],['wn4',4],['wn5'],['ws10',1],['wr8',1],['ws11'],['ws3',4],['ws2',2],['wo1',2],['wr6'],['wr5',2],['wu3'],['wn6',2],['wr9',2]]),
-  sideboard:counts([['eira',1],['sbws1',4],...['sbwu3','sbws2','sbws3','sbwo1','sbws4','sbwu2'].map(key=>[key,1])]),
+  sideboard:counts([['eira',1],['sbws1',4],...['sbwu3','sbns3','sbws3','sbno3','sbws4','sbwu2'].map(key=>[key,1])]),
   shields:counts(['shnu1','shnr7','shnu2','shnr9','shnu3'].map(key=>[key,1]))}
 
 });
