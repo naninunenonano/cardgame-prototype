@@ -64,15 +64,15 @@
  // 成長コストLv3/Lv4・未記載の覚醒前数値はデータで調整できる試作値。
  const characterLevels={1:{cost:1,text:'成長時・開始時：1ドロー。',effects:[{kind:'draw',count:1}]},2:{cost:3,text:'成長時・開始時：相手ランダム1捨て。成長直後のみメモリー・フラスコを任意使用。',effects:[{kind:'randomDiscard',count:1}]},3:{cost:5,text:'成長時・開始時：相手の場1枚をバウンス（マナ不可）→ランダム1捨て。',effects:[{kind:'enemyBounce'},{kind:'randomDiscard',count:1}]},4:{cost:7,text:'成長時：相手2捨て。常時：自分の効果で相手が実際に1枚捨てるごと1ドロー＋アクア・ガード。サイドの不特定3軽減。',effects:[{kind:'randomDiscard',count:2}]}};
  const sideDefs=[
- {key:'almar',name:'アルマー',type:'キャラクター',cost:M.cost(1),level:0,text:'Lv1→Lv4へ順番に成長。成長もサイド使用1ターン1枚に含む。通常の攻撃・ブロックは行わない。'},
+ {key:'almar',name:'アルマー',type:'キャラクター',cost:M.cost(1),level:0,text:'Lv1→Lv4へ順番に成長。通常の攻撃・ブロックは行わない。'},
  {key:'gunveet',name:'記憶の管理者 リゼット',type:'通常',cost:M.cost(4,{青:3}),attack:7,maxHealth:7,symbols:{青:1},requiredCharacter:'almar',provisional:true,onEnter:[{kind:'destroyTapped'}],awaken:'darkGunveet',text:'登場時：相手の横向き1体を破壊。相手ターン終了時、相手手札0なら覚醒。覚醒前7/7・青1は仮設定。'},
  {key:'alegre',name:'ルナ・アレグル',type:'通常',cost:M.cost(5,{青:2}),attack:5,maxHealth:5,symbols:{青:1},provisional:true,onEnd:[{kind:'draw',count:1},{kind:'handDiscard',count:1}],awaken:'alegria',text:'終了時1ドロー→自分の手札1捨て。自分の開始時、トラッシュの呪文6枚を山札へ戻して覚醒可能。5/5・青1は仮設定。'},
  {key:'dogiragon',name:'蒼き覚醒 ドギラゴンX',type:'通常',cost:M.cost(8),attack:13,maxHealth:13,symbols:{},revolution:true,text:'通常支払い不可。自分の元コスト5以上のクリーチャーの攻撃時に革命チェンジ。交換元を除外し同じ枠で攻撃を引き継ぐ。サイド使用1回。'},
  {key:'viceCharger',name:'メモリー・フラスコ',type:'呪文',cost:M.cost(0),stackCost:M.cost(0),requiredCharacter:'almar',charger:true,sideboardDiscardAfterUse:true,onUse:[{kind:'randomDiscard',count:1},{kind:'blueStock'}],text:'アルマー専用チャージャー。相手の手札をランダムに1枚捨てさせ、青ストック1個を得る。使用後はトラッシュへ。サイドボードに戻れば再使用できる。'},
- {key:'lostSoul',name:'記憶の簒奪',type:'呪文',cost:M.cost(0,{青:8}),requiredCharacter:'almar',onUse:[{kind:'randomDiscard',count:999}],text:'相手の手札をすべて捨てさせる。実際の捨て札1枚ごとにアルマーLv4が誘発する。'},
+ {key:'lostSoul',name:'記憶の簒奪',type:'呪文',cost:M.cost(6,{青:1}),requiredCharacter:'almar',onUse:[{kind:'randomDiscard',count:999}],text:'相手の手札をすべて捨てさせる。実際の捨て札1枚ごとにアルマーLv4が誘発する。'},
  {key:'conspiracy',name:'陰謀と計略の手',type:'呪文',cost:M.cost(3,{青:1}),onUse:[{kind:'enemyUnitBounce'},{kind:'opponentDiscard'}],text:'相手の1体をバウンス→相手本人が手札1枚を選んで捨てる。'},
  {key:'technology',name:'インビンシブル・テクノロジー',type:'呪文',cost:M.cost(12,{青:1}),allBlueReduction:3,onUse:[{kind:'technologySearch'},{kind:'technologyCast'}],text:'自分のマナがすべて青なら不特定をさらに3軽減（0まで）。山札から任意枚数を手札へ→現在手札枚数以下の元コストの青カード1枚を任意で無料使用。'},
- {key:'interstellar',name:'星界の門番 デウス・エクス・マキナ',type:'通常',cost:M.cost(4,{青:3}),attack:9,maxHealth:9,symbols:{青:2},requiredCharacter:'almar',abilities:['ブロッカー'],justDiver:true,onEnter:[{kind:'interstellarEnter'}],onAttack:[{kind:'interstellarAttack'}],text:'ジャストダイバー：登場時、次の自分のターン開始まで相手に選ばれず、攻撃されない。登場時：手札の呪文またはトラッシュの元コスト5以下の呪文を無料使用→除外。攻撃時：除外の元コスト5以下の呪文を無料使用→使用後山札下。'},
+ {key:'interstellar',name:'星界の門番 デウス・エクス・マキナ',type:'通常',cost:M.cost(6,{青:1}),attack:5,maxHealth:5,symbols:{青:2},requiredCharacter:'almar',abilities:['ブロッカー'],justDiver:true,onEnter:[{kind:'interstellarEnter'}],onAttack:[{kind:'interstellarAttack'}],text:'ジャストダイバー：登場時、次の自分のターン開始まで相手に選ばれず、攻撃されない。登場時：手札またはトラッシュから元コスト7以下の呪文1枚を無料使用→除外。攻撃時：除外の元コスト7以下の呪文1枚を無料使用→使用後山札下。'},
  {key:'vt5000',name:'飛翔龍 5000VT',type:'通常',color:'青',cost:M.cost(7,{青:1}),attack:12,maxHealth:12,symbols:{青:2},fieldReduction:true,onEnter:[{kind:'vtBounceLock'}],text:'両者の場のクリーチャー・設置物1枚につき無色コストを1軽減（0まで）。青1は必須。登場時：両者の攻撃力5以下を全バウンス。次の相手ターン中、相手は攻撃力5以下を出せない。'}
  ];
  for(const d of sideDefs)cards[d.key]={color:'青',symbols:{},abilities:[],onUse:[],onEnter:[],onDefeat:[],sideboardOnly:true,reduction:{minimum:{青:1}},...d};
@@ -184,6 +184,36 @@
  hole('bs8','超次元ドラヴィタ・ホール','青',3,[{kind:'psychicChoice',choice:'dravitaRecover'}],{max:7},'自分のトラッシュから呪文1枚を手札へ戻す。その後サイドからコスト7以下のサイキック1体を出す。');
  add('shno1',{name:'パーフェクト・シールド',color:'無色',rarity:'OR',type:'シールドカード',deckSection:'shields',cardSection:'shields',cost:M.cost(10),shieldRule:{event:'attackDeclared',effect:'perfectShield'},text:'相手の攻撃時、任意色のストック合計10個を支払い、その攻撃を無効にして相手のターンを終了する。'});
  catalog.shieldKeys.push('shno1');
+ const white=(key,definition)=>add(key,{color:'白',civilizations:['白'],...definition});
+ const whiteMana=n=>M.cost(n-1,{白:1});
+ for(const key of ['wn4','wn5'])c[key].snakeEye=true;
+ white('ws10',{name:'スネークアイ・キャット',rarity:'SR',type:'通常',snakeEye:true,cost:whiteMana(4),attack:3,maxHealth:4,
+  onEnter:[{kind:'ownLinkDestroy'},{kind:'destroyUnitTarget'}],text:'登場時、自分のシールドリンク1枚を破壊。その後、相手クリーチャー1体を破壊。'});
+ white('wr8',{name:'スネークアイ・ドッグ',rarity:'R',type:'通常',snakeEye:true,cost:whiteMana(2),attack:1,maxHealth:2,
+  onEnter:[{kind:'ownLinkDestroy'},{kind:'damagePlayer',amount:2}],text:'登場時、自分のシールドリンク1枚を破壊。その後、相手に2ダメージ。'});
+ white('ws11',{name:'蛇眼神殿',rarity:'SR',type:'設置物',shieldLink:true,cost:whiteMana(3),
+  onStructureDestroy:[{kind:'templeRestore'}],text:'破壊時、自分のトラッシュから蛇眼神殿以外のシールドリンク1枚を設置する。'});
+ white('wn6',{name:'リアクティブ・シールド',rarity:'N',type:'設置物',shieldLink:true,cost:whiteMana(1),
+  onStructureDestroy:[{kind:'reactiveShield'}],text:'破壊時、ランダムな相手クリーチャー1体に3ダメージ。'});
+ white('wr9',{name:'ギャラクシー・シールド',rarity:'R',type:'設置物',shieldLink:true,cost:whiteMana(4),
+  onEnter:[{kind:'galaxyShield'}],
+  text:'登場時、山札上2枚を見る。設置できるシールドリンクがあれば1枚を選び設置する。その後、残ったカードから1枚を手札に加え、さらに残ったカードをトラッシュに置く。'});
+ white('wu3',{name:'蛇眼の大蛇（仮称）',rarity:'UR',type:'通常',snakeEye:true,cost:whiteMana(8),attack:4,maxHealth:7,
+  serpentAbility:true,onEnter:[{kind:'serpentRecycle'}],text:'登場時、自分のトラッシュからクリーチャーを任意の枚数戻し（サイド由来はサイドボードへ）、その枚数以下の合計コストとなるようトラッシュからシールドリンクを設置する。自分のターンに自身を除外して、山札からコスト2以下のスネークアイを最大2体出す。'});
+ const whiteSide=(key,definition)=>white(key,{sideboardOnly:true,cardSection:'sideboard',...definition});
+ whiteSide('sbws1',{name:'スネークアイ・チャージャー',rarity:'SR',type:'呪文',snakeEye:true,charger:true,sideboardDiscardAfterUse:true,cost:M.cost(0),stackCost:M.cost(0),
+  onUse:[{kind:'snakeCharger'}],text:'白ストックトークン1個を得る。山札上3枚を公開し、スネークアイとシールドリンクを手札へ、残りを山札の下へ。'});
+ c.t10.cost=whiteMana(1);
+ const special=(key,name,rarity,cost,attack,maxHealth,specialSummon,extra)=>whiteSide(key,
+  {name,rarity,cost:whiteMana(cost),attack,maxHealth,specialSummon,type:'通常',...extra});
+ special('sbws2','フォーミュラ・シンクロン','SR',2,2,2,'synchro',{onEnter:[{kind:'draw',count:1}],text:'シンクロ。登場時に1枚引く。'});
+ special('sbws3','蛇眼の原罪龍','SR',8,6,6,'fusion',{snakeEye:true,onEnter:[{kind:'fusionRecover'}],
+  text:'融合。スネークアイ2体と無色ストック1個、またはシールドリンク2枚。登場時、自分のトラッシュのシールドリンク1枚を任意で回収。'});
+ special('sbwo1','フルール・ド・バロネス','OR',10,7,9,'synchro',{
+  baronne:true,text:'シンクロ。自分のターンに各1回、自身を破壊してトラッシュのカードを無料使用、または場の1枚を破壊。場にいる間1回、対抗魔術と同様に相手の行動を無効にできる。'});
+ special('sbws4','スネークアイ・ファントム','SR',4,2,4,'synchro',{snakeEye:true,onEnter:[{kind:'phantomLinks',remaining:2}],text:'シンクロ。登場時、トラッシュのスネークアイ・クリーチャーを最大2枚、能力のないシールドリンクとして設置。'});
+ special('sbwu2','蛇眼の断罪龍','UR',12,7,15,'synchro',{snakeEye:true,
+  judgmentDragon:true,text:'シンクロ。お互いのターンに各1回、場・トラッシュの1枚を能力のないシールドリンクとして設置。相手ターンに1回、攻撃時にリンクを破壊して攻撃クリーチャーを破壊。離場時、トラッシュの蛇眼の原罪龍をサイドへ戻す。'});
  const equip=(key,name,rarity,count,equipment,face,description)=>{
   add(key,{name,rarity,color:'赤',type:'設置物',sideboardOnly:true,cardSection:'sideboard',cost:M.cost(0),stackCost:M.cost(0,{赤:count}),equipment,faceIds:[key,face],text:description});
  };
@@ -201,7 +231,10 @@
  dragon('sbrr1-2','最強龍 オウギンガ・ゼロ',4,4,4,{speedAttacker:true,text:'スピードアタッカー。'});
  equip('sbrr2','熱血剣 グリージーホーン','R',1,'greasy','sbrr2-2','装備先にマッハファイター。自分の終了時に装備先が横向きなら龍解。');
  dragon('sbrr2-2','熱血龍 リトルビッグホーン',5,4,3,{machFighter:{duration:'entryTurn'},text:'マッハファイター。'});
- add('sbrn1',{name:'ネクスト・チャージャー',color:'赤',rarity:'N',type:'呪文',cardSection:'sideboard',sideboardOnly:true,charger:true,cost:M.cost(0),stackCost:M.cost(0),onUse:[{kind:'nextCharger'}],text:'任意で手札をすべて好きな順番で山札の下へ置き、同じ枚数引く。どちらの場合も使用後に赤ストック1個を獲得。'});
+ add('sbrn1',{name:'ネクスト・チャージャー',color:'赤',rarity:'N',type:'呪文',cardSection:'sideboard',sideboardOnly:true,charger:true,sideboardDiscardAfterUse:true,cost:M.cost(0),stackCost:M.cost(0),onUse:[{kind:'nextCharger'}],text:'任意で手札をすべて好きな順番で山札の下へ置き、同じ枚数引く。どちらの場合も使用後に赤ストック1個を獲得。'});
+ add('shnu1',{name:'反撃の一手',rarity:'UR',type:'シールドカード',color:'無色',cardSection:'shields',deckSection:'shields',cost:null,
+  shieldRule:{event:'lethal',effect:'counterMove'},text:'ライフが0以下になるダメージを受けた時、ライフを1にし、キャラクターと同じ色のストックを5個得る。このターン、ライフは減少しない。'});
+ catalog.shieldKeys.push('shnu1');
  for(const [key,name,event,effect,text] of [
   ['shnr7','力の温存','damaged','reserveStacks','ダメージを受けた時、キャラクターと同じ色のストックを2個得る。'],
   ['shnr8','力の解放','attackDeclared','releaseStacks','相手の攻撃時、任意色のストック5個で攻撃クリーチャーを破壊し、さらに相手のクリーチャー1体を任意で破壊。'],
@@ -218,7 +251,7 @@
  for(const key of ['almar_sbbu1','sbbu1'])c[key].psychic=true;
  const eligibleLegacySide=new Set(['sbnl3','sbgu1','almar_sbbu1','sbbu1','sbnr4','celestia_sbnr1','lumiere_sbwr1','sbwl1']);
  for(const card of Object.values(c)){
-  if(card.sideboardOnly&&!card.psychic&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
+  if(card.sideboardOnly&&!card.psychic&&!card.specialSummon&&!card.xyz&&card.type!=='キャラクター'&&!card.stackCost&&!card.unavailable){
    if(eligibleLegacySide.has(card.key))card.unavailable='色付きストック支払い条件が未確定。';
    else{
     Object.assign(card,{sideboardOnly:false,mainDeckOnly:true,cardSection:'main',deckSection:'main'});
