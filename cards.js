@@ -184,6 +184,8 @@
  hole('bs8','超次元ドラヴィタ・ホール','青',3,[{kind:'psychicChoice',choice:'dravitaRecover'}],{max:7},'自分のトラッシュから呪文1枚を手札へ戻す。その後サイドからコスト7以下のサイキック1体を出す。');
  add('shno1',{name:'パーフェクト・シールド',color:'無色',rarity:'OR',type:'シールドカード',deckSection:'shields',cardSection:'shields',cost:M.cost(10),shieldRule:{event:'attackDeclared',effect:'perfectShield'},text:'相手の攻撃時、任意色のストック合計10個を支払い、その攻撃を無効にして相手のターンを終了する。'});
  catalog.shieldKeys.push('shno1');
+ add('exgkn1',{name:'ドゥザイコGR',color:'黒',civilizations:['黒'],rarity:'N',type:'通常',cardKind:'GRクリーチャー',grCreature:true,unlimitedCopies:true,deckSection:'gr',cardSection:'gr',cost:M.cost(1,{黒:1}),attack:2,maxHealth:2,text:'同名枚数制限なし。GRデッキに最大6枚採用できる。バトルゾーンを離れる場合、持ち主のGRデッキの一番下へ戻る。'});
+ add('rr4',{cardSection:'main',deckSection:'main',name:'音奏 プーンギ',color:'赤',civilizations:['赤'],rarity:'R',type:'通常',cost:M.cost(1,{赤:1}),attack:1,maxHealth:2,opponentSpellTax:1,grOnOpponentSpell:true,text:'①相手が使用する呪文の無色コストを1増やす（複数体は加算）。②自分のターン中、相手が呪文を使用したとき、GR召喚を1回行う。'});
  const white=(key,definition)=>add(key,{color:'白',civilizations:['白'],...definition});
  const whiteMana=n=>M.cost(n-1,{白:1});
  for(const key of ['wn4','wn5'])c[key].snakeEye=true;
