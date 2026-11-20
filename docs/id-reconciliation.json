@@ -454,7 +454,7 @@
     "almar_sbbs": 1,
     "sbbr": 2,
     "rl": 4,
-    "rr": 3,
+    "rr": 4,
     "rs": 6,
     "sbnn": 1,
     "sbnr": 4,
@@ -506,7 +506,8 @@
     "ro": 1,
     "ku": 4,
     "redmoonavenger_shku": 1,
-    "lumiere_wu": 1
+    "lumiere_wu": 1,
+    "exgkn": 1
   },
   "usedIds": [
     "almar_bs1",
@@ -547,6 +548,7 @@
     "bu3",
     "bu4",
     "celestia_sbnr1",
+    "exgkn1",
     "gl1",
     "gl2",
     "gn1",
@@ -676,6 +678,7 @@
     "rr1",
     "rr2",
     "rr3",
+    "rr4",
     "rs1",
     "rs2",
     "rs3",

@@ -3854,6 +3854,42 @@
       "oldForm": null,
       "serial": 7,
       "retired": false
+    },
+    {
+      "oldId": "exgkn1",
+      "baseId": "exgkn1",
+      "id": "exgkn1",
+      "name": "ドゥザイコGR",
+      "oldRarity": "N",
+      "rarity": "N",
+      "color": "黒",
+      "section": "gr",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 1,
+      "retired": false,
+      "postInstall": true
+    },
+    {
+      "oldId": "rr4",
+      "baseId": "rr4",
+      "id": "rr4",
+      "name": "音奏 プーンギ",
+      "oldRarity": "R",
+      "rarity": "R",
+      "color": "赤",
+      "section": "main",
+      "ownerCharacterId": null,
+      "token": false,
+      "generated": false,
+      "faces": [],
+      "oldForm": null,
+      "serial": 4,
+      "retired": false,
+      "postInstall": true
     }
   ],
   "aliases": {
@@ -4149,7 +4185,9 @@
     "sbwu3": "sbwu3",
     "sbws2": "sbns3",
     "sbns2": "sbns3",
-    "sbwo1": "sbno3"
+    "sbwo1": "sbno3",
+    "exgkn1": "exgkn1",
+    "rr4": "rr4"
   },
   "forms": {
     "darkGunveet": "almar_sbbu1-2",
@@ -4182,7 +4220,7 @@
     "almar_sbbs": 1,
     "sbbr": 2,
     "rl": 4,
-    "rr": 3,
+    "rr": 4,
     "rs": 6,
     "sbnn": 1,
     "sbnr": 4,
@@ -4234,7 +4272,8 @@
     "ro": 1,
     "ku": 4,
     "redmoonavenger_shku": 1,
-    "lumiere_wu": 1
+    "lumiere_wu": 1,
+    "exgkn": 1
   },
   "retiredIds": [
     "alegre",
